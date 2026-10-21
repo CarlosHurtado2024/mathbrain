@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fafaf7">
+  <meta name="description" content="Mira las matemáticas con otros ojos. Explora los programas de cálculo, probabilidad, estadística, álgebra y trigonometría de MathBrain.">
+  <meta property="og:title" content="MathBrain — Matemáticas con otros ojos">
+  <meta property="og:description" content="Un espacio para explorar, visualizar y entender las ideas detrás de los números.">
+  <title>MathBrain — Matemáticas con otros ojos</title>
+  <link rel="icon" type="image/svg+xml" href="assets/mark.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="courses.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Saltar al contenido</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#" aria-label="MathBrain, inicio"><img src="assets/mark.svg" alt="" width="37" height="46"><span>Math<span class="brand-blue">Brain</span><small>THINK BEYOND NUMBERS</small></span></a>
+      <nav aria-label="Navegación principal" class="main-nav">
+        <a href="#cursos" class="nav-courses">Explorar cursos</a>
+        <a href="#enfoque">Nuestro enfoque</a>
+        <a href="#nosotros">Sobre MathBrain</a>
+      </nav>
+      <a href="#cursos" class="header-cta">Empieza a explorar <span aria-hidden="true">↗</span></a>
+      <button class="menu-toggle icon-button" aria-label="Abrir menú" aria-expanded="false"><span></span><span></span></button>
+    </div>
+  </header>
+  <main id="main">
+    <div id="home-view">
+      <section class="hero page-width" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="tiny-star" aria-hidden="true">✳</span> LA CURIOSIDAD ES EL PUNTO DE PARTIDA</p>
+          <h1 id="hero-title">Las matemáticas,<br>con <em>otros ojos.</em></h1>
+          <p class="hero-description">Más allá de memorizar fórmulas, hay un mundo de ideas por descubrir. Un espacio para explorar, visualizar y entender.</p>
+          <div class="hero-actions"><a class="button button-dark" href="#cursos">Explorar los cursos <span aria-hidden="true">↗</span></a><button class="text-link" id="hero-demo">Descubre una idea <span aria-hidden="true">→</span></button></div>
+          <div class="hero-note"><span class="note-line"></span> A tu ritmo. Desde lo esencial. En español.</div>
+        </div>
+        <div class="hero-visual">
+          <button id="visual-demo" class="chalkboard" aria-label="Explorar una demostración interactiva sobre las derivadas">
+            <div class="board-top"><span><i></i> UN PEQUEÑO CAMBIO DE PERSPECTIVA</span><span class="board-plus" aria-hidden="true">+</span></div>
+            <div id="hero-art" aria-hidden="true"></div>
+            <div class="board-bottom"><span>Una curva. Infinitas ideas.</span><span class="board-play" aria-hidden="true">↗</span></div>
+          </button>
+          <div class="visual-caption"><span>01 / LA INTUICIÓN DETRÁS DE LA DERIVADA</span><span>Explora la idea <span aria-hidden="true">↗</span></span></div>
+          <span class="handwritten" aria-hidden="true">Todo empieza con un ¿por qué?</span>
+        </div>
+      </section>
+      <div class="topic-strip"><div class="page-width"><span>Ideas que se conectan</span><span>Cálculo</span><i>·</i><span>Probabilidad</span><i>·</i><span>Estadística</span><i>·</i><span>Álgebra</span><i>·</i><span>Trigonometría</span><span class="strip-symbol" aria-hidden="true">∞</span></div></div>
+      <section class="courses-section page-width" id="cursos" aria-labelledby="courses-title">
+        <div class="section-heading"><div><p class="eyebrow">EXPLORA LA BIBLIOTECA</p><h2 id="courses-title">Una idea lleva a la siguiente.</h2></div><p>Elige un tema.<br>Encuentra una nueva forma de verlo.</p></div>
+        <div class="catalog-tools"><div class="filter-tabs" role="group" aria-label="Filtrar cursos por tema"><button class="filter active" data-filter="all" aria-pressed="true">Todos <span>6</span></button><button class="filter" data-filter="calculo" aria-pressed="false">Cálculo</button><button class="filter" data-filter="estadistica" aria-pressed="false">Estadística y probabilidad</button><button class="filter" data-filter="algebra" aria-pressed="false">Álgebra</button><button class="filter" data-filter="trigonometria" aria-pressed="false">Trigonometría</button></div><label class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><input id="course-search" type="search" placeholder="Busca una idea…" aria-label="Buscar cursos"></label></div>
+        <div class="catalog-meta"><span id="results-count" aria-live="polite">6 cursos para explorar</span><label>Nivel <select id="level-filter" aria-label="Filtrar por nivel"><option value="all">Todos los niveles</option><option value="Inicial">Inicial</option><option value="Intermedio">Intermedio</option></select></label></div>
+        <div id="course-grid" class="course-grid"></div>
+        <div id="empty-state" class="empty-state" hidden><span aria-hidden="true">∅</span><h3>Una idea por encontrar.</h3><p>Prueba con otro tema o cambia los filtros.</p><button id="reset-filters" class="button button-dark">Ver todos los cursos</button></div>
+        <p class="preparation-note"><span class="status-dot"></span> Estamos construyendo esta biblioteca. Explora los programas; los videos llegarán pronto.</p>
+      </section>
+      <section class="start-band page-width"><div class="start-symbol" aria-hidden="true">↗</div><div><p class="eyebrow">CADA CAMINO EMPIEZA CON UNA IDEA</p><h2>¿No sabes por dónde empezar?</h2><p>Las bases de álgebra son un buen lugar para dar el primer paso.</p></div><a href="#curso/algebra" class="button button-outline">Empieza por lo esencial <span aria-hidden="true">→</span></a></section>
+      <section class="approach-section page-width" id="enfoque" aria-labelledby="approach-title"><div class="approach-intro"><p class="eyebrow">EL ENFOQUE MATHBRAIN</p><h2 id="approach-title">Primero la intuición.<br>Después, la fórmula.</h2><p>Aprender tiene más sentido cuando puedes ver de dónde viene una idea y cómo se conecta con las demás.</p><button class="text-link" id="approach-demo">Prueba una idea interactiva <span aria-hidden="true">↗</span></button></div><div class="principles"><article><span class="principle-number">01</span><div><h3>Visualiza lo abstracto</h3><p>Gráficas y ejemplos para darle forma a lo que una ecuación quiere decir.</p></div><span class="principle-icon" aria-hidden="true">◉</span></article><article><span class="principle-number">02</span><div><h3>Entiende el porqué</h3><p>Haz preguntas, encuentra patrones y construye tu propia intuición.</p></div><span class="principle-icon" aria-hidden="true">∴</span></article><article><span class="principle-number">03</span><div><h3>Conecta las ideas</h3><p>Avanza desde las bases y descubre cómo un concepto abre la puerta al siguiente.</p></div><span class="principle-icon" aria-hidden="true">⌁</span></article></div></section>
+      <section class="about-section" id="nosotros"><div class="page-width about-inner"><div class="about-mark"><img src="assets/mark.svg" alt="Símbolo geométrico MathBrain" width="84" height="120"></div><div><p class="eyebrow">SOBRE MATHBRAIN</p><h2>Think beyond numbers.</h2><p>MathBrain nace de una idea sencilla: las matemáticas no son solo números. Son una manera de mirar el mundo. Este será un lugar para aprender matemáticas y estadística con claridad, curiosidad y a tu propio ritmo.</p></div><a class="about-top" href="#" aria-label="Volver al inicio">↑</a></div></section>
+    </div>
+    <section id="course-view" class="page-width course-detail" hidden aria-labelledby="detail-title"></section>
+  </main>
+  <footer class="site-footer page-width"><a class="footer-brand" href="#">Math<span>Brain</span></a><p>Una idea a la vez.</p><span>© <span id="year">2026</span> MathBrain</span><a href="#cursos">Explorar cursos <span aria-hidden="true">↗</span></a></footer>
+  <dialog id="demo-dialog" aria-labelledby="demo-title"><div class="dialog-header"><p class="eyebrow">EL LABORATORIO DE IDEAS</p><button class="icon-button close-dialog" aria-label="Cerrar demostración">×</button></div><h2 id="demo-title">¿Qué nos dice una derivada?</h2><p>Mueve el punto sobre la curva. La recta tangente muestra qué tan rápido cambia la función en ese lugar.</p><div class="demo-graph" id="demo-graph"></div><label class="slider-label" for="demo-slider"><span>Posición de <i>x</i></span><strong id="x-value">1.0</strong></label><input id="demo-slider" type="range" min="-2" max="2" step="0.05" value="1"><div class="demo-equations"><span>Función <strong>f(x) = x²</strong></span><span>Pendiente <strong id="slope-value">f′(1) = 2</strong></span></div><p class="demo-explanation" id="demo-explanation" aria-live="polite"></p><a class="text-link close-demo-link" href="#curso/calculo-diferencial">Explorar el programa de cálculo <span aria-hidden="true">→</span></a></dialog>
+  <div id="toast" class="toast" role="status"></div>
+</body>
+</html>
