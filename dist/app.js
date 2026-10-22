@@ -11,12 +11,12 @@
   let currentLesson = 0;
   let toastTimer;
   const palettes = {
-    blue: ['#1c3a4d', '#8bc8ce', '#dcdfb5'],
-    sand: ['#e8dfcc', '#9b7652', '#567f7a'],
-    green: ['#2e4d44', '#bad0a4', '#e9c59b'],
-    purple: ['#39394e', '#a5abc9', '#c5c49c'],
-    rose: ['#e8d8ce', '#aa7365', '#627e75'],
-    slate: ['#294349', '#9fc4b5', '#e0caa2']
+    blue: ['#10213d', '#8acff0', '#f0d5a0'],
+    sand: ['#261e32', '#e6b996', '#b5b5ff'],
+    green: ['#102b2b', '#9bd9be', '#e9c59b'],
+    purple: ['#211c3c', '#b8b4f3', '#9be4dc'],
+    rose: ['#2c1d30', '#e6aabd', '#a3cce8'],
+    slate: ['#122b36', '#9fcfcf', '#e0caa2']
   };
 
   function artwork(course, unique) {

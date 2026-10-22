@@ -47,7 +47,7 @@ En `dist/courses.js` se modifican los títulos, descripciones, nivel, prerrequis
 
 ## Identidad visual
 
-`dist/assets/mark.svg` es una adaptación vectorial del símbolo geométrico facilitado por el usuario. `dist/assets/mathbrain-original.png` conserva el logo original. La paleta utiliza azul y turquesa con fondos claros y diagramas SVG propios. La estructura de exploración se inspira en https://www.3blue1brown.com/; el contenido y las ilustraciones de este sitio son propios.
+`dist/assets/mark.svg` es una adaptación vectorial del símbolo geométrico facilitado por el usuario. `dist/assets/mathbrain-original.png` conserva el logo original. El tema espacial utiliza fondos azul noche, estrellas sutiles y acentos azules y turquesa. Los estilos del tema están en `dist/space.css` y el campo de estrellas en `dist/assets/stars.svg`; no requieren animaciones ni dependencias. Las ilustraciones de los cursos son diagramas SVG propios con paletas oscuras. La estructura de exploración se inspira en https://www.3blue1brown.com/; el contenido y las ilustraciones de este sitio son propios.
 
 ## Comprobaciones
 
