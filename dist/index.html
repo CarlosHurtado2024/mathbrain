@@ -17,8 +17,13 @@
   <link rel="stylesheet" href="space.css">
   <script defer src="courses.js"></script>
   <script defer src="app.js"></script>
+  <script defer src="space.js"></script>
 </head>
 <body>
+  <div id="space-background" class="space-background" data-state="static" aria-hidden="true">
+    <div class="space-nebula"></div>
+    <canvas id="space-canvas"></canvas>
+  </div>
   <a class="skip" href="#main">Saltar al contenido</a>
   <header class="site-header">
     <div class="header-inner">
@@ -84,5 +89,10 @@
   <footer class="site-footer page-width"><a class="footer-brand" href="#">Math<span>Brain</span></a><p>Una idea a la vez.</p><span>© <span id="year">2026</span> MathBrain</span><a href="#cursos">Explorar cursos <span aria-hidden="true">↗</span></a></footer>
   <dialog id="demo-dialog" aria-labelledby="demo-title"><div class="dialog-header"><p class="eyebrow">EL LABORATORIO DE IDEAS</p><button class="icon-button close-dialog" aria-label="Cerrar demostración">×</button></div><h2 id="demo-title">¿Qué nos dice una derivada?</h2><p>Mueve el punto sobre la curva. La recta tangente muestra qué tan rápido cambia la función en ese lugar.</p><div class="demo-graph" id="demo-graph"></div><label class="slider-label" for="demo-slider"><span>Posición de <i>x</i></span><strong id="x-value">1.0</strong></label><input id="demo-slider" type="range" min="-2" max="2" step="0.05" value="1"><div class="demo-equations"><span>Función <strong>f(x) = x²</strong></span><span>Pendiente <strong id="slope-value">f′(1) = 2</strong></span></div><p class="demo-explanation" id="demo-explanation" aria-live="polite"></p><a class="text-link close-demo-link" href="#curso/calculo-diferencial">Explorar el programa de cálculo <span aria-hidden="true">→</span></a></dialog>
   <div id="toast" class="toast" role="status"></div>
+  <button id="space-motion-toggle" class="space-motion-toggle" type="button" aria-label="Pausar animación del fondo espacial" aria-pressed="false" hidden>
+    <svg class="space-pause-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M7 5v10M13 5v10"/></svg>
+    <svg class="space-play-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m7 5 8 5-8 5Z"/></svg>
+    <span class="space-motion-label">Pausar fondo</span>
+  </button>
 </body>
 </html>

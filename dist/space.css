@@ -24,12 +24,57 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: -2;
   pointer-events: none;
   background: url('assets/stars.svg') repeat;
   background-size: 820px 820px;
   opacity: .68;
 }
+.space-background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+#space-canvas { display: block; width: 100%; height: 100%; }
+.space-nebula {
+  position: absolute;
+  inset: -12%;
+  background: radial-gradient(ellipse at 78% 22%, #4355bf30, transparent 48%),
+    radial-gradient(ellipse at 18% 72%, #7c3ca32b, transparent 46%),
+    radial-gradient(ellipse at 62% 65%, #237c9130, transparent 42%);
+  animation: space-nebula-drift 36s ease-in-out infinite alternate paused;
+}
+.space-background[data-state="running"] .space-nebula { animation-play-state: running; }
+@keyframes space-nebula-drift {
+  from { transform: translate3d(-2%, -1%, 0) scale(1); opacity: .7; }
+  to { transform: translate3d(3%, 3%, 0) scale(1.12) rotate(4deg); opacity: 1; }
+}
+.space-motion-toggle {
+  position: fixed;
+  z-index: 15;
+  right: 20px;
+  bottom: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border: 1px solid #9bbfed40;
+  border-radius: 24px;
+  background: #0b172bea;
+  color: #c7dff4;
+  font-size: 10px;
+  box-shadow: 0 4px 20px #0003;
+  backdrop-filter: blur(10px);
+}
+.space-motion-toggle:hover { background: #1d3550; border-color: #9bdde580; }
+.space-motion-toggle svg { width: 17px; height: 17px; }
+.space-motion-toggle .space-play-icon { display: none; }
+.space-motion-toggle[aria-pressed="true"] .space-play-icon { display: block; }
+.space-motion-toggle[aria-pressed="true"] .space-pause-icon { display: none; }
+.site-footer { padding-bottom: 78px; }
 ::selection { color: #fff; background: #366680; }
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
   outline-color: #9be8ed;
@@ -199,7 +244,11 @@ input[type=range] { accent-color: #8edfd7; }
   .course-content { padding: 18px; }
   .course-card .description { font-size: 12px; }
   .hero-visual::before { inset: -20px 0; }
+  .space-motion-toggle { right: 14px; bottom: 14px; padding: 9px; }
+  .space-motion-label { display: none; }
+  .space-nebula { animation-duration: 48s; }
 }
 @media(prefers-reduced-motion:reduce) {
   .course-card { transition: none; }
+  .space-nebula { animation: none; opacity: .7; }
 }

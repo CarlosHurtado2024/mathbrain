@@ -47,11 +47,13 @@ En `dist/courses.js` se modifican los títulos, descripciones, nivel, prerrequis
 
 ## Identidad visual
 
-`dist/assets/mark.svg` es una adaptación vectorial del símbolo geométrico facilitado por el usuario. `dist/assets/mathbrain-original.png` conserva el logo original. El tema espacial utiliza fondos azul noche, estrellas sutiles y acentos azules y turquesa. Los estilos del tema están en `dist/space.css` y el campo de estrellas en `dist/assets/stars.svg`; no requieren animaciones ni dependencias. Las ilustraciones de los cursos son diagramas SVG propios con paletas oscuras. La estructura de exploración se inspira en https://www.3blue1brown.com/; el contenido y las ilustraciones de este sitio son propios.
+`dist/assets/mark.svg` es una adaptación vectorial del símbolo geométrico facilitado por el usuario. `dist/assets/mathbrain-original.png` conserva el logo original. El tema espacial utiliza fondos azul noche, estrellas y acentos azules y turquesa. Los estilos están en `dist/space.css`; `dist/space.js` añade nebulosas en movimiento, estrellas fugaces, profundidad al desplazarse y una estela de constelación que sigue el mouse. El campo estático de `dist/assets/stars.svg` sirve como respaldo.
+
+El botón de la esquina inferior derecha permite pausar o reanudar el fondo y recuerda la preferencia en el navegador. Si el sistema solicita reducir movimiento, el fondo permanece estático. La animación se suspende cuando la página no está visible; en móviles reduce la cantidad de partículas y no activa la estela del mouse. No se necesitan dependencias externas. Las ilustraciones de los cursos son diagramas SVG propios con paletas oscuras. La estructura de exploración se inspira en https://www.3blue1brown.com/; el contenido y las ilustraciones de este sitio son propios.
 
 ## Comprobaciones
 
-`npm run check` comprueba la sintaxis de los scripts. La vista local permite verificar navegación, filtros, búsqueda, programa de lecciones, descarga y el laboratorio interactivo de derivadas. No hay videos suministrados: la reproducción real se debe verificar al incorporar los primeros enlaces.
+`npm run check` comprueba la sintaxis de los scripts. `npm test` verifica la pausa, su persistencia, la suspensión al ocultar la página y la preferencia de movimiento reducido. La vista local permite verificar navegación, filtros, búsqueda, programa de lecciones, descarga, el laboratorio interactivo de derivadas y el fondo espacial. No hay videos suministrados: la reproducción real se debe verificar al incorporar los primeros enlaces.
 
 ## Alojamiento original en Sites
 
