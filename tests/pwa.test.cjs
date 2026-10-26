@@ -137,6 +137,22 @@ test('La instalación prepara únicamente archivos locales existentes, incluyend
   assert.equal(env.calls.claimed, 0);
 });
 
+test('La foto del autor está identificada y disponible sin conexión', async () => {
+  const html = fs.readFileSync(path.join(directory, 'index.html'), 'utf8');
+  const photoTag = html.match(/<img\b[^>]*src="assets\/autor-carlos\.jpeg"[^>]*>/);
+  assert.ok(photoTag);
+  assert.match(photoTag[0], /alt="Carlos Hurtado, autor de MathBrain"/);
+  const photo = fs.readFileSync(path.join(directory, 'assets/autor-carlos.jpeg'));
+  assert.deepEqual(photo.subarray(0, 2), Buffer.from([255, 216]));
+  assert.deepEqual(photo.subarray(-2), Buffer.from([255, 217]));
+  const env = environment();
+  assert.ok(env.shellUrls.includes(new URL('assets/autor-carlos.jpeg', appRoot).href));
+  await env.seed('assets/autor-carlos.jpeg', photo);
+  const response = await env.emit('fetch', { request: request('assets/autor-carlos.jpeg') });
+  assert.deepEqual(Buffer.from(await response.arrayBuffer()), photo);
+  assert.equal(env.calls.fetched.length, 0);
+});
+
 test('Un fallo del precache rechaza la instalación completa y conserva la versión anterior', async () => {
   const previousCache = 'mathbrain-shell-previous';
   const env = environment({
