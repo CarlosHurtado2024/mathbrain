@@ -23,19 +23,33 @@ Repositorio: [CarlosHurtado2024/mathbrain](https://github.com/CarlosHurtado2024/
    | Ajuste | Valor |
    | --- | --- |
    | Framework Preset | Other |
-   | Build Command | `npm run check` |
+   | Build Command | `npm run build` |
    | Output Directory | `dist` |
    | Install Command | Vacío; no hay dependencias que instalar |
 
 4. Pulsa **Deploy**. Este proyecto no necesita variables de entorno.
 
-La comprobación valida la sintaxis de JavaScript; los archivos del sitio ya están en `dist/`. Los cursos usan enlaces con `#`, por lo que no requieren reglas de reescritura. `server.cjs` sirve únicamente para la vista previa local.
+La compilación valida la sintaxis y genera automáticamente la versión de la caché de la aplicación a partir de los archivos de `dist/`. Los cursos usan enlaces con `#`, por lo que no requieren reglas de reescritura. `server.cjs` sirve únicamente para la vista previa local.
 
 Cuando el repositorio esté conectado a Vercel, los cambios en la rama de producción configurada generarán nuevos despliegues. Para un proyecto nuevo, usa `main` como rama de producción. Consulta la [documentación de la integración con GitHub](https://vercel.com/docs/git/vercel-for-github) y la [configuración de Vercel](https://vercel.com/docs/project-configuration/vercel-json).
 
 ## Vista local
 
 Desde esta carpeta, ejecuta `npm run dev` y abre `http://127.0.0.1:4173`.
+
+## Instalar MathBrain como aplicación
+
+El botón «Instalar app» de la cabecera y «Instalar MathBrain» del pie permiten añadir la aplicación con su propio icono. En navegadores compatibles, el botón abre la instalación del navegador cuando está disponible. Si no lo está, muestra pasos para el dispositivo. En iPhone/iPad se utiliza Compartir → Añadir a pantalla de inicio; en Safari para Mac, Añadir al Dock cuando el navegador lo admite. La instalación depende del navegador y del sistema operativo.
+
+Para instalarla desde un teléfono, utiliza la dirección HTTPS publicada en Vercel. `localhost` y `127.0.0.1` permiten pruebas en el mismo equipo; una dirección HTTP de la red local no equivale a una publicación HTTPS.
+
+`dist/manifest.webmanifest` define el nombre MathBrain, su ventana independiente, sus colores e iconos. `dist/assets/icons/` incluye los PNG de 192 y 512 píxeles, el icono adaptable de Android y el icono de Apple de 180 píxeles. El símbolo conserva el logo de MathBrain sobre azul noche. Los PNG están incluidos en el repositorio: no necesitan dependencias para desplegarse. Para regenerarlos a partir del SVG se puede ejecutar `scripts/generate-icons.cjs` con `sharp` disponible en el entorno de Node.
+
+Después de completar la primera carga, el service worker conserva las explicaciones, ejercicios, simulaciones y recursos locales para usarlos sin conexión. Los vídeos y fuentes externas no se descargan: los vídeos necesitan internet y la tipografía dispone de alternativas locales. Los guardados permanecen en el almacenamiento del mismo navegador.
+
+`npm run build` calcula una nueva versión cuando cambia cualquier archivo publicado. La aplicación muestra un aviso para actualizar cuando la nueva versión está preparada; se recarga al aceptar y no interrumpe automáticamente una simulación. El service worker solo elimina cachés anteriores de MathBrain. Durante el desarrollo, ejecuta `npm run build` después de cambiar archivos para generar la actualización; `npm run check` valida sintaxis sin cambiar la versión.
+
+`npm test` también comprueba los flujos de instalación por plataforma, las cancelaciones, la preparación sin conexión, las actualizaciones con confirmación, los iconos y la estabilidad de las versiones de caché.
 
 ## Incorporar videos
 

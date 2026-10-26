@@ -5,11 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#070b18">
   <meta name="color-scheme" content="dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="MathBrain">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="description" content="Encuentra explicaciones de matemáticas, explora simulaciones y aprende con ejercicios resueltos. Tu universo de ideas, a tu ritmo.">
   <meta property="og:title" content="MathBrain — Dale play a tu curiosidad">
   <meta property="og:description" content="Explicaciones, simulaciones y ejercicios resueltos. Encuentra la idea que necesitas entender.">
   <title>MathBrain — Dale play a tu curiosidad</title>
   <link rel="icon" type="image/svg+xml" href="assets/mark.svg">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=Lora:ital,wght@400;500;600;1,400&display=swap" rel="stylesheet">
@@ -19,6 +25,7 @@
   <script defer src="library.js"></script>
   <script defer src="app.js"></script>
   <script defer src="space.js"></script>
+  <script defer src="install.js"></script>
 </head>
 <body>
   <div id="space-background" class="space-background" data-state="static" aria-hidden="true"><div class="space-nebula"></div><canvas id="space-canvas"></canvas></div>
@@ -40,7 +47,7 @@
       <a href="#" class="mobile-brand" aria-label="MathBrain, inicio"><img src="assets/mark.svg" alt="" width="25" height="34"></a>
       <form id="search-form" class="global-search" role="search"><span data-icon="search"></span><label class="sr-only" for="content-search">Buscar un tema, una explicación o un ejercicio</label><input id="content-search" type="search" placeholder="¿Qué quieres entender hoy?" autocomplete="off" maxlength="160"><kbd aria-hidden="true">/</kbd></form>
       <a class="topbar-note" href="#explorar">A tu ritmo. A tu manera. <span aria-hidden="true">✦</span></a>
-      <a class="profile-mark" href="#biblioteca" aria-label="Abrir mi biblioteca">MB</a>
+      <button class="install-app-button" type="button" data-install aria-label="Instalar MathBrain" aria-haspopup="dialog" aria-controls="install-dialog" title="Instalar MathBrain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></svg><span>Instalar app</span></button>
     </header>
     <main id="main" tabindex="-1">
       <div id="home-view">
@@ -64,9 +71,23 @@
       <section id="about-view" class="about-view" aria-labelledby="about-title" hidden><p class="eyebrow">SOBRE MATHBRAIN</p><h1 id="about-title" tabindex="-1">Las matemáticas,<br>con otros ojos.</h1><p class="about-intro">Primero la intuición. Después, la fórmula. Un espacio para explorar, visualizar y entender las ideas detrás de los números.</p><article class="creator-section"><img src="assets/silueta-autor.svg" alt="Silueta genérica de una persona" width="400" height="500" loading="lazy"><div><p class="eyebrow">HOLA, SOY</p><h2>Carlos Hurtado</h2><p class="creator-credential">Soy estadístico de la Universidad Nacional de Colombia.</p><p>Soy un apasionado por la enseñanza de las matemáticas. Con MathBrain, quiero acercarte a las matemáticas y la estadística para que comprendas las ideas detrás de los procedimientos y descubras el sentido de cada fórmula.</p><p>Mi propuesta parte de la curiosidad: explorar una pregunta, visualizar un concepto y conectar la teoría con ejemplos que tengan sentido. Quiero ayudarte a construir bases sólidas y a avanzar con confianza.</p><blockquote>Hacer que aprender sea un camino de descubrimiento, una idea a la vez.</blockquote><a class="button button-primary" href="#explorar">Empieza por una idea <span aria-hidden="true">↗</span></a></div></article></section>
       <noscript><p class="empty-state">Activa JavaScript para buscar contenidos y utilizar las simulaciones de MathBrain.</p></noscript>
     </main>
-    <footer class="site-footer"><a href="#" class="footer-brand">Math<span>Brain</span></a><p>Think beyond numbers.</p><a href="#nosotros">Hecho para entender. <span aria-hidden="true">↗</span></a></footer>
+    <footer class="site-footer"><a href="#" class="footer-brand">Math<span>Brain</span></a><p>Think beyond numbers.</p><button type="button" class="footer-install" data-install aria-haspopup="dialog" aria-controls="install-dialog">Instalar MathBrain <span aria-hidden="true">↓</span></button><a href="#nosotros">Hecho para entender. <span aria-hidden="true">↗</span></a></footer>
   </div>
   <div id="toast" class="toast" role="status"></div>
+  <dialog class="install-dialog" id="install-dialog" aria-labelledby="install-title" aria-describedby="install-description">
+    <button id="close-install" class="close-install" type="button" aria-label="Cerrar instrucciones de instalación">×</button>
+    <img src="assets/icons/icon-192.png" alt="" width="76" height="76">
+    <p class="eyebrow">TU UNIVERSO, SIEMPRE A MANO</p>
+    <h2 id="install-title">MathBrain, contigo.</h2>
+    <p id="install-description">Añade MathBrain a tus aplicaciones para abrirla con su propio icono, en el celular o el computador.</p>
+    <button type="button" id="install-native" class="button button-primary" hidden>Instalar ahora</button>
+    <h3 id="install-guide-title"></h3>
+    <ol id="install-steps"></ol>
+    <p id="install-note" class="install-note"></p>
+    <p class="install-offline" id="install-offline">Al completar la preparación, podrás usar las explicaciones, los ejercicios y las simulaciones sin conexión. Los vídeos externos necesitan internet.</p>
+    <p id="install-feedback" class="install-feedback"></p>
+  </dialog>
+  <div class="app-update" id="app-update" role="status" hidden><p>Hay una nueva versión de MathBrain.</p><button id="update-app" type="button">Actualizar</button><button id="dismiss-update" type="button" aria-label="Actualizar más tarde">Más tarde</button></div>
   <button id="space-motion-toggle" class="space-motion-toggle" type="button" aria-label="Pausar animación del fondo espacial" aria-pressed="false" hidden><svg class="space-pause-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M7 5v10M13 5v10"/></svg><svg class="space-play-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m7 5 8 5-8 5Z"/></svg><span class="space-motion-label">Pausar fondo</span></button>
 </body>
 </html>
