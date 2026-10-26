@@ -58,6 +58,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 .topbar-note span { color:#a0dcd9; font-size:17px; margin-left:12px; }
 .profile-mark { background:#9dbfe514; border:1px solid #9dbfe52a; border-radius:50%; width:35px; height:35px; display:grid; place-items:center; font-size:10px; color:#b9d4e9; flex-shrink:0; }
 .mobile-brand { display:none; }
+.theme-control { position:relative; display:inline-flex; align-items:center; gap:7px; flex-shrink:0; padding:8px 10px; border:1px solid #a7c3e438; border-radius:24px; color:#bed0e6; background:#a7c3e408; }
+.theme-control>svg { width:17px; height:17px; flex-shrink:0; pointer-events:none; }
+.theme-control select { width:76px; border:0; color:inherit; background:transparent; font-size:11px; cursor:pointer; }
+.theme-control select option { color:#dceaff; background:#101a2d; }
+.theme-control:focus-within { outline:2px solid var(--teal); outline-offset:3px; }
+.theme-control select:focus-visible { outline:none; }
+@media(max-width:1200px) { .theme-control { margin-left:auto; }.theme-control + .install-app-button { margin-left:0; } }
+@media(max-width:650px) { .topbar { gap:9px!important; }.theme-control { padding:0; width:33px; height:33px; justify-content:center; }.theme-control select { position:absolute; inset:0; width:100%; height:100%; opacity:0; font-size:16px; }.theme-control>svg { width:17px; height:17px; } }
 .global-search { min-width:0; }
 .install-app-button { display:inline-flex; align-items:center; justify-content:center; gap:8px; flex-shrink:0; border:1px solid #9ce9da50; background:#9ce9da0b; border-radius:24px; padding:9px 14px; color:#b3eadf; font-size:11px; white-space:nowrap; }
 .install-app-button:hover { background:#9ce9da20; }
