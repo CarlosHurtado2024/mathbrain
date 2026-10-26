@@ -23,6 +23,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="space.css">
   <link rel="stylesheet" href="themes.css">
+  <link rel="stylesheet" href="explore.css">
   <script defer src="courses.js"></script>
   <script defer src="library.js"></script>
   <script defer src="app.js"></script>
@@ -62,6 +63,12 @@
         <div class="home-intro"><span><span class="tiny-spark" aria-hidden="true">✳</span> Un tema. Distintas formas de entenderlo.</span><span id="library-stats"></span></div>
         <div id="recent-shelf"></div>
       </div>
+      <section id="courses-view" class="course-browser" aria-labelledby="courses-title" hidden>
+        <header class="course-browser-heading"><div><p class="eyebrow">TU PRÓXIMA IDEA EMPIEZA AQUÍ</p><h1 id="courses-title" tabindex="-1">Explora a tu ritmo.</h1><p>Elige un curso. Conecta las ideas, experimenta y resuelve.</p></div><div class="course-browser-total"><strong>06</strong><span>cursos para explorar</span></div></header>
+        <div class="course-browser-toolbar"><div id="course-topics" class="course-topics" role="group" aria-label="Filtrar cursos por tema"></div><label class="course-level"><span>Nivel</span><select id="course-level-filter" aria-label="Filtrar cursos por nivel"><option value="all">Todos los niveles</option><option value="Inicial">Inicial</option><option value="Intermedio">Intermedio</option></select></label></div>
+        <section class="course-collection" aria-labelledby="course-collection-title"><div class="course-collection-heading"><div><h2 id="course-collection-title">Todos los cursos</h2><p id="course-results" role="status" aria-live="polite"></p></div><a class="course-content-link" href="#explorar?vista=contenidos">Buscar un contenido <span data-icon="right"></span></a></div><div id="course-grid" class="course-grid"></div><div id="course-empty" class="course-empty" hidden><h3>No hay cursos con esta combinación.</h3><p>Prueba otro tema o nivel para encontrar tu siguiente idea.</p><button class="button button-secondary" type="button" data-reset-courses>Ver todos los cursos</button></div></section>
+        <aside class="course-discovery-note"><span data-icon="search"></span><div><strong>¿Buscas una idea en concreto?</strong><p>Usa el buscador de arriba para encontrar una explicación, una simulación o un ejercicio.</p></div><a href="#explorar?vista=contenidos">Explorar contenidos <span data-icon="right"></span></a></aside>
+      </section>
       <section class="discovery" aria-label="Catálogo de contenidos">
         <div id="catalog-heading" class="catalog-heading" hidden><p class="eyebrow" id="catalog-eyebrow">EXPLORA A TU MANERA</p><h1 id="catalog-title" tabindex="-1">Encuentra esa idea.</h1><p id="catalog-description"></p></div>
         <div class="catalog-toolbar"><div class="format-tabs" role="group" aria-label="Tipo de contenido"><button class="format-tab active" type="button" data-format="all" aria-pressed="true">Todo</button><button class="format-tab" type="button" data-format="explanation" aria-pressed="false"><span data-icon="book"></span>Explicaciones</button><button class="format-tab" type="button" data-format="simulation" aria-pressed="false"><span data-icon="simulation"></span>Simulaciones</button><button class="format-tab" type="button" data-format="exercise" aria-pressed="false"><span data-icon="exercise"></span>Ejercicios resueltos</button></div><div class="catalog-selects"><label><span class="sr-only">Filtrar por tema</span><select id="topic-filter"><option value="all">Todos los temas</option><option value="algebra">Álgebra</option><option value="calculo">Cálculo</option><option value="probabilidad">Probabilidad</option><option value="estadistica">Estadística</option><option value="trigonometria">Trigonometría</option></select></label><label><span class="sr-only">Filtrar por nivel</span><select id="level-filter"><option value="all">Todos los niveles</option><option value="Inicial">Inicial</option><option value="Intermedio">Intermedio</option></select></label></div></div>

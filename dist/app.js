@@ -14,6 +14,7 @@
   let recent = loadList('mathbrain-recent');
   let page = 'inicio';
   let filters = { query: '', type: 'all', topic: 'all', level: 'all' };
+  let courseFilters = { topic: 'all', level: 'all' };
   let toastTimer;
   let artworkSequence = 0;
   let lastRoutedHash = null;
@@ -57,7 +58,7 @@
     toastTimer = setTimeout(() => select('#toast').classList.remove('visible'), 3500);
   }
 
-  function artwork(resource) {
+  function artwork(resource, square = false) {
     artworkSequence += 1;
     const palette = {
       blue: ['#11263d', '#8dc8ed', '#b0e7df'], sand: ['#30253b', '#e1bd99', '#b7a9ed'],
@@ -66,7 +67,7 @@
     }[resource.color];
     const [background, primary, accent] = palette;
     const patternId = `art-grid-${artworkSequence}`;
-    const grid = `<defs><pattern id="${patternId}" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="${primary}" stroke-opacity=".085" stroke-width=".7"/></pattern></defs><rect width="400" height="230" fill="${background}"/><rect width="400" height="230" fill="url(#${patternId})"/>`;
+    const grid = `<defs><pattern id="${patternId}" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="${primary}" stroke-opacity=".085" stroke-width=".7"/></pattern></defs><rect y="${square ? -85 : 0}" width="400" height="${square ? 400 : 230}" fill="${background}"/><rect y="${square ? -85 : 0}" width="400" height="${square ? 400 : 230}" fill="url(#${patternId})"/>`;
     const axes = `<path d="M45 181H361M94 197V46" stroke="${primary}" stroke-opacity=".3" stroke-width="1" fill="none"/>`;
     let drawing;
     if (resource.art === 'derivative') {
@@ -89,7 +90,7 @@
       const rectangles = Array.from({ length: 14 }, (_, index) => { const horizontal = 92 + index * 16; const vertical = 174 - 48 * Math.sin((horizontal - 70) / 264 * Math.PI) - (horizontal - 70) / 3.3 * .6; return `<rect x="${horizontal}" y="${vertical}" width="15" height="${181 - vertical}" fill="${primary}" fill-opacity=".14" stroke="${primary}" stroke-opacity=".35" stroke-width=".7"/>`; }).join('');
       drawing = `${axes}${rectangles}<path d="${curve}" stroke="${primary}" stroke-width="2" fill="none"/><text x="108" y="88" fill="${accent}" font-size="36" font-family="Georgia,serif">∫</text><text x="134" y="84" fill="${accent}" font-size="18" font-family="Georgia,serif" font-style="italic">f(x) dx</text>`;
     }
-    return `<svg viewBox="0 0 400 230" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${grid}${drawing}</svg>`;
+    return `<svg viewBox="${square ? '0 -85 400 400' : '0 0 400 230'}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${grid}${drawing}</svg>`;
   }
 
   function heroArt() {
@@ -108,6 +109,39 @@
   function card(resource) {
     const format = library.formats[resource.type];
     return `<article class="content-card ${resource.color}"><a href="#contenido/${resource.id}" class="card-art" tabindex="-1" aria-hidden="true">${artwork(resource)}<span class="art-label">MATHBRAIN / EXPLORA LAS IDEAS</span><span class="art-type">${icon(format.icon)}${format.title}</span><span class="card-open">↗</span></a>${saveButton(resource)}<div class="card-copy"><p class="card-topic">${topicName(resource.topic)}</p><h3><a href="#contenido/${resource.id}">${escape(resource.title)}</a></h3><p>${escape(resource.description)}</p><div class="card-meta"><span class="level-indicator ${resource.level === 'Inicial' ? 'initial' : ''}" aria-hidden="true"><i></i><i></i><i></i></span>${resource.level}<span>${resource.type === 'exercise' ? `${resource.steps.length} pasos` : resource.type === 'simulation' ? 'Interactiva' : 'Lectura'}</span></div></div></article>`;
+  }
+
+  function courseCard(course) {
+    const resources = library.resources.filter(resource => resource.courseId === course.id);
+    const count = type => resources.filter(resource => resource.type === type).length;
+    const simulations = count('simulation');
+    const exercises = count('exercise');
+    const symbol = { derivative: 'f′', integral: '∫', probability: 'P(A)', inference: 'x̄', algebra: 'x²', trigonometry: 'θ' }[course.art];
+    return `<article class="course-album ${course.color}"><a class="course-album-link" href="#curso/${course.id}" aria-labelledby="course-name-${course.id}"><div class="course-cover">${artwork(course, true)}<span class="course-cover-label">MATHBRAIN / CURSO</span><span class="course-cover-symbol" aria-hidden="true">${symbol}</span><span class="course-cover-open" aria-hidden="true">${icon('play')}</span></div><div class="course-album-copy"><p class="course-album-topic">${escape(course.label)}</p><h3 id="course-name-${course.id}">${escape(course.title)}</h3><p class="course-album-description">${escape(course.description)}</p><div class="course-album-meta"><span>${count('explanation')} explicaciones</span><span>${course.level}</span></div><div class="course-album-extras">${simulations ? `<span>${simulations} ${simulations === 1 ? 'simulación' : 'simulaciones'}</span>` : ''}${exercises ? `<span>${exercises} ${exercises === 1 ? 'ejercicio' : 'ejercicios'}</span>` : ''}</div></div></a></article>`;
+  }
+
+  function renderCourses() {
+    const visibleCourses = courses.filter(course => (courseFilters.topic === 'all' || (course.id === 'probabilidad' ? 'probabilidad' : course.category) === courseFilters.topic) && (courseFilters.level === 'all' || course.level === courseFilters.level));
+    select('.course-browser-total strong').textContent = String(courses.length).padStart(2, '0');
+    select('#course-level-filter').value = courseFilters.level;
+    selectAll('[data-course-topic]').forEach(button => {
+      const active = button.dataset.courseTopic === courseFilters.topic;
+      button.setAttribute('aria-pressed', String(active));
+    });
+    select('#course-collection-title').textContent = courseFilters.topic === 'all' ? courseFilters.level === 'all' ? 'Todos los cursos' : 'Cursos de nivel ' + courseFilters.level.toLowerCase() : topicName(courseFilters.topic);
+    select('#course-results').textContent = `${visibleCourses.length} ${visibleCourses.length === 1 ? 'curso' : 'cursos'} · Explicaciones y práctica a tu ritmo`;
+    select('#course-grid').innerHTML = visibleCourses.map(courseCard).join('');
+    select('#course-empty').hidden = visibleCourses.length > 0;
+    document.title = 'Explorar cursos | MathBrain';
+  }
+
+  function updateCourseCatalog(changes) {
+    courseFilters = { ...courseFilters, ...changes };
+    const parameters = new URLSearchParams();
+    if (courseFilters.topic !== 'all') parameters.set('curso_tema', courseFilters.topic);
+    if (courseFilters.level !== 'all') parameters.set('curso_nivel', courseFilters.level);
+    history.pushState(null, '', `#explorar${parameters.size ? `?${parameters}` : ''}`);
+    route(false);
   }
 
   function shelf(id, title, description, resources, destination) {
@@ -177,8 +211,9 @@
     if (filters.type !== 'all') parameters.set('tipo', filters.type);
     if (filters.topic !== 'all') parameters.set('tema', filters.topic);
     if (filters.level !== 'all') parameters.set('nivel', filters.level);
+    if (destination === 'explorar' && !parameters.size) parameters.set('vista', 'contenidos');
     const address = `#${destination}${parameters.size ? `?${parameters}` : ''}`;
-    history[replace && page !== 'inicio' ? 'replaceState' : 'pushState'](null, '', address);
+    history[replace && !['inicio', 'cursos'].includes(page) ? 'replaceState' : 'pushState'](null, '', address);
     route(false);
   }
 
@@ -247,10 +282,13 @@
     try { destination = decodeURIComponent(rawPath); } catch { destination = 'invalid'; }
     const parameters = new URLSearchParams(rawParameters);
     filters = { query: (parameters.get('q') || '').slice(0, 160), type: library.formats[parameters.get('tipo')] ? parameters.get('tipo') : 'all', topic: library.topics.some(topic => topic.id === parameters.get('tema')) ? parameters.get('tema') : 'all', level: ['Inicial', 'Intermedio'].includes(parameters.get('nivel')) ? parameters.get('nivel') : 'all' };
+    courseFilters = { topic: library.topics.some(topic => topic.id === parameters.get('curso_tema')) ? parameters.get('curso_tema') : 'all', level: ['Inicial', 'Intermedio'].includes(parameters.get('curso_nivel')) ? parameters.get('curso_nivel') : 'all' };
     page = !destination || destination === 'inicio' ? 'inicio' : destination === 'biblioteca' ? 'biblioteca' : destination === 'nosotros' ? 'nosotros' : ['explorar', 'cursos', 'enfoque', 'simulaciones', 'ejercicios'].includes(destination) ? 'explorar' : 'detalle';
+    if (['explorar', 'cursos'].includes(destination) && !filters.query && filters.type === 'all' && filters.topic === 'all' && filters.level === 'all' && parameters.get('vista') !== 'contenidos') page = 'cursos';
     if (destination === 'simulaciones') filters.type = 'simulation';
     if (destination === 'ejercicios') filters.type = 'exercise';
     select('#home-view').hidden = page !== 'inicio';
+    select('#courses-view').hidden = page !== 'cursos';
     select('.discovery').hidden = !['inicio', 'explorar', 'biblioteca'].includes(page);
     select('#learning-paths').hidden = page !== 'inicio';
     select('#detail-view').hidden = page !== 'detalle';
@@ -264,6 +302,9 @@
       if (resource) renderResource(resource);
       else if (course) renderCourse(course);
       else missingResource();
+    } else if (page === 'cursos') {
+      select('#detail-view').replaceChildren();
+      renderCourses();
     } else if (page === 'nosotros') {
       select('#detail-view').replaceChildren();
       document.title = 'Sobre MathBrain | MathBrain';
@@ -272,7 +313,7 @@
       renderCatalog();
       if (page === 'inicio') document.title = 'MathBrain — Dale play a tu curiosidad';
     }
-    const activeNav = page === 'explorar' ? filters.type === 'simulation' ? 'simulaciones' : filters.type === 'exercise' ? 'ejercicios' : 'explorar' : page;
+    const activeNav = page === 'cursos' || (page === 'detalle' && destination.startsWith('curso/')) ? 'explorar' : page === 'explorar' ? filters.type === 'simulation' ? 'simulaciones' : filters.type === 'exercise' ? 'ejercicios' : 'explorar' : page;
     selectAll('[data-nav]').forEach(link => {
       const active = link.dataset.nav === activeNav;
       link.classList.toggle('active', active);
@@ -281,7 +322,7 @@
     });
     if (shouldFocus) {
       window.scrollTo({ top: 0, behavior: 'instant' });
-      const heading = page === 'detalle' ? select('#detail-title') : page === 'nosotros' ? select('#about-title') : page === 'inicio' ? select('#main') : select('#catalog-title');
+      const heading = page === 'detalle' ? select('#detail-title') : page === 'nosotros' ? select('#about-title') : page === 'inicio' ? select('#main') : page === 'cursos' ? select('#courses-title') : select('#catalog-title');
       heading?.focus({ preventScroll: true });
     }
   }
@@ -402,8 +443,12 @@
   select('#library-stats').textContent = `${library.search({ type: 'explanation' }).length} explicaciones · ${library.search({ type: 'simulation' }).length} simulaciones · ${library.search({ type: 'exercise' }).length} ejercicios`;
   select('#course-paths').innerHTML = courses.map(course => `<a class="path-card ${course.color}" href="#curso/${course.id}"><span class="path-symbol" aria-hidden="true">${course.art === 'derivative' ? 'f′' : course.art === 'integral' ? '∫' : course.art === 'probability' ? 'P' : course.art === 'inference' ? 'x̄' : course.art === 'algebra' ? 'x²' : 'θ'}</span><span><strong>${course.title}</strong><small>${course.lessons.length} explicaciones · ${course.level}</small></span><span aria-hidden="true">↗</span></a>`).join('');
   select('#saved-count').textContent = saved.size;
+  select('#course-topics').innerHTML = [{ id: 'all', title: 'Todos' }, ...library.topics].map(topic => `<button class="course-topic" type="button" data-course-topic="${topic.id}" aria-pressed="${topic.id === 'all'}">${escape(topic.title)}</button>`).join('');
+  selectAll('[data-course-topic]').forEach(button => button.addEventListener('click', () => updateCourseCatalog({ topic: button.dataset.courseTopic })));
+  select('#course-level-filter').addEventListener('change', event => updateCourseCatalog({ level: event.target.value }));
+  select('[data-reset-courses]').addEventListener('click', () => { updateCourseCatalog({ topic: 'all', level: 'all' }); select('[data-course-topic="all"]').focus(); });
   select('#content-search').addEventListener('input', event => updateCatalog({ query: event.target.value }, true));
-  select('#search-form').addEventListener('submit', event => { event.preventDefault(); updateCatalog({ query: select('#content-search').value }); select('#catalog-title').focus(); });
+  select('#search-form').addEventListener('submit', event => { event.preventDefault(); updateCatalog({ query: select('#content-search').value }); select(page === 'cursos' ? '#courses-title' : '#catalog-title').focus(); });
   select('#topic-filter').addEventListener('change', event => updateCatalog({ topic: event.target.value }));
   select('#level-filter').addEventListener('change', event => updateCatalog({ level: event.target.value }));
   selectAll('[data-format]').forEach(button => button.addEventListener('click', () => updateCatalog({ type: button.dataset.format })));

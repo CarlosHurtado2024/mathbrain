@@ -6,6 +6,8 @@ Biblioteca visual en español de matemáticas y estadística, con un catálogo i
 
 La portada organiza los contenidos en filas horizontales de explicaciones, simulaciones y ejercicios resueltos. El buscador encuentra conceptos individuales y acepta búsquedas sin tildes, plurales y preguntas como «¿qué es una derivada?». Se pueden combinar los filtros de tema, formato y nivel. Las búsquedas quedan en el enlace para poder compartirlas.
 
+«Explorar» abre primero una colección de cursos con portadas, nivel y cantidades reales de explicaciones, simulaciones y ejercicios. Los filtros por tema y nivel permiten elegir una ruta; cada portada abre su programa y sus lecciones. El buscador global y «Buscar un contenido» conservan el acceso directo a los recursos individuales. Los filtros de cursos se guardan en el enlace y funcionan con la navegación atrás y adelante.
+
 La biblioteca incluye 30 explicaciones con ejemplos, seis ejercicios con soluciones desplegables y cuatro simulaciones: la derivada, las sumas de Riemann, el círculo unitario y lanzamientos de moneda. Los controles modifican las gráficas y los cálculos reales. Los videos se muestran cuando se incorpora una URL compatible; no son necesarios para leer las explicaciones.
 
 Los marcadores guardan contenidos en «Mi biblioteca» mediante el almacenamiento del navegador. La portada muestra los contenidos consultados recientemente, sin simular porcentajes de progreso. Los guardados y el historial son locales al navegador; no hay cuentas ni sincronización entre dispositivos. Si el almacenamiento está bloqueado, el catálogo y los guardados de la visita siguen funcionando.
