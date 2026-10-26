@@ -5,7 +5,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 const source = fs.readFileSync(path.join(__dirname, '../dist/space.js'), 'utf8');
 
-function environment({ reduced = false, savedPause = false, storageFails = false } = {}) {
+function environment({ reduced = false, savedPause = false, storageFails = false, theme } = {}) {
   const target = extra => {
     const listeners = new Map();
     return Object.assign({
@@ -13,12 +13,19 @@ function environment({ reduced = false, savedPause = false, storageFails = false
       emit(name, value = {}) { listeners.get(name)?.(value); }
     }, extra);
   };
-  const gradient = { addColorStop() {} };
+  const gradients = [];
+  const createGradient = type => {
+    const gradient = { type, stops: [], addColorStop(position, color) { this.stops.push({ position, color }); } };
+    gradients.push(gradient);
+    return gradient;
+  };
   const ctx = {
     clearCount: 0,
+    fills: [], strokes: [],
     setTransform() {}, clearRect() { this.clearCount++; }, fillRect() {},
-    beginPath() {}, arc() {}, fill() {}, moveTo() {}, lineTo() {}, stroke() {}, drawImage() {},
-    createRadialGradient: () => gradient, createLinearGradient: () => gradient
+    beginPath() {}, arc() {}, fill() { this.fills.push(this.fillStyle); }, moveTo() {}, lineTo() {},
+    stroke() { this.strokes.push(this.strokeStyle); }, drawImage() {},
+    createRadialGradient: () => createGradient('radial'), createLinearGradient: () => createGradient('linear')
   };
   const layer = { dataset: { state: 'static' } };
   const canvas = { getContext: () => ctx, width: 0, height: 0 };
@@ -28,7 +35,7 @@ function environment({ reduced = false, savedPause = false, storageFails = false
   const media = target({ matches: reduced });
   const pointer = target({ matches: true });
   const document = target({
-    hidden: false, documentElement: target({}),
+    hidden: false, documentElement: target({ dataset: theme ? { theme } : {} }),
     getElementById: id => ({ 'space-background': layer, 'space-canvas': canvas, 'space-motion-toggle': toggle })[id],
     createElement: () => ({ getContext: () => ctx })
   });
@@ -50,7 +57,12 @@ function environment({ reduced = false, savedPause = false, storageFails = false
     cancelAnimationFrame(id) { frames.delete(id); }
   });
   return {
-    layer, canvas, toggle, attrs, label, media, document, window, stored, frames, ctx,
+    layer, canvas, toggle, attrs, label, media, document, window, stored, frames, ctx, gradients,
+    get frameRequests() { return frameNumber; },
+    changeTheme(nextTheme) {
+      document.documentElement.dataset.theme = nextTheme;
+      document.emit('mathbrain:themechange', { detail: { theme: nextTheme } });
+    },
     tick(milliseconds) {
       now += milliseconds;
       const pending = [...frames.values()];
@@ -58,6 +70,10 @@ function environment({ reduced = false, savedPause = false, storageFails = false
       for (const callback of pending) callback(now);
     }
   };
+}
+
+function colorChannels(color) {
+  return color.match(/^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/)?.slice(1).join(',') || color;
 }
 
 test('La pausa detiene la animación, se guarda y permite reanudarla', () => {
@@ -135,6 +151,66 @@ test('Las estrellas y estelas se dibujan, con resolución limitada en escritorio
   env.window.innerHeight = 844;
   env.window.emit('resize');
   assert.equal(env.canvas.width, Math.round(390 * 1.25));
+  env.tick(34);
+  assert.equal(env.frames.size, 1);
+});
+
+test('Las estrellas y el brillo utilizan una paleta diferente en el tema claro', () => {
+  const dark = environment({ reduced: true, theme: 'dark' });
+  const light = environment({ reduced: true, theme: 'light' });
+  const defaultTheme = environment({ reduced: true });
+  assert.ok(dark.ctx.fills.length > 0);
+  assert.ok(light.ctx.fills.length > 0);
+  assert.notEqual(colorChannels(light.ctx.fills.at(-1)), colorChannels(dark.ctx.fills.at(-1)));
+  assert.equal(colorChannels(defaultTheme.ctx.fills.at(-1)), colorChannels(dark.ctx.fills.at(-1)));
+  assert.notDeepEqual(light.gradients.find(gradient => gradient.type === 'radial').stops,
+    dark.gradients.find(gradient => gradient.type === 'radial').stops);
+});
+
+test('Cambiar de tema repinta las estrellas pausadas sin reanudar el fondo', () => {
+  const env = environment({ savedPause: true, theme: 'dark' });
+  const clearCount = env.ctx.clearCount;
+  const fillCount = env.ctx.fills.length;
+  const darkColor = colorChannels(env.ctx.fills.at(-1));
+  env.changeTheme('light');
+  assert.ok(env.ctx.clearCount > clearCount);
+  assert.ok(env.ctx.fills.length > fillCount);
+  assert.notEqual(colorChannels(env.ctx.fills.at(-1)), darkColor);
+  assert.equal(env.layer.dataset.state, 'paused');
+  assert.equal(env.frames.size, 0);
+  assert.equal(env.frameRequests, 0);
+  assert.equal(env.stored.get('mathbrain-space-paused'), 'true');
+  env.changeTheme('dark');
+  assert.equal(colorChannels(env.ctx.fills.at(-1)), darkColor);
+  assert.equal(env.frames.size, 0);
+});
+
+test('El cambio de tema respeta movimiento reducido y repinta inmediatamente', () => {
+  const env = environment({ reduced: true, theme: 'dark' });
+  const clearCount = env.ctx.clearCount;
+  const darkColor = colorChannels(env.ctx.fills.at(-1));
+  env.changeTheme('light');
+  assert.ok(env.ctx.clearCount > clearCount);
+  assert.notEqual(colorChannels(env.ctx.fills.at(-1)), darkColor);
+  assert.equal(env.layer.dataset.state, 'static');
+  assert.equal(env.toggle.hidden, true);
+  assert.equal(env.frameRequests, 0);
+  env.window.emit('pointermove', { clientX: 300, clientY: 200, pointerType: 'mouse' });
+  assert.equal(env.frames.size, 0);
+});
+
+test('Cambiar de tema durante la animación no inicia ni duplica fotogramas', () => {
+  const env = environment({ theme: 'dark' });
+  env.tick(34);
+  const pendingFrames = [...env.frames.keys()];
+  const frameRequests = env.frameRequests;
+  const clearCount = env.ctx.clearCount;
+  env.changeTheme('light');
+  env.changeTheme('dark');
+  assert.ok(env.ctx.clearCount > clearCount);
+  assert.equal(env.layer.dataset.state, 'running');
+  assert.equal(env.frameRequests, frameRequests);
+  assert.deepEqual([...env.frames.keys()], pendingFrames);
   env.tick(34);
   assert.equal(env.frames.size, 1);
 });

@@ -12,6 +12,22 @@
   const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
   const storageKey = 'mathbrain-space-paused';
   const tau = Math.PI * 2;
+  const palettes = {
+    dark: {
+      star: '190,214,255', connection: '137,217,239',
+      meteorTail: '110,160,255', meteorMiddle: '126,194,255', meteorHead: '220,246,255', meteorCore: '224,247,255',
+      dust: '160,227,244', dustConnection: '131,201,244',
+      glowInner: '#91c6ff22', glowOuter: '#5acdd515', glowEdge: '#5acdd500'
+    },
+    light: {
+      star: '46,85,133', connection: '27,113,132',
+      meteorTail: '80,106,175', meteorMiddle: '48,111,160', meteorHead: '34,91,128', meteorCore: '28,100,128',
+      dust: '39,113,134', dustConnection: '66,106,157',
+      glowInner: '#456fa429', glowOuter: '#3a85951c', glowEdge: '#3a859500'
+    }
+  };
+  const currentPalette = () => palettes[document.documentElement.dataset.theme === 'light' ? 'light' : 'dark'];
+  let palette = currentPalette();
   let paused = false;
   try { paused = localStorage.getItem(storageKey) === 'true'; } catch { /* El fondo funciona sin almacenamiento. */ }
 
@@ -37,11 +53,13 @@
   const glow = document.createElement('canvas');
   glow.width = glow.height = 160;
   const glowContext = glow.getContext('2d');
-  if (glowContext) {
+  function paintGlow() {
+    if (!glowContext) return;
+    glowContext.clearRect(0, 0, 160, 160);
     const gradient = glowContext.createRadialGradient(80, 80, 0, 80, 80, 80);
-    gradient.addColorStop(0, '#91c6ff22');
-    gradient.addColorStop(.35, '#5acdd515');
-    gradient.addColorStop(1, '#5acdd500');
+    gradient.addColorStop(0, palette.glowInner);
+    gradient.addColorStop(.35, palette.glowOuter);
+    gradient.addColorStop(1, palette.glowEdge);
     glowContext.fillStyle = gradient;
     glowContext.fillRect(0, 0, 160, 160);
   }
@@ -94,7 +112,7 @@
       const drift = reducedMotion.matches ? 0 : time * (.6 + star.depth);
       const y = ((star.y + drift + offset.y * star.depth - scrollPosition * star.depth * .045) % height + height) % height;
       const twinkle = reducedMotion.matches ? 1 : .78 + .22 * Math.sin(time * .9 + star.phase);
-      ctx.fillStyle = `rgba(190,214,255,${star.opacity * twinkle})`;
+      ctx.fillStyle = `rgba(${palette.star},${star.opacity * twinkle})`;
       ctx.beginPath();
       ctx.arc(x, y, star.radius, 0, tau);
       ctx.fill();
@@ -102,7 +120,7 @@
       if (pointerActive && connections < 6) {
         const distance = Math.hypot(x - pointer.x, y - pointer.y);
         if (distance < 155) {
-          ctx.strokeStyle = `rgba(137,217,239,${(1 - distance / 155) * .24})`;
+          ctx.strokeStyle = `rgba(${palette.connection},${(1 - distance / 155) * .24})`;
           ctx.lineWidth = .65;
           ctx.beginPath();
           ctx.moveTo(pointer.x, pointer.y);
@@ -128,16 +146,16 @@
       const tailY = meteor.y - meteor.vy / speed * meteor.length;
       const alpha = Math.sin(meteor.age / meteor.life * Math.PI) * .72;
       const streak = ctx.createLinearGradient(tailX, tailY, meteor.x, meteor.y);
-      streak.addColorStop(0, 'rgba(110,160,255,0)');
-      streak.addColorStop(.65, `rgba(126,194,255,${alpha * .4})`);
-      streak.addColorStop(1, `rgba(220,246,255,${alpha})`);
+      streak.addColorStop(0, `rgba(${palette.meteorTail},0)`);
+      streak.addColorStop(.65, `rgba(${palette.meteorMiddle},${alpha * .4})`);
+      streak.addColorStop(1, `rgba(${palette.meteorHead},${alpha})`);
       ctx.strokeStyle = streak;
       ctx.lineWidth = 1.25;
       ctx.beginPath();
       ctx.moveTo(tailX, tailY);
       ctx.lineTo(meteor.x, meteor.y);
       ctx.stroke();
-      ctx.fillStyle = `rgba(224,247,255,${alpha})`;
+      ctx.fillStyle = `rgba(${palette.meteorCore},${alpha})`;
       ctx.beginPath();
       ctx.arc(meteor.x, meteor.y, 1.4, 0, tau);
       ctx.fill();
@@ -150,13 +168,13 @@
       particle.x += particle.vx * dt;
       particle.y += particle.vy * dt;
       const alpha = (1 - particle.age / particle.life) * .65;
-      ctx.fillStyle = `rgba(160,227,244,${alpha})`;
+      ctx.fillStyle = `rgba(${palette.dust},${alpha})`;
       ctx.beginPath();
       ctx.arc(particle.x, particle.y, particle.radius, 0, tau);
       ctx.fill();
       const neighbor = dust[i - 1];
       if (neighbor && Math.hypot(neighbor.x - particle.x, neighbor.y - particle.y) < 55) {
-        ctx.strokeStyle = `rgba(131,201,244,${alpha * .28})`;
+        ctx.strokeStyle = `rgba(${palette.dustConnection},${alpha * .28})`;
         ctx.lineWidth = .6;
         ctx.beginPath();
         ctx.moveTo(particle.x, particle.y);
@@ -223,6 +241,11 @@
   window.addEventListener('pagehide', () => { suspended = true; syncState(); });
   window.addEventListener('pageshow', () => { suspended = false; syncState(); });
   document.addEventListener('visibilitychange', syncState);
+  document.addEventListener('mathbrain:themechange', () => {
+    palette = currentPalette();
+    paintGlow();
+    paint(0);
+  });
   reducedMotion.addEventListener('change', syncState);
   finePointer.addEventListener('change', () => { resize(); syncState(); });
   toggle.addEventListener('click', () => {
@@ -231,6 +254,7 @@
     syncState();
   });
 
+  paintGlow();
   resize();
   syncState();
 })();

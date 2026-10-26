@@ -1,7 +1,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'mathbrain-shell-';
-const CACHE_NAME = 'mathbrain-shell-c8b89ba229a68a02';
+const CACHE_NAME = 'mathbrain-shell-a07fad423f061299';
 const APP_ROOT = new URL('./', self.location.href);
 const SHELL_FILES = [
   './', './index.html', './styles.css', './space.css', './themes.css', './theme.js',
