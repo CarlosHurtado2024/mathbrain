@@ -1,6 +1,16 @@
 # MathBrain
 
-Sitio en español para explorar cursos de matemáticas y estadística. HTML, CSS y JavaScript sin dependencias de compilación.
+Biblioteca visual en español de matemáticas y estadística, con un catálogo inspirado en plataformas de contenido y un fondo espacial animado. HTML, CSS y JavaScript sin dependencias de compilación.
+
+## Explorar la biblioteca
+
+La portada organiza los contenidos en filas horizontales de explicaciones, simulaciones y ejercicios resueltos. El buscador encuentra conceptos individuales y acepta búsquedas sin tildes, plurales y preguntas como «¿qué es una derivada?». Se pueden combinar los filtros de tema, formato y nivel. Las búsquedas quedan en el enlace para poder compartirlas.
+
+La biblioteca incluye 30 explicaciones con ejemplos, seis ejercicios con soluciones desplegables y cuatro simulaciones: la derivada, las sumas de Riemann, el círculo unitario y lanzamientos de moneda. Los controles modifican las gráficas y los cálculos reales. Los videos se muestran cuando se incorpora una URL compatible; no son necesarios para leer las explicaciones.
+
+Los marcadores guardan contenidos en «Mi biblioteca» mediante el almacenamiento del navegador. La portada muestra los contenidos consultados recientemente, sin simular porcentajes de progreso. Los guardados y el historial son locales al navegador; no hay cuentas ni sincronización entre dispositivos. Si el almacenamiento está bloqueado, el catálogo y los guardados de la visita siguen funcionando.
+
+En `dist/library.js` se editan las explicaciones, ejemplos, ejercicios, simulaciones y etiquetas de búsqueda. Las rutas de aprendizaje conservan sus datos en `dist/courses.js`. Los enlaces `#contenido/identificador` abren cada recurso; `#curso/identificador` abre su ruta. Los enlaces anteriores `#curso/identificador/número` siguen abriendo la explicación correspondiente.
 
 ## Desplegar en Vercel desde GitHub
 
@@ -39,21 +49,21 @@ video: 'https://www.youtube.com/watch?v=ID_DE_11_CAR'
 
 El identificador de YouTube del ejemplo es un marcador: reemplázalo por el enlace real. Se admiten enlaces de YouTube, YouTube Shorts, Vimeo público y archivos `.mp4` o `.webm` (locales o HTTPS). Los videos externos deben permitir inserción. Los archivos con pista de audio deben incluir subtítulos accesibles antes de publicarse. Para archivos grandes, conviene utilizar un proveedor de video y pegar su URL compatible. Este sitio no incluye un panel de subida ni un servidor de almacenamiento de videos.
 
-Los archivos MP4/WebM locales pueden guardarse dentro de `dist/assets/videos/`. El sitio mostrará automáticamente el reproductor en las lecciones con URL compatible. Hasta entonces muestra «En preparación», la descripción y una idea clave. Las duraciones, el progreso de reproducción y los certificados no se simulan.
+Los archivos MP4/WebM locales pueden guardarse dentro de `dist/assets/videos/`. El sitio muestra automáticamente el reproductor en las explicaciones con URL compatible. Las explicaciones escritas y los ejemplos permanecen disponibles. Las duraciones, el progreso de reproducción y los certificados no se simulan.
 
 ## Editar los programas
 
-En `dist/courses.js` se modifican los títulos, descripciones, nivel, prerrequisitos, lecciones e ideas clave. Hay seis programas preliminares con cinco lecciones cada uno. Los filtros, la búsqueda sin distinción de tildes, los enlaces directos a las lecciones y la descarga del programa se generan a partir de estos datos.
+En `dist/courses.js` se modifican los títulos, descripciones, nivel, prerrequisitos, lecciones e ideas clave. Hay seis rutas con cinco explicaciones cada una. Si se añaden lecciones, también deben incorporarse su explicación y ejemplo en `dist/library.js`. Los enlaces directos y la descarga del programa se generan a partir de estos datos.
 
 ## Identidad visual
 
 `dist/assets/mark.svg` es una adaptación vectorial del símbolo geométrico facilitado por el usuario. `dist/assets/mathbrain-original.png` conserva el logo original. El tema espacial utiliza fondos azul noche, estrellas y acentos azules y turquesa. Los estilos están en `dist/space.css`; `dist/space.js` añade nebulosas en movimiento, estrellas fugaces, profundidad al desplazarse y una estela de constelación que sigue el mouse. El campo estático de `dist/assets/stars.svg` sirve como respaldo.
 
-El botón de la esquina inferior derecha permite pausar o reanudar el fondo y recuerda la preferencia en el navegador. Si el sistema solicita reducir movimiento, el fondo permanece estático. La animación se suspende cuando la página no está visible; en móviles reduce la cantidad de partículas y no activa la estela del mouse. No se necesitan dependencias externas. Las ilustraciones de los cursos son diagramas SVG propios con paletas oscuras. La estructura de exploración se inspira en https://www.3blue1brown.com/; el contenido y las ilustraciones de este sitio son propios.
+El botón de la esquina inferior derecha permite pausar o reanudar el fondo y recuerda la preferencia en el navegador. Si el sistema solicita reducir movimiento, el fondo permanece estático. La animación se suspende cuando la página no está visible; en móviles reduce la cantidad de partículas y no activa la estela del mouse. No se necesitan dependencias externas. Las ilustraciones son diagramas SVG propios con paletas oscuras. El catálogo usa navegación lateral, filas de tarjetas y filtros de formato; en móviles la navegación principal pasa a una barra inferior.
 
 ## Comprobaciones
 
-`npm run check` comprueba la sintaxis de los scripts. `npm test` verifica la pausa, su persistencia, la suspensión al ocultar la página y la preferencia de movimiento reducido. La vista local permite verificar navegación, filtros, búsqueda, programa de lecciones, descarga, el laboratorio interactivo de derivadas y el fondo espacial. No hay videos suministrados: la reproducción real se debe verificar al incorporar los primeros enlaces.
+`npm run check` comprueba la sintaxis de todos los scripts. `npm test` verifica la integridad del catálogo, las búsquedas, los filtros combinados, la selección de guardados, los cálculos de Riemann y del círculo unitario, los lanzamientos de moneda y el comportamiento del fondo espacial. La vista local permite comprobar las filas de contenido, navegación, búsqueda, guardados, soluciones desplegables y controles de las cuatro simulaciones. No hay videos suministrados: la reproducción se debe verificar al incorporar los primeros enlaces.
 
 ## Alojamiento original en Sites
 

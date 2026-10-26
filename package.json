@@ -5,7 +5,7 @@
   "description": "Biblioteca visual de matemáticas y estadística en español",
   "scripts": {
     "dev": "node server.cjs",
-    "check": "node --check dist/app.js && node --check dist/courses.js && node --check dist/space.js",
+    "check": "node --check dist/app.js && node --check dist/courses.js && node --check dist/library.js && node --check dist/space.js",
     "test": "node --test tests/*.test.cjs"
   }
 }
