@@ -252,7 +252,7 @@
     if (resource.type === 'simulation') {
       body = `<div class="simulation-panel">${simulationControls(resource)}</div><div class="reader-body"><h2>La idea detrás de lo que ves</h2><div class="key-concept"><h3>Quédate con esto</h3><p>${escape(resource.key)}</p></div><p>Modifica los controles y observa cómo cambian la gráfica y sus valores. Conecta lo que ves con las explicaciones y los ejercicios de esta misma ruta.</p></div>`;
     } else if (resource.type === 'exercise') {
-      body = `<div class="reader-art">${artwork(resource)}</div><div class="reader-body"><h2>Tu reto</h2><p>${escape(resource.statement)}</p><div class="key-concept"><h3>La herramienta que necesitas</h3><p>${escape(resource.key)}</p></div><p>Inténtalo a tu ritmo. Cuando quieras, abre la solución y compara el razonamiento con el tuyo.</p><details class="solution"><summary>Ver solución paso a paso · ${resource.steps.length} pasos</summary><ol class="solution-steps">${resource.steps.map(step => `<li><h3>${escape(step.title)}</h3><p>${escape(step.text)}</p><span class="step-equation">${escape(step.equation)}</span></li>`).join('')}</ol><p class="solution-answer"><strong>Resultado:</strong> ${escape(resource.answer)}</p></details></div>`;
+      body = `<div class="reader-art">${artwork(resource)}</div><div class="reader-body"><h2>Tu reto</h2><p>${escape(resource.statement)}</p><div class="key-concept"><h3>La herramienta que necesitas</h3><p>${escape(resource.key)}</p></div><p>Inténtalo a tu ritmo. Cuando quieras, abre la solución y compara el razonamiento con el tuyo.</p>${resource.check ? `<form id="answer-check" class="answer-check" novalidate><label for="answer-input">Comprueba tu resultado <span>${escape(resource.check.label)}</span></label><div class="answer-row"><input id="answer-input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" maxlength="40" placeholder="Ej.: 3/4, 0,75 o 75 %" aria-describedby="answer-feedback"><button class="button button-secondary" type="submit">Comprobar</button></div><p id="answer-feedback" class="answer-feedback" role="status" aria-live="polite"></p></form>` : ''}<details class="solution"><summary>Ver solución paso a paso · ${resource.steps.length} pasos</summary><ol class="solution-steps">${resource.steps.map(step => `<li><h3>${escape(step.title)}</h3><p>${escape(step.text)}</p><span class="step-equation">${escape(step.equation)}</span></li>`).join('')}</ol><p class="solution-answer"><strong>Resultado:</strong> ${escape(resource.answer)}</p></details></div>`;
     } else {
       const next = resourceById.get(`${resource.courseId}-${resource.lessonIndex + 2}`);
       body = `${video || `<div class="reader-art">${artwork(resource)}</div>`}<div class="reader-body"><h2>Primero, la intuición</h2>${resource.paragraphs.map(paragraph => `<p>${escape(paragraph)}</p>`).join('')}<div class="key-concept"><h3>La idea clave</h3><p>${escape(resource.key)}</p></div><div class="example-box"><h3>Veámoslo con un ejemplo</h3><p>${escape(resource.example)}</p></div><div class="reader-next">${next ? `<a class="button button-secondary" href="#contenido/${next.id}">Siguiente idea ${icon('right')}</a>` : `<a class="button button-secondary" href="#curso/${resource.courseId}">Volver a la ruta ${icon('right')}</a>`}</div></div>`;
@@ -260,6 +260,7 @@
     select('#detail-view').innerHTML = `<nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="#">Inicio</a><span aria-hidden="true">/</span><a href="#explorar?tema=${resource.topic}">${topicName(resource.topic)}</a><span aria-hidden="true">/</span><span>${format.title}</span></nav><header class="detail-header"><p class="eyebrow">${topicName(resource.topic).toUpperCase()} · ${format.title.toUpperCase()} · ${resource.level.toUpperCase()}</p><h1 id="detail-title" tabindex="-1">${escape(resource.title)}</h1><p>${escape(resource.description)}</p><div class="detail-actions">${saveButton(resource, true)}<button type="button" class="text-button" data-copy>${icon('link')}Copiar enlace</button></div></header><div class="detail-layout"><article class="reader ${resource.color}">${body}</article>${relatedPanel(resource)}</div>`;
     document.title = `${resource.title} | MathBrain`;
     if (resource.type === 'simulation') bindSimulation(resource);
+    if (resource.type === 'exercise') bindAnswerCheck(resource);
   }
 
   function renderCourse(course) {
@@ -332,9 +333,11 @@
       derivative: { label: 'Posición del punto, x', min: -2, max: 2, step: .05, value: 1 },
       riemann: { label: 'Número de rectángulos', min: 1, max: 50, step: 1, value: 8 },
       circle: { label: 'Ángulo del giro', min: 0, max: 360, step: 1, value: 45 },
-      probability: { label: 'Probabilidad de obtener cara', min: 0, max: 1, step: .05, value: .5 }
+      probability: { label: 'Probabilidad de obtener cara', min: 0, max: 1, step: .05, value: .5 },
+      system: { label: 'Pendiente m de la recta y = mx + 1', min: -2, max: 3, step: .25, value: 1 },
+      confidence: { label: 'Tamaño de cada muestra, n', min: 5, max: 100, step: 5, value: 25 }
     }[resource.simulation];
-    return `<div id="simulation-graph" class="simulation-graph"></div><div class="simulation-controls"><label class="slider-label" for="simulation-slider"><span>${config.label}</span><output id="simulation-value" for="simulation-slider"></output></label><input id="simulation-slider" type="range" min="${config.min}" max="${config.max}" step="${config.step}" value="${config.value}">${resource.simulation === 'riemann' ? '<label class="simulation-select" for="riemann-method">Altura de cada rectángulo<select id="riemann-method"><option value="left">Extremo izquierdo</option><option value="right">Extremo derecho</option><option value="midpoint" selected>Punto medio</option></select></label>' : ''}${resource.simulation === 'probability' ? '<div class="simulation-buttons"><button type="button" id="toss-coins" class="button button-primary">Lanzar 100 veces</button><button type="button" id="reset-coins" class="button button-secondary">Reiniciar</button></div>' : ''}<div id="simulation-stats" class="simulation-stats" aria-live="polite" aria-atomic="true"></div><p id="simulation-explanation" class="simulation-explanation"></p></div>`;
+    return `<div id="simulation-graph" class="simulation-graph"></div><div class="simulation-controls"><label class="slider-label" for="simulation-slider"><span>${config.label}</span><output id="simulation-value" for="simulation-slider"></output></label><input id="simulation-slider" type="range" min="${config.min}" max="${config.max}" step="${config.step}" value="${config.value}">${resource.simulation === 'riemann' ? '<label class="simulation-select" for="riemann-method">Altura de cada rectángulo<select id="riemann-method"><option value="left">Extremo izquierdo</option><option value="right">Extremo derecho</option><option value="midpoint" selected>Punto medio</option></select></label>' : ''}${resource.simulation === 'probability' ? '<div class="simulation-buttons"><button type="button" id="toss-coins" class="button button-primary">Lanzar 100 veces</button><button type="button" id="reset-coins" class="button button-secondary">Reiniciar</button></div>' : ''}${resource.simulation === 'confidence' ? '<div class="simulation-buttons"><button type="button" id="sample-intervals" class="button button-primary">Tomar 20 muestras</button><button type="button" id="reset-intervals" class="button button-secondary">Reiniciar</button></div>' : ''}<div id="simulation-stats" class="simulation-stats" aria-live="polite" aria-atomic="true"></div><p id="simulation-explanation" class="simulation-explanation"></p></div>`;
   }
 
   function graphFrame(label, drawing) {
@@ -346,6 +349,7 @@
   function bindSimulation(resource) {
     const slider = select('#simulation-slider');
     let flips = [];
+    let intervals = [];
     function render() {
       const value = Number(slider.value);
       let graph;
@@ -384,6 +388,29 @@
         statistics = stat('Coseno', number(cosine)) + stat('Seno', number(sine)) + stat('Radianes', number(radians));
         explanation = 'El tramo horizontal muestra el coseno y el vertical, el seno. Sus signos cambian según el cuadrante. La onda muestra cómo varía el seno al completar una vuelta.';
         controlValue = `${value}°`;
+      } else if (resource.simulation === 'system') {
+        const horizontal = input => 65 + (input + 2) * 47;
+        const vertical = output => 250 - (output + 2) * 23;
+        const segment = (slope, intercept) => linePath([-3, 9].map(input => [horizontal(input), vertical(slope * input + intercept)]));
+        const solution = library.lineIntersection(-1, 5, value, 1);
+        const equation = value === 0 ? '1' : `${value === 1 ? '' : value === -1 ? '−' : number(value, 2)}x + 1`;
+        const visible = solution.solutions === 1 && solution.x >= -2 && solution.x <= 8 && solution.y >= -2 && solution.y <= 8;
+        const ticks = [0, 2, 4, 6, 8].map(tick => `<text x="${horizontal(tick) - 3}" y="${vertical(0) + 16}">${tick}</text>`).join('') + [2, 4, 6, 8].map(tick => `<text x="${horizontal(0) - 14}" y="${vertical(tick) + 4}">${tick}</text>`).join('');
+        graph = graphFrame(solution.solutions === 1 ? `Rectas x + y = 5 e y = ${equation}. Se cruzan en (${number(solution.x, 2)}, ${number(solution.y, 2)}).` : 'Rectas paralelas y distintas: el sistema no tiene solución.', `<path d="M55 ${vertical(0)}H552M${horizontal(0)} 262V28" stroke="#8ba8bd" stroke-opacity=".4"/><g clip-path="url(#simulation-clip)" fill="none" stroke-width="2.2"><path d="${segment(-1, 5)}" stroke="#e9cd9c"/><path d="${segment(value, 1)}" stroke="#9adfd2"/></g>${visible ? `<path d="M${horizontal(solution.x)} ${vertical(0)}V${vertical(solution.y)}H${horizontal(0)}" stroke="#d8e6c7" stroke-dasharray="4 6" opacity=".35" fill="none"/><circle cx="${horizontal(solution.x)}" cy="${vertical(solution.y)}" r="5" fill="#d8e6c7"/><circle cx="${horizontal(solution.x)}" cy="${vertical(solution.y)}" r="12" fill="none" stroke="#d8e6c7" opacity=".3"/>` : ''}<g fill="#8ba8bd" font-family="Arial,sans-serif" font-size="11">${ticks}</g><g font-family="Georgia,serif" font-size="17" paint-order="stroke" stroke="#0a1626" stroke-width="6" stroke-linejoin="round"><text x="440" y="40" fill="#e9cd9c">x + y = 5</text><text x="440" y="64" fill="#9adfd2">y = ${equation}</text></g>`);
+        statistics = stat('Pendiente m', number(value, 2)) + stat('Solución x', solution.solutions === 1 ? number(solution.x, 2) : '—') + stat('Solución y', solution.solutions === 1 ? number(solution.y, 2) : '—');
+        explanation = solution.solutions === 0 ? 'Con m = −1 las rectas son paralelas y distintas: nunca se cruzan, así que ningún par (x, y) cumple las dos ecuaciones. El sistema no tiene solución.' : `Las rectas se cruzan en un único punto: (${number(solution.x, 2)}, ${number(solution.y, 2)}) cumple las dos ecuaciones a la vez.${visible ? '' : ' El cruce queda fuera de la ventana: cuanto más se parecen las pendientes, más lejos está.'}`;
+        controlValue = number(value, 2);
+      } else if (resource.simulation === 'confidence') {
+        const horizontal = input => 65 + (input - 30) / 40 * 470;
+        const rowHeight = 225 / Math.max(intervals.length, 20);
+        const covered = intervals.filter(interval => interval.covers).length;
+        const margin = 1.96 * 10 / Math.sqrt(value);
+        const rows = intervals.map((interval, index) => { const vertical = 25 + (index + .5) * rowHeight; const color = interval.covers ? '#9adfd2' : '#e2a6c4'; return `<path d="M${horizontal(interval.lower)} ${vertical}H${horizontal(interval.upper)}" stroke="${color}" stroke-width="${Math.min(3, rowHeight * .55).toFixed(2)}" stroke-linecap="round"/><circle cx="${horizontal(interval.center)}" cy="${vertical}" r="${Math.min(2.6, rowHeight * .4).toFixed(2)}" fill="${color}"/>`; }).join('');
+        graph = graphFrame(intervals.length ? `${intervals.length} intervalos del 95 % con muestras de tamaño ${value}. ${covered} contienen la media real 50.` : 'Sin muestras. Pulsa Tomar 20 muestras para construir intervalos.', `<path d="M55 255H552" stroke="#8ba8bd" stroke-opacity=".4"/><g clip-path="url(#simulation-clip)">${rows}</g><path d="M${horizontal(50)} 22V255" stroke="#e9cd9c" stroke-width="1.4" stroke-dasharray="5 5"/>${intervals.length ? '' : '<text x="300" y="140" text-anchor="middle" fill="#94aec8" font-size="14" font-family="Arial,sans-serif">Cada muestra produce un intervalo distinto.</text>'}<g fill="#8ba8bd" font-family="Arial,sans-serif" font-size="11">${[30, 40, 50, 60, 70].map(tick => `<text x="${horizontal(tick) - 7}" y="275">${tick}</text>`).join('')}<text x="${horizontal(50) + 8}" y="18" fill="#e9cd9c">MEDIA REAL μ = 50</text><text x="65" y="292" fill="#9adfd2">CONTIENE μ</text><text x="160" y="292" fill="#e2a6c4">NO CONTIENE μ</text></g>`);
+        statistics = stat('Intervalos', number(intervals.length, 0)) + stat('Contienen μ', number(covered, 0)) + stat('Cobertura', intervals.length ? `${number(covered / intervals.length * 100, 1)} %` : '—');
+        explanation = `Población normal con μ = 50 y σ = 10. Con n = ${value}, cada intervalo es x̄ ± ${number(margin, 2)}. Muestras más grandes producen intervalos más estrechos, pero la cobertura a largo plazo sigue cerca del 95 %. Al cambiar n, el experimento se reinicia. Límite: 100 intervalos.`;
+        controlValue = String(value);
+        select('#sample-intervals').disabled = intervals.length >= 100;
       } else {
         let heads = 0;
         const points = flips.map((flip, index) => { heads += flip; return [65 + (index + 1) / Math.max(flips.length, 100) * 470, 250 - heads / (index + 1) * 205]; });
@@ -400,11 +427,28 @@
       select('#simulation-value').textContent = controlValue;
       slider.setAttribute('aria-valuetext', controlValue);
     }
-    slider.addEventListener('input', () => { if (resource.simulation === 'probability') flips = []; render(); });
+    slider.addEventListener('input', () => { flips = []; intervals = []; render(); });
     select('#riemann-method')?.addEventListener('change', render);
     select('#toss-coins')?.addEventListener('click', () => { flips.push(...library.coinExperiment(Number(slider.value), Math.min(100, 5000 - flips.length))); render(); });
     select('#reset-coins')?.addEventListener('click', () => { flips = []; render(); });
+    select('#sample-intervals')?.addEventListener('click', () => { intervals.push(...library.confidenceIntervals({ size: Number(slider.value), count: Math.min(20, 100 - intervals.length) })); render(); });
+    select('#reset-intervals')?.addEventListener('click', () => { intervals = []; render(); });
     render();
+  }
+
+  function bindAnswerCheck(resource) {
+    const form = select('#answer-check');
+    if (!form) return;
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      const input = select('#answer-input');
+      const feedback = select('#answer-feedback');
+      const result = library.checkAnswer(resource.check, input.value);
+      form.dataset.state = result === null ? 'invalid' : result ? 'correct' : 'incorrect';
+      input.setAttribute('aria-invalid', String(result !== true));
+      feedback.textContent = result === null ? 'Escribe un número, una fracción como 8/3 o un porcentaje como 25 %.' : result ? '¡Exacto! Abre la solución para comparar tu razonamiento con el nuestro.' : 'Todavía no. Revisa la herramienta que necesitas e inténtalo de nuevo, o abre el primer paso de la solución.';
+      if (result) select('.solution summary').textContent = `Compara tu razonamiento · ${resource.steps.length} pasos`;
+    });
   }
 
   function toggleSaved(id) {

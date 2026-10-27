@@ -8,7 +8,9 @@ La portada organiza los contenidos en filas horizontales de explicaciones, simul
 
 «Explorar» abre primero una colección de cursos con portadas, nivel y cantidades reales de explicaciones, simulaciones y ejercicios. Los filtros por tema y nivel permiten elegir una ruta; cada portada abre su programa y sus lecciones. El buscador global y «Buscar un contenido» conservan el acceso directo a los recursos individuales. Los filtros de cursos se guardan en el enlace y funcionan con la navegación atrás y adelante.
 
-La biblioteca incluye 30 explicaciones con ejemplos, seis ejercicios con soluciones desplegables y cuatro simulaciones: la derivada, las sumas de Riemann, el círculo unitario y lanzamientos de moneda. Los controles modifican las gráficas y los cálculos reales. Los videos se muestran cuando se incorpora una URL compatible; no son necesarios para leer las explicaciones.
+La biblioteca incluye 30 explicaciones con ejemplos, seis ejercicios con soluciones desplegables y seis simulaciones, al menos una por curso: la derivada, las sumas de Riemann, el círculo unitario, lanzamientos de moneda, la intersección de dos rectas (sistemas de ecuaciones) e intervalos de confianza del 95 % construidos con muestras aleatorias. Los controles modifican las gráficas y los cálculos reales.
+
+Cada ejercicio permite comprobar el resultado antes de abrir la solución. La respuesta acepta enteros, decimales con coma o punto, fracciones como `8/3`, porcentajes y unidades sencillas; el valor esperado y su tolerancia se definen en el campo `check` de cada ejercicio en `dist/library.js`. Los videos se muestran cuando se incorpora una URL compatible; no son necesarios para leer las explicaciones.
 
 Los marcadores guardan contenidos en «Mi biblioteca» mediante el almacenamiento del navegador. La portada muestra los contenidos consultados recientemente, sin simular porcentajes de progreso. Los guardados y el historial son locales al navegador; no hay cuentas ni sincronización entre dispositivos. Si el almacenamiento está bloqueado, el catálogo y los guardados de la visita siguen funcionando.
 
@@ -81,7 +83,7 @@ El botón de la esquina inferior derecha permite pausar o reanudar el fondo y re
 
 ## Comprobaciones
 
-`npm run check` comprueba la sintaxis de todos los scripts. `npm test` verifica la integridad del catálogo, las búsquedas, los filtros combinados, la selección de guardados, los cálculos de Riemann y del círculo unitario, los lanzamientos de moneda y el comportamiento del fondo espacial. La vista local permite comprobar las filas de contenido, navegación, búsqueda, guardados, soluciones desplegables y controles de las cuatro simulaciones. No hay videos suministrados: la reproducción se debe verificar al incorporar los primeros enlaces.
+`npm run check` comprueba la sintaxis de todos los scripts. `npm test` verifica la integridad del catálogo, las búsquedas, los filtros combinados, la selección de guardados, los cálculos de Riemann y del círculo unitario, los lanzamientos de moneda, la intersección de rectas, la cobertura de los intervalos de confianza, la lectura de respuestas de los ejercicios y el comportamiento del fondo espacial. La vista local permite comprobar las filas de contenido, navegación, búsqueda, guardados, comprobación de respuestas, soluciones desplegables y controles de las seis simulaciones. No hay videos suministrados: la reproducción se debe verificar al incorporar los primeros enlaces.
 
 ## Alojamiento original en Sites
 

@@ -11,10 +11,10 @@ for (const filename of ['courses.js', 'library.js']) {
 const library = context.window.MATHBRAIN_LIBRARY;
 
 test('El catálogo contiene explicaciones completas, simulaciones y ejercicios con identificadores únicos', () => {
-  assert.equal(library.resources.length, 40);
-  assert.equal(new Set(library.resources.map(resource => resource.id)).size, 40);
+  assert.equal(library.resources.length, 42);
+  assert.equal(new Set(library.resources.map(resource => resource.id)).size, 42);
   assert.equal(library.search({ type: 'explanation' }).length, 30);
-  assert.equal(library.search({ type: 'simulation' }).length, 4);
+  assert.equal(library.search({ type: 'simulation' }).length, 6);
   assert.equal(library.search({ type: 'exercise' }).length, 6);
   for (const resource of library.resources) {
     assert.ok(library.topics.some(topic => topic.id === resource.topic));
@@ -28,6 +28,7 @@ test('El catálogo contiene explicaciones completas, simulaciones y ejercicios c
       assert.ok(resource.steps.length >= 3);
       assert.ok(resource.answer);
       assert.ok(resource.steps.every(step => step.title && step.text && step.equation));
+      assert.ok(resource.check?.label && Number.isFinite(resource.check.value));
     }
   }
 });
@@ -94,4 +95,55 @@ test('Los lanzamientos de moneda respetan la probabilidad y usan cada ensayo ind
   let index = 0;
   assert.deepEqual(Array.from(library.coinExperiment(.5, 4, () => draws[index++])), [1, 0, 1, 0]);
   assert.equal(index, 4);
+});
+
+test('Cada curso ofrece al menos una simulación y las nuevas se encuentran al buscar', () => {
+  for (const course of context.window.MATHBRAIN_COURSES) {
+    assert.ok(library.resources.some(resource => resource.courseId === course.id && resource.type === 'simulation'), course.id);
+  }
+  assert.ok(library.search({ query: 'sistemas de ecuaciones' }).some(resource => resource.id === 'sim-sistema'));
+  assert.ok(library.search({ query: 'intervalos de confianza' }).some(resource => resource.id === 'sim-intervalos'));
+  assert.deepEqual(Array.from(library.search({ type: 'simulation', topic: 'estadistica' }), resource => resource.id), ['sim-intervalos']);
+});
+
+test('La intersección de rectas distingue una solución, ninguna o infinitas', () => {
+  const crossing = library.lineIntersection(-1, 5, 1, 1);
+  assert.equal(crossing.solutions, 1);
+  assert.equal(crossing.x, 2);
+  assert.equal(crossing.y, 3);
+  assert.equal(library.lineIntersection(-1, 5, -1, 1).solutions, 0);
+  assert.equal(library.lineIntersection(2, 1, 2, 1).solutions, Infinity);
+  const steep = library.lineIntersection(-1, 5, 3, 1);
+  assert.ok(Math.abs(steep.y - (3 * steep.x + 1)) < 1e-12 && Math.abs(steep.x + steep.y - 5) < 1e-12);
+});
+
+test('Los intervalos de confianza usan el margen correcto y cubren la media cerca del 95 %', () => {
+  const [single] = library.confidenceIntervals({ size: 25, count: 1, random: () => .5 });
+  assert.ok(Math.abs(single.upper - single.lower - 2 * 1.96 * 10 / 5) < 1e-9);
+  assert.ok(Math.abs((single.upper + single.lower) / 2 - single.center) < 1e-9);
+  assert.equal(single.covers, single.lower <= 50 && 50 <= single.upper);
+  let seed = 12345;
+  const random = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+  const intervals = library.confidenceIntervals({ size: 16, count: 2000, random });
+  const coverage = intervals.filter(interval => interval.covers).length / intervals.length;
+  assert.ok(coverage > .93 && coverage < .97, String(coverage));
+});
+
+test('La comprobación de respuestas acepta decimales con coma, fracciones, porcentajes y unidades', () => {
+  assert.equal(library.parseAnswer('x = 7'), 7);
+  assert.equal(library.parseAnswer(' 2,5 '), 2.5);
+  assert.equal(library.parseAnswer('−1'), -1);
+  assert.equal(library.parseAnswer('8/3'), 8 / 3);
+  assert.equal(library.parseAnswer('62,5 %'), .625);
+  assert.equal(library.parseAnswer('5 cm'), 5);
+  assert.equal(library.parseAnswer('cinco'), null);
+  assert.equal(library.parseAnswer('1/0'), null);
+  assert.equal(library.parseAnswer(''), null);
+  const exercise = id => library.resources.find(resource => resource.id === id).check;
+  assert.equal(library.checkAnswer(exercise('ej-ecuacion'), 'x=7'), true);
+  assert.equal(library.checkAnswer(exercise('ej-ecuacion'), '6'), false);
+  for (const answer of ['0,625', '62,5 %', '62.5', '5/8']) assert.equal(library.checkAnswer(exercise('ej-bayes'), answer), true, answer);
+  for (const answer of ['8/3', '2,67', '2.667']) assert.equal(library.checkAnswer(exercise('ej-integral'), answer), true, answer);
+  assert.equal(library.checkAnswer(exercise('ej-integral'), '2,6'), false);
+  assert.equal(library.checkAnswer(exercise('ej-triangulo'), 'no sé'), null);
 });
