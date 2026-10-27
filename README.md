@@ -16,7 +16,7 @@ Los marcadores guardan contenidos en «Mi biblioteca» mediante el almacenamient
 
 El selector de tema de la cabecera permite elegir Oscuro, Claro o Sistema. La preferencia se conserva en el mismo navegador y se sincroniza entre sus pestañas; Sistema sigue los cambios de apariencia del dispositivo. Sin una preferencia guardada se mantiene el aspecto oscuro original. El tema claro conserva las constelaciones, las estrellas y las estelas con una paleta azul y petróleo visible sobre el fondo claro, y los diagramas sobre sus paneles de contraste. El fondo adapta su paleta al cambiar de tema incluso cuando está pausado o se utiliza movimiento reducido. La elección se aplica antes de mostrar la página y funciona también sin conexión en la aplicación instalada.
 
-En `dist/library.js` se editan las explicaciones, ejemplos, ejercicios, simulaciones y etiquetas de búsqueda. Las rutas de aprendizaje conservan sus datos en `dist/courses.js`. Los enlaces `#contenido/identificador` abren cada recurso; `#curso/identificador` abre su ruta. Los enlaces anteriores `#curso/identificador/número` siguen abriendo la explicación correspondiente.
+Las lecciones (texto, fórmulas LaTeX, video y ejercicios de práctica) se escriben en Markdown dentro de `content/`; consulta «Escribir lecciones». En `dist/library.js` se editan las simulaciones, los ejercicios resueltos y sus etiquetas de búsqueda, y `dist/courses.js` conserva los datos de cada ruta. Los enlaces `#contenido/identificador` abren cada recurso; `#curso/identificador` abre su ruta. Los enlaces anteriores `#curso/identificador/número` siguen abriendo la explicación correspondiente.
 
 ## Desplegar en Vercel desde GitHub
 
@@ -57,23 +57,63 @@ Después de completar la primera carga, el service worker conserva las explicaci
 
 `npm test` también comprueba los flujos de instalación por plataforma, las cancelaciones, la preparación sin conexión, las actualizaciones con confirmación, los iconos y la estabilidad de las versiones de caché.
 
-## Incorporar videos
+## Escribir lecciones
 
-Edita `dist/courses.js`. Cada curso tiene una lista `lessons`; sustituye `video: null` por un enlace, por ejemplo:
+Cada lección es un archivo Markdown en `content/<id-del-curso>/NN-tema.md`. La lección de ejemplo completa es `content/calculo-diferencial/03-que-es-una-derivada.md`. El número inicial (`01`, `02`…) fija el orden y el identificador: la tercera lección de `calculo-diferencial` se abre en `#contenido/calculo-diferencial-3`. Para añadir una clase, crea el siguiente archivo numerado. Para un curso nuevo, añade sus datos en `dist/courses.js` y crea una carpeta con el mismo `id`.
 
-```js
-video: 'https://www.youtube.com/watch?v=ID_DE_11_CAR'
-// También admite https://vimeo.com/ID_NUMERICO
-// O un archivo: video: 'assets/videos/mi-leccion.mp4'
-```
+````markdown
+---
+titulo: ¿Qué es una derivada?
+descripcion: Construye la pendiente instantánea a partir de rectas secantes.
+video: https://www.youtube.com/watch?v=XXXXXXXXXXX
+etiquetas: derivada tangente pendiente limite
+---
 
-El identificador de YouTube del ejemplo es un marcador: reemplázalo por el enlace real. Se admiten enlaces de YouTube, YouTube Shorts, Vimeo público y archivos `.mp4` o `.webm` (locales o HTTPS). Los videos externos deben permitir inserción. Los archivos con pista de audio deben incluir subtítulos accesibles antes de publicarse. Para archivos grandes, conviene utilizar un proveedor de video y pegar su URL compatible. Este sitio no incluye un panel de subida ni un servidor de almacenamiento de videos.
+## Primero, la intuición
 
-Los archivos MP4/WebM locales pueden guardarse dentro de `dist/assets/videos/`. El sitio muestra automáticamente el reproductor en las explicaciones con URL compatible. Las explicaciones escritas y los ejemplos permanecen disponibles. Las duraciones, el progreso de reproducción y los certificados no se simulan.
+Texto con fórmulas en línea como $f(x) = x^2$ y en bloque:
+
+$$f'(a) = \lim_{h \to 0} \frac{f(a+h) - f(a)}{h}$$
+
+:::idea
+La idea clave de la lección (obligatoria). Aparece destacada y se usa en la búsqueda.
+:::
+
+:::ejemplo
+Un ejemplo resuelto.
+:::
+
+:::nota
+Una advertencia o un error frecuente.
+:::
+
+:::ejercicio
+Si $f(x) = x^2$, ¿cuánto vale $f'(3)$?
+respuesta: 6
+pista: Usa $f'(x) = 2x$.
+solucion: $f'(3) = 2 \cdot 3 = 6$.
+:::
+
+:::ejercicio
+Si $f'(a) < 0$, la función cerca de $a$…
+- [ ] crece
+- [x] decrece
+solucion: Una pendiente negativa indica que la gráfica baja.
+:::
+````
+
+- **Texto:** subtítulos con `##` y `###`, listas con `-` o `1.`, `**negrita**`, `*cursiva*`, código entre comillas invertidas y enlaces `[texto](https://…)`. Para escribir un signo de dólar, usa `\$`.
+- **LaTeX:** `$…$` en línea y `$$…$$` en bloque, en una o varias líneas. Las fórmulas se convierten con [KaTeX](https://katex.org) durante la compilación: el navegador recibe HTML ya preparado, con MathML para lectores de pantalla. Si una fórmula tiene un error, la compilación se detiene e indica el archivo y la línea.
+- **Ejercicios:** `respuesta:` comprueba un número, una fracción (`8/3`) o un porcentaje, y `tolerancia: 0,01` acepta aproximaciones. Con opciones `- [ ]` y una sola `- [x]`, el ejercicio es de opción múltiple. `pista:` y `solucion:` son opcionales y admiten LaTeX.
+- **Video:** pega el enlace en `video:`. Se admiten YouTube (incluidos los videos «No listados» y los Shorts), Vimeo público y archivos `.mp4` o `.webm` en `dist/assets/videos/`. Para cursos completos se recomienda YouTube «No listado»: el alojamiento es gratuito y la calidad se adapta a la conexión. Los videos externos deben permitir la inserción y los archivos con audio deben incluir subtítulos. Si el campo está vacío, la lección muestra su ilustración.
+
+Después de editar, ejecuta `npm run content` y revisa el resultado con `npm run dev`, o `npm run build` para preparar la publicación. `dist/content.js` es un archivo generado: no se edita a mano, pero se guarda en el repositorio y `npm test` comprueba que coincide con `content/`. Al hacer push, Vercel ejecuta `npm run build` y publica las lecciones.
+
+KaTeX 0.16.22 (licencia MIT) está incluido en el proyecto. `vendor/katex/katex.min.js` se usa solo al compilar y `dist/vendor/katex/` contiene la hoja de estilos y las fuentes WOFF2, que también se guardan para usarlas sin conexión. Una lección con muchas fórmulas añade unos 80 KB sin comprimir a `dist/content.js`, mucho menos con la compresión del servidor. Si el catálogo crece a cientos de lecciones, conviene publicar cada lección en un archivo propio que se cargue al abrirla.
 
 ## Editar los programas
 
-En `dist/courses.js` se modifican los títulos, descripciones, nivel, prerrequisitos, lecciones e ideas clave. Hay seis rutas con cinco explicaciones cada una. Si se añaden lecciones, también deben incorporarse su explicación y ejemplo en `dist/library.js`. Los enlaces directos y la descarga del programa se generan a partir de estos datos.
+En `dist/courses.js` se modifican el título, la descripción, el nivel, los prerrequisitos y la presentación de cada ruta. Las lecciones de una ruta son los archivos de su carpeta en `content/`. El programa descargable se genera con los títulos, descripciones e ideas clave de esos archivos.
 
 ## Identidad visual
 
@@ -83,7 +123,7 @@ El botón de la esquina inferior derecha permite pausar o reanudar el fondo y re
 
 ## Comprobaciones
 
-`npm run check` comprueba la sintaxis de todos los scripts. `npm test` verifica la integridad del catálogo, las búsquedas, los filtros combinados, la selección de guardados, los cálculos de Riemann y del círculo unitario, los lanzamientos de moneda, la intersección de rectas, la cobertura de los intervalos de confianza, la lectura de respuestas de los ejercicios y el comportamiento del fondo espacial. La vista local permite comprobar las filas de contenido, navegación, búsqueda, guardados, comprobación de respuestas, soluciones desplegables y controles de las seis simulaciones. No hay videos suministrados: la reproducción se debe verificar al incorporar los primeros enlaces.
+`npm run check` comprueba la sintaxis de todos los scripts. `npm test` verifica la compilación de las lecciones Markdown y sus fórmulas LaTeX, la integridad del catálogo, las búsquedas, los filtros combinados, la selección de guardados, los cálculos de Riemann y del círculo unitario, los lanzamientos de moneda, la intersección de rectas, la cobertura de los intervalos de confianza, la lectura de respuestas de los ejercicios y el comportamiento del fondo espacial. La vista local permite comprobar las filas de contenido, navegación, búsqueda, guardados, comprobación de respuestas, soluciones desplegables y controles de las seis simulaciones. No hay videos suministrados: la reproducción se debe verificar al incorporar los primeros enlaces.
 
 ## Alojamiento original en Sites
 

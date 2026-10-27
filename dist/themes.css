@@ -243,3 +243,20 @@ html[data-theme="light"] .answer-check[data-state=correct] { border-color: #0875
 html[data-theme="light"] .answer-check[data-state=correct] .answer-feedback { color: #076568; }
 html[data-theme="light"] .answer-check[data-state=incorrect] { border-color: #b4547f; }
 html[data-theme="light"] .answer-check[data-state=incorrect] .answer-feedback { color: #9b3d68; }
+
+html[data-theme="light"] .lesson-content h3:not(.key-concept h3,.example-box h3,.lesson-note h3), html[data-theme="light"] .lesson-exercise-statement p { color: #294b62; }
+html[data-theme="light"] .lesson-content > ul, html[data-theme="light"] .lesson-content > ol, html[data-theme="light"] .lesson-note p, html[data-theme="light"] .lesson-hint p, html[data-theme="light"] .lesson-solution p { color: #445e73; }
+html[data-theme="light"] .lesson-content .katex { color: #16324a; }
+html[data-theme="light"] .lesson-content a, html[data-theme="light"] .lesson-exercise-label, html[data-theme="light"] .lesson-hint summary, html[data-theme="light"] .lesson-solution summary { color: #076568; }
+html[data-theme="light"] .lesson-content code { background: #e3ecf2; }
+html[data-theme="light"] .lesson-note { background: #fbf6ec; border-color: #c9a768; }
+html[data-theme="light"] .lesson-note h3 { color: #8a6420; }
+html[data-theme="light"] .lesson-exercise { background: #f1f6f8; border-color: #becfd9; }
+html[data-theme="light"] .lesson-answer-label { color: #52677c; }
+html[data-theme="light"] .lesson-choices label { color: #294b62; border-color: #becfd9; background: #ffffff; }
+html[data-theme="light"] .lesson-choices label:has(input:checked) { border-color: #087578; background: #e8f4f3; }
+html[data-theme="light"] .lesson-exercise .answer-row input { color: #16324a; background: #ffffff; border-color: #a4bdcd; }
+html[data-theme="light"] .lesson-exercise[data-state=correct] { border-color: #087578; }
+html[data-theme="light"] .lesson-exercise[data-state=correct] .answer-feedback { color: #076568; }
+html[data-theme="light"] .lesson-exercise[data-state=incorrect] { border-color: #b4547f; }
+html[data-theme="light"] .lesson-exercise[data-state=incorrect] .answer-feedback { color: #9b3d68; }

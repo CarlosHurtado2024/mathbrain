@@ -5,7 +5,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const context = vm.createContext({ window: {} });
-for (const filename of ['courses.js', 'library.js']) {
+for (const filename of ['courses.js', 'content.js', 'library.js']) {
   vm.runInContext(fs.readFileSync(path.join(__dirname, '../dist', filename), 'utf8'), context);
 }
 const library = context.window.MATHBRAIN_LIBRARY;
@@ -20,9 +20,9 @@ test('El catálogo contiene explicaciones completas, simulaciones y ejercicios c
     assert.ok(library.topics.some(topic => topic.id === resource.topic));
     assert.ok(resource.title && resource.description && resource.key);
     if (resource.type === 'explanation') {
-      assert.ok(resource.paragraphs.length >= 1);
-      assert.ok(resource.paragraphs.every(paragraph => paragraph.length > 80));
-      assert.ok(resource.example.length > 40);
+      assert.match(resource.html, /<p>.{80,}<\/p>/);
+      assert.match(resource.html, /class="key-concept"/);
+      assert.match(resource.html, /class="example-box"/);
     }
     if (resource.type === 'exercise') {
       assert.ok(resource.steps.length >= 3);

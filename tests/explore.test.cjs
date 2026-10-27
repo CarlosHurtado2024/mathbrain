@@ -112,7 +112,7 @@ function environment(hash = '#explorar', prepareLibrary = () => {}) {
     setTimeout: () => 1,
     clearTimeout() {}
   });
-  for (const filename of ['courses.js', 'library.js']) vm.runInContext(fs.readFileSync(path.join(directory, filename), 'utf8'), context);
+  for (const filename of ['courses.js', 'content.js', 'library.js']) vm.runInContext(fs.readFileSync(path.join(directory, filename), 'utf8'), context);
   prepareLibrary(window.MATHBRAIN_LIBRARY, window.MATHBRAIN_COURSES);
   vm.runInContext(source, context);
   return {
