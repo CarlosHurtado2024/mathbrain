@@ -11,9 +11,9 @@ for (const filename of ['courses.js', 'content.js', 'library.js']) {
 const library = context.window.MATHBRAIN_LIBRARY;
 
 test('El catálogo contiene explicaciones completas, simulaciones y ejercicios con identificadores únicos', () => {
-  assert.equal(library.resources.length, 42);
-  assert.equal(new Set(library.resources.map(resource => resource.id)).size, 42);
-  assert.equal(library.search({ type: 'explanation' }).length, 30);
+  assert.equal(library.resources.length, 63);
+  assert.equal(new Set(library.resources.map(resource => resource.id)).size, 63);
+  assert.equal(library.search({ type: 'explanation' }).length, 51);
   assert.equal(library.search({ type: 'simulation' }).length, 6);
   assert.equal(library.search({ type: 'exercise' }).length, 6);
   for (const resource of library.resources) {

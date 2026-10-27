@@ -10,7 +10,9 @@ const root = path.resolve(__dirname, '..');
 const contentDirectory = path.join(root, 'content');
 const outputPath = path.join(root, 'dist', 'content.js');
 const blockTitles = { idea: 'La idea clave', ejemplo: 'Veámoslo con un ejemplo', nota: 'Ten en cuenta' };
-const frontMatterFields = new Set(['titulo', 'descripcion', 'video', 'etiquetas']);
+const frontMatterFields = new Set(['titulo', 'descripcion', 'video', 'etiquetas', 'unidad', 'modulo']);
+// Notación en español disponible en todas las fórmulas: \sen x, \cis \theta, \arcsen x, \gr P, \Dom f, \Ran f.
+const macros = { '\\sen': '\\operatorname{sen}', '\\arcsen': '\\operatorname{arcsen}', '\\cis': '\\operatorname{cis}', '\\gr': '\\operatorname{gr}', '\\Dom': '\\operatorname{Dom}', '\\Ran': '\\operatorname{Ran}' };
 
 class ContentError extends Error {
   constructor(file, line, message) {
@@ -22,10 +24,34 @@ const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({ '&
 
 function renderMath(tex, displayMode, where) {
   try {
-    return katex.renderToString(tex, { displayMode, throwOnError: true, strict: 'ignore', output: 'htmlAndMathml' });
+    return katex.renderToString(tex, { displayMode, throwOnError: true, strict: 'ignore', output: 'htmlAndMathml', macros: { ...macros } });
   } catch (error) {
     throw new ContentError(where.file, where.line, `LaTeX no válido en «${tex}»: ${error.message.replace(/^KaTeX parse error: /, '')}`);
   }
+}
+
+// Una fórmula en bloque con varias partes separadas por \qquad se divide en piezas que,
+// en pantallas estrechas, pasan a la línea siguiente en vez de obligar a desplazarse.
+function displayMath(tex, where) {
+  const parts = [];
+  let depth = 0;
+  let start = 0;
+  for (let index = 0; index < tex.length; index += 1) {
+    if (tex[index] === '\\') {
+      if (depth === 0 && tex.startsWith('\\qquad', index) && !/[a-zA-Z]/.test(tex[index + 6] || '')) {
+        parts.push(tex.slice(start, index));
+        start = index + 6;
+        index += 5;
+      } else if (tex.startsWith('\\begin', index)) depth += 1;
+      else if (tex.startsWith('\\end', index)) depth -= 1;
+      else index += 1;
+    } else if (tex[index] === '{') depth += 1;
+    else if (tex[index] === '}') depth -= 1;
+  }
+  parts.push(tex.slice(start));
+  const pieces = parts.map(part => part.trim()).filter(Boolean);
+  if (pieces.length < 2) return `<div class="math-display">${renderMath(tex, true, where)}</div>`;
+  return `<div class="math-display math-group">${pieces.map(piece => `<span class="math-part">${renderMath(piece, true, where)}</span>`).join('')}</div>`;
 }
 
 // Convierte una línea de Markdown en HTML: fórmulas, **negrita**, *cursiva*, `código` y [enlaces](https://…).
@@ -45,13 +71,17 @@ function inline(text, where) {
 
 // Texto sin formato para la búsqueda y la descarga del programa.
 function plainTex(tex) {
-  const symbols = { to: '→', cdot: '·', times: '×', neq: '≠', leq: '≤', geq: '≥', pm: '±', infty: '∞', pi: 'π', theta: 'θ', sigma: 'σ', mu: 'μ', alpha: 'α', beta: 'β', Delta: 'Δ', sqrt: '√' };
-  let text = tex.replace(/\\(?:left|right|,|;|!|quad|qquad|displaystyle)/g, ' ').replace(/\\text\{([^{}]*)\}/g, '$1');
+  const symbols = { to: '→', cdot: '·', cdots: '⋯', ldots: '…', dots: '…', times: '×', neq: '≠', ne: '≠', leq: '≤', le: '≤', geq: '≥', ge: '≥', pm: '±', mp: '∓', infty: '∞', iff: '⟺', Rightarrow: '⇒', circ: '∘', in: '∈', subset: '⊂', cup: '∪', pi: 'π', theta: 'θ', sigma: 'σ', mu: 'μ', alpha: 'α', beta: 'β', omega: 'ω', Delta: 'Δ', sqrt: '√', sum: 'Σ', prod: 'Π' };
+  const operators = new Set(['sen', 'cos', 'tan', 'cot', 'sec', 'csc', 'cis', 'log', 'ln', 'lim', 'arcsen', 'gr', 'Dom', 'Ran']);
+  const sets = { N: 'ℕ', Z: 'ℤ', Q: 'ℚ', R: 'ℝ', C: 'ℂ', I: '𝕀' };
+  let text = tex.replace(/\\(?:left|right|,|;|!|quad|qquad|displaystyle)/g, ' ').replace(/\\text\{([^{}]*)\}/g, '$1')
+    .replace(/\^\\circ/g, '°').replace(/\\mathbb\{([A-Z])\}/g, (match, letter) => sets[letter] || letter).replace(/\\overline\{([^{}]*)\}/g, '$1');
   for (let previous; previous !== text;) {
     previous = text;
-    text = text.replace(/\\d?frac\{([^{}]*)\}\{([^{}]*)\}/g, '($1)/($2)');
+    text = text.replace(/\\sqrt\{([^{}]*)\}/g, '√($1)').replace(/\\[dt]?frac\{([^{}]*)\}\{([^{}]*)\}/g, '($1)/($2)');
   }
-  return text.replace(/_\{([^{}]*)\}/g, ' $1').replace(/\^\{([^{}]*)\}/g, '^$1').replace(/\\([a-zA-Z]+)/g, (match, name) => symbols[name] || name).replace(/[{}]/g, '');
+  return text.replace(/_\{([^{}]*)\}/g, ' $1').replace(/\^\{([^{}]*)\}/g, '^$1')
+    .replace(/\\([a-zA-Z]+)/g, (match, name) => operators.has(name) ? ` ${name} ` : symbols[name] || name).replace(/[{}]/g, '').replace(/ _/g, '_');
 }
 
 function plain(text) {
@@ -91,12 +121,12 @@ function blocks(lines, file, firstLine) {
       while (++index < lines.length && !lines[index].trim().endsWith('$$')) formula.push(lines[index]);
       if (index >= lines.length) throw new ContentError(file, line, 'La fórmula $$ no tiene cierre.');
       formula.push(lines[index].trim().slice(0, -2));
-      html.push(`<div class="math-display">${renderMath(formula.join('\n').trim(), true, where)}</div>`);
+      html.push(displayMath(formula.join('\n').trim(), where));
       continue;
     }
     if (/^\$\$.+\$\$$/.test(text.trim())) {
       flushParagraph(); flushList();
-      html.push(`<div class="math-display">${renderMath(text.trim().slice(2, -2).trim(), true, where)}</div>`);
+      html.push(displayMath(text.trim().slice(2, -2).trim(), where));
       continue;
     }
     const heading = text.match(/^(#{2,3})\s+(.+)$/);
@@ -202,7 +232,7 @@ function compileLesson(source, file, id) {
   }
   flush();
   if (!key) throw new ContentError(file, 1, 'Cada lección necesita un bloque :::idea con su idea clave.');
-  return { id, title: data.titulo, description: data.descripcion, video: data.video || null, tags: data.etiquetas || '', key, exercises, html: html.join('') };
+  return { id, title: data.titulo, description: data.descripcion, video: data.video || null, tags: data.etiquetas || '', unit: data.unidad || null, module: data.modulo || null, key, exercises, html: html.join('') };
 }
 
 function compileAll() {

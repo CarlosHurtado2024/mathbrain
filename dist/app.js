@@ -10,6 +10,8 @@
   const resourceById = new Map(library.resources.map(resource => [resource.id, resource]));
   const number = (value, digits = 3) => new Intl.NumberFormat('es-CO', { maximumFractionDigits: digits }).format(Math.abs(value) < 1e-10 ? 0 : value);
   const topicName = topicId => library.topics.find(topic => topic.id === topicId)?.title || '';
+  const legacyLessons = { 'algebra-1': 8, 'algebra-2': 11, 'algebra-3': 9, 'algebra-4': 13, 'algebra-5': 12, 'trigonometria-1': 19, 'trigonometria-2': 20, 'trigonometria-3': 21, 'trigonometria-4': 22, 'trigonometria-5': 25 };
+  const currentId = id => legacyLessons[id] ? `fundamentos-matematicas-${legacyLessons[id]}` : id;
   const saved = new Set(loadList('mathbrain-saved'));
   let recent = loadList('mathbrain-recent');
   let page = 'inicio';
@@ -40,7 +42,7 @@
   function loadList(key) {
     try {
       const value = JSON.parse(localStorage.getItem(key) || '[]');
-      return Array.isArray(value) ? [...new Set(value.filter(id => resourceById.has(id)))].slice(0, 200) : [];
+      return Array.isArray(value) ? [...new Set(value.map(currentId).filter(id => resourceById.has(id)))].slice(0, 200) : [];
     } catch {
       return [];
     }
@@ -179,7 +181,7 @@
       button.setAttribute('aria-pressed', String(active));
     });
     if (page === 'inicio') {
-      const featured = ['calculo-diferencial-3', 'algebra-2', 'probabilidad-1', 'trigonometria-2', 'calculo-integral-2', 'inferencia-estadistica-3', 'algebra-4', 'probabilidad-4'].map(id => resourceById.get(id));
+      const featured = ['calculo-diferencial-3', 'fundamentos-matematicas-11', 'probabilidad-1', 'fundamentos-matematicas-20', 'calculo-integral-2', 'inferencia-estadistica-3', 'fundamentos-matematicas-13', 'probabilidad-4'].map(id => resourceById.get(id));
       select('#recent-shelf').innerHTML = shelf('recent', 'Vuelve a tus ideas', 'Los contenidos que exploraste recientemente en este navegador.', recent.slice(0, 6).map(id => resourceById.get(id)), '');
       select('#catalog-content').innerHTML = shelf('start', 'Empieza por una idea', 'Explicaciones que van directo al «¿por qué?».', featured, '#explorar?tipo=explanation')
         + shelf('simulations', 'Menos imaginar. Más experimentar.', 'Mueve, cambia, prueba. Aquí tú tienes el control.', library.search({ type: 'simulation' }), '#simulaciones')
@@ -221,7 +223,8 @@
     const candidates = library.resources.filter(candidate => candidate.id !== resource.id && candidate.courseId === resource.courseId);
     const otherFormats = ['simulation', 'exercise', 'explanation'].filter(type => type !== resource.type).map(type => candidates.find(candidate => candidate.type === type)).filter(Boolean);
     const selectedIds = new Set(otherFormats.map(candidate => candidate.id));
-    const related = [...otherFormats, ...candidates.filter(candidate => !selectedIds.has(candidate.id))].slice(0, 4);
+    const distance = candidate => Number.isInteger(candidate.lessonIndex) && Number.isInteger(resource.lessonIndex) ? Math.abs(candidate.lessonIndex - resource.lessonIndex) : Infinity;
+    const related = [...otherFormats, ...candidates.filter(candidate => !selectedIds.has(candidate.id)).sort((first, second) => distance(first) - distance(second))].slice(0, 4);
     const course = courses.find(candidate => candidate.id === resource.courseId);
     return `<aside class="detail-aside"><div class="related-panel"><h2>Conecta esta idea</h2><p>Otra forma de entender el mismo tema.</p>${related.map(candidate => `<a class="related-link" href="#contenido/${candidate.id}"><small>${library.formats[candidate.type].title}</small><strong>${escape(candidate.title)} <span aria-hidden="true">↗</span></strong></a>`).join('')}<a class="related-link" href="#curso/${course.id}"><small>Ruta de aprendizaje</small><strong>${escape(course.title)} →</strong></a></div><p class="prerequisite"><strong>Un buen punto de partida</strong>${escape(course.prerequisite)}</p></aside>`;
   }
@@ -275,7 +278,7 @@
         if (result === null) { form.dataset.state = 'invalid'; feedback.textContent = 'Elige una de las opciones.'; return; }
       } else {
         const input = select('input', form);
-        result = library.checkAnswer({ value: library.parseAnswer(form.dataset.answer), tolerance: Number(form.dataset.tolerance) || 1e-6 }, input.value);
+        result = library.checkAnswer({ value: library.parseAnswer(form.dataset.answer), tolerance: Number(form.dataset.tolerance) || 1e-6, percent: /%\s*$/.test(form.dataset.answer) }, input.value);
         input.setAttribute('aria-invalid', String(result !== true));
         if (result === null) { form.dataset.state = 'invalid'; feedback.textContent = 'Escribe un número, una fracción como 8/3 o un porcentaje como 25 %.'; return; }
       }
@@ -287,7 +290,7 @@
   function renderCourse(course) {
     const lessons = library.resources.filter(resource => resource.courseId === course.id && resource.type === 'explanation');
     const extras = library.resources.filter(resource => resource.courseId === course.id && resource.type !== 'explanation');
-    select('#detail-view').innerHTML = `<nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="#">Inicio</a><span aria-hidden="true">/</span><a href="#explorar">Explorar</a><span aria-hidden="true">/</span><span>Ruta de aprendizaje</span></nav><header class="detail-header"><p class="eyebrow">RUTA DE APRENDIZAJE · NIVEL ${course.level.toUpperCase()}</p><h1 id="detail-title" tabindex="-1">${escape(course.title)}</h1><p>${escape(course.intro)}</p><div class="detail-actions"><a class="button button-primary" href="#contenido/${lessons[0].id}">${icon('book')}Empezar la ruta</a><button class="text-button" type="button" data-download="${course.id}">${icon('download')}Descargar programa</button></div></header><div class="detail-layout"><div><div class="lesson-list">${lessons.map((lesson, index) => `<a href="#contenido/${lesson.id}"><span class="lesson-number">${String(index + 1).padStart(2, '0')}</span><span><strong>${escape(lesson.title)}</strong><small>${escape(lesson.description)}${lesson.practice ? ` · ${lesson.practice} ${lesson.practice === 1 ? 'ejercicio' : 'ejercicios'}` : ''}</small></span><span aria-hidden="true">↗</span></a>`).join('')}</div></div><aside class="detail-aside"><div class="related-panel"><h2>Practica esta ruta</h2><p>Entender, experimentar y resolver.</p>${extras.map(resource => `<a class="related-link" href="#contenido/${resource.id}"><small>${library.formats[resource.type].title}</small><strong>${escape(resource.title)} ↗</strong></a>`).join('')}</div><p class="prerequisite"><strong>Antes de empezar</strong>${escape(course.prerequisite)}</p></aside></div>`;
+    select('#detail-view').innerHTML = `<nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="#">Inicio</a><span aria-hidden="true">/</span><a href="#explorar">Explorar</a><span aria-hidden="true">/</span><span>Ruta de aprendizaje</span></nav><header class="detail-header"><p class="eyebrow">RUTA DE APRENDIZAJE · NIVEL ${course.level.toUpperCase()}</p><h1 id="detail-title" tabindex="-1">${escape(course.title)}</h1><p>${escape(course.intro)}</p><div class="detail-actions"><a class="button button-primary" href="#contenido/${lessons[0].id}">${icon('book')}Empezar la ruta</a><button class="text-button" type="button" data-download="${course.id}">${icon('download')}Descargar programa</button></div></header><div class="detail-layout"><div><div class="lesson-list">${lessons.map((lesson, index) => `${lesson.unit && lesson.unit !== lessons[index - 1]?.unit ? `<h2 class="lesson-unit">${escape(lesson.unit)}</h2>` : ''}<a href="#contenido/${lesson.id}"><span class="lesson-number">${escape(lesson.module || String(index + 1).padStart(2, '0'))}</span><span><strong>${escape(lesson.title)}</strong><small>${escape(lesson.description)}${lesson.practice ? ` · ${lesson.practice} ${lesson.practice === 1 ? 'ejercicio' : 'ejercicios'}` : ''}</small></span><span aria-hidden="true">↗</span></a>`).join('')}</div></div><aside class="detail-aside"><div class="related-panel"><h2>Practica esta ruta</h2><p>Entender, experimentar y resolver.</p>${extras.map(resource => `<a class="related-link" href="#contenido/${resource.id}"><small>${library.formats[resource.type].title}</small><strong>${escape(resource.title)} ↗</strong></a>`).join('')}</div><p class="prerequisite"><strong>Antes de empezar</strong>${escape(course.prerequisite)}</p></aside></div>`;
     document.title = `${course.title} | MathBrain`;
   }
 
@@ -296,7 +299,17 @@
     document.title = 'Contenido no encontrado | MathBrain';
   }
 
+  // Los cursos de Álgebra y Trigonometría forman ahora Fundamentos de Matemáticas: sus enlaces antiguos siguen funcionando.
+  function legacyHash(hash) {
+    const updated = hash.replace(/^#contenido\/((?:algebra|trigonometria)-\d)(?=$|\?)/, (match, id) => legacyLessons[id] ? `#contenido/${currentId(id)}` : match)
+      .replace(/^#curso\/(?:algebra|trigonometria)(?:\/\d+)?(?=$|\?)/, '#curso/fundamentos-matematicas')
+      .replace(/([?&](?:curso_)?tema=)(?:algebra|trigonometria)(?=&|$)/g, '$1fundamentos');
+    return updated === hash ? null : updated;
+  }
+
   function route(shouldFocus = true) {
+    const legacy = legacyHash(location.hash);
+    if (legacy) history.replaceState(null, '', legacy);
     if (shouldFocus && lastRoutedHash === location.hash) return;
     lastRoutedHash = location.hash;
     const [rawPath, rawParameters = ''] = location.hash.slice(1).split('?');

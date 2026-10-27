@@ -233,3 +233,6 @@ main { padding:24px 42px 0; max-width:1640px; margin:auto; min-height:calc(100vh
 .lesson-exercise[data-state=correct] { border-color:#8ce5df66; }.lesson-exercise[data-state=correct] .answer-feedback { color:#a8e7d9; }.lesson-exercise[data-state=incorrect] { border-color:#e2a6c466; }.lesson-exercise[data-state=incorrect] .answer-feedback { color:#efbcd4; }
 @media(max-width:650px) { .lesson-exercise .answer-row { flex-direction:row; }.lesson-exercise .answer-row input[type=text] { flex:1 1 100%; } }
 .answer-row .lesson-choices input { flex:0 0 auto; width:16px; height:16px; min-width:0; padding:0; border:0; background:none; }.lesson-choices label span { flex:1; text-align:left; }
+.lesson-list .lesson-unit { margin:18px 0 0; padding:0 2px; font-size:12px; font-weight:600; letter-spacing:1.3px; text-transform:uppercase; color:#9ce1d7; }.lesson-list .lesson-unit:first-child { margin-top:0; }.lesson-list .lesson-number { flex:0 0 2.4em; font-variant-numeric:tabular-nums; }
+.math-group { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; column-gap:2.4em; row-gap:6px; }.math-group .katex-display { margin:0; }
+@media(max-width:650px) { .lesson-content .math-display .katex { font-size:1em; }.math-group { column-gap:1.4em; } }

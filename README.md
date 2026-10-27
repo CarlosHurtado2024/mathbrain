@@ -8,7 +8,9 @@ La portada organiza los contenidos en filas horizontales de explicaciones, simul
 
 «Explorar» abre primero una colección de cursos con portadas, nivel y cantidades reales de explicaciones, simulaciones y ejercicios. Los filtros por tema y nivel permiten elegir una ruta; cada portada abre su programa y sus lecciones. El buscador global y «Buscar un contenido» conservan el acceso directo a los recursos individuales. Los filtros de cursos se guardan en el enlace y funcionan con la navegación atrás y adelante.
 
-La biblioteca incluye 30 explicaciones con ejemplos, seis ejercicios con soluciones desplegables y seis simulaciones, al menos una por curso: la derivada, las sumas de Riemann, el círculo unitario, lanzamientos de moneda, la intersección de dos rectas (sistemas de ecuaciones) e intervalos de confianza del 95 % construidos con muestras aleatorias. Los controles modifican las gráficas y los cálculos reales.
+El catálogo tiene cinco cursos. **Fundamentos de Matemáticas** (código MB-FM-101) sigue el programa académico del mismo nombre: 31 lecciones, una por módulo, organizadas en cinco unidades (números reales y aritmética, álgebra fundamental, funciones, trigonometría y números complejos), todas con fórmulas LaTeX y ejercicios interactivos. Este curso sustituye a los anteriores de Álgebra y Trigonometría, y sus enlaces antiguos (`#contenido/algebra-2`, `#curso/trigonometria`, `tema=algebra`…) redirigen al módulo equivalente. Los guardados y el historial de esos cursos se conservan. Los otros cuatro cursos son Cálculo diferencial, Probabilidad, Inferencia estadística y Cálculo integral.
+
+La biblioteca incluye 51 explicaciones con ejemplos, seis ejercicios resueltos con soluciones desplegables y seis simulaciones, al menos una por curso: la derivada, las sumas de Riemann, el círculo unitario, lanzamientos de moneda, la intersección de dos rectas (sistemas de ecuaciones) e intervalos de confianza del 95 % construidos con muestras aleatorias. Los controles modifican las gráficas y los cálculos reales.
 
 Cada ejercicio permite comprobar el resultado antes de abrir la solución. La respuesta acepta enteros, decimales con coma o punto, fracciones como `8/3`, porcentajes y unidades sencillas; el valor esperado y su tolerancia se definen en el campo `check` de cada ejercicio en `dist/library.js`. Los videos se muestran cuando se incorpora una URL compatible; no son necesarios para leer las explicaciones.
 
@@ -67,6 +69,9 @@ titulo: ¿Qué es una derivada?
 descripcion: Construye la pendiente instantánea a partir de rectas secantes.
 video: https://www.youtube.com/watch?v=XXXXXXXXXXX
 etiquetas: derivada tangente pendiente limite
+# Opcionales, para cursos organizados por unidades:
+unidad: Unidad 2 · Álgebra fundamental
+modulo: 2.1
 ---
 
 ## Primero, la intuición
@@ -103,13 +108,14 @@ solucion: Una pendiente negativa indica que la gráfica baja.
 ````
 
 - **Texto:** subtítulos con `##` y `###`, listas con `-` o `1.`, `**negrita**`, `*cursiva*`, código entre comillas invertidas y enlaces `[texto](https://…)`. Para escribir un signo de dólar, usa `\$`.
-- **LaTeX:** `$…$` en línea y `$$…$$` en bloque, en una o varias líneas. Las fórmulas se convierten con [KaTeX](https://katex.org) durante la compilación: el navegador recibe HTML ya preparado, con MathML para lectores de pantalla. Si una fórmula tiene un error, la compilación se detiene e indica el archivo y la línea.
-- **Ejercicios:** `respuesta:` comprueba un número, una fracción (`8/3`) o un porcentaje, y `tolerancia: 0,01` acepta aproximaciones. Con opciones `- [ ]` y una sola `- [x]`, el ejercicio es de opción múltiple. `pista:` y `solucion:` son opcionales y admiten LaTeX.
+- **LaTeX:** `$…$` en línea y `$$…$$` en bloque, en una o varias líneas. Las fórmulas se convierten con [KaTeX](https://katex.org) durante la compilación: el navegador recibe HTML ya preparado, con MathML para lectores de pantalla. Si una fórmula tiene un error, la compilación se detiene e indica el archivo y la línea. Además de los comandos de LaTeX, están disponibles `\sen`, `\arcsen`, `\cis`, `\gr`, `\Dom` y `\Ran` para la notación en español.
+- **Unidades:** con `unidad:` y `modulo:`, la página del curso agrupa las lecciones bajo el título de cada unidad y muestra el número de módulo (por ejemplo, `2.1`) en lugar del número de orden. Las lecciones consecutivas con la misma `unidad` forman un grupo.
+- **Ejercicios:** `respuesta:` comprueba un número, una fracción (`8/3`) o un porcentaje, y `tolerancia: 0,01` acepta aproximaciones. Si la respuesta se escribe con `%` (por ejemplo, `40%`), se acepta tanto `40 %` como `0,4`. Para cantidades grandes, pide la respuesta en miles o millones: un punto de miles como en `600.000` se leería como decimal. Con opciones `- [ ]` y una sola `- [x]`, el ejercicio es de opción múltiple. `pista:` y `solucion:` son opcionales y admiten LaTeX.
 - **Video:** pega el enlace en `video:`. Se admiten YouTube (incluidos los videos «No listados» y los Shorts), Vimeo público y archivos `.mp4` o `.webm` en `dist/assets/videos/`. Para cursos completos se recomienda YouTube «No listado»: el alojamiento es gratuito y la calidad se adapta a la conexión. Los videos externos deben permitir la inserción y los archivos con audio deben incluir subtítulos. Si el campo está vacío, la lección muestra su ilustración.
 
 Después de editar, ejecuta `npm run content` y revisa el resultado con `npm run dev`, o `npm run build` para preparar la publicación. `dist/content.js` es un archivo generado: no se edita a mano, pero se guarda en el repositorio y `npm test` comprueba que coincide con `content/`. Al hacer push, Vercel ejecuta `npm run build` y publica las lecciones.
 
-KaTeX 0.16.22 (licencia MIT) está incluido en el proyecto. `vendor/katex/katex.min.js` se usa solo al compilar y `dist/vendor/katex/` contiene la hoja de estilos y las fuentes WOFF2, que también se guardan para usarlas sin conexión. Una lección con muchas fórmulas añade unos 80 KB sin comprimir a `dist/content.js`, mucho menos con la compresión del servidor. Si el catálogo crece a cientos de lecciones, conviene publicar cada lección en un archivo propio que se cargue al abrirla.
+KaTeX 0.16.22 (licencia MIT) está incluido en el proyecto. `vendor/katex/katex.min.js` se usa solo al compilar y `dist/vendor/katex/` contiene la hoja de estilos y las fuentes WOFF2, que también se guardan para usarlas sin conexión. Con 51 lecciones, `dist/content.js` pesa unos 2,2 MB sin comprimir y unos 145 KB con la compresión del servidor. El navegador lo descarga una vez y la aplicación instalada lo guarda para usarlo sin conexión. Si el catálogo sigue creciendo, conviene publicar cada lección en un archivo propio que se cargue al abrirla.
 
 ## Editar los programas
 

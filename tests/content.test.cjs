@@ -14,7 +14,11 @@ test('El contenido publicado coincide con los archivos Markdown de content/', ()
 
 test('Cada curso tiene lecciones con identificadores consecutivos e idea clave', () => {
   const lessons = compileAll();
-  assert.equal(lessons.length, 30);
+  assert.equal(lessons.length, 51);
+  const fundamentals = lessons.filter(lesson => lesson.courseId === 'fundamentos-matematicas');
+  assert.equal(fundamentals.length, 31);
+  assert.deepEqual(Array.from(fundamentals.slice(0, 6), lesson => lesson.module), ['1.1', '1.2', '1.3', '1.4', '1.5', '2.1']);
+  assert.ok(fundamentals.every(lesson => lesson.unit && lesson.exercises >= 3));
   for (const lesson of lessons) {
     assert.match(lesson.id, new RegExp(`^${lesson.courseId}-\\d+$`));
     assert.ok(lesson.title && lesson.description && lesson.key && lesson.html);

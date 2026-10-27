@@ -2,11 +2,10 @@
   'use strict';
 
   const topics = [
-    { id: 'algebra', title: 'Álgebra', color: 'purple', symbol: 'x²' },
+    { id: 'fundamentos', title: 'Fundamentos', color: 'purple', symbol: 'ℝ' },
     { id: 'calculo', title: 'Cálculo', color: 'blue', symbol: '∫' },
     { id: 'probabilidad', title: 'Probabilidad', color: 'sand', symbol: 'P(A)' },
-    { id: 'estadistica', title: 'Estadística', color: 'green', symbol: 'x̄' },
-    { id: 'trigonometria', title: 'Trigonometría', color: 'rose', symbol: 'θ' }
+    { id: 'estadistica', title: 'Estadística', color: 'green', symbol: 'x̄' }
   ];
   const formats = {
     explanation: { title: 'Explicación', icon: 'book', action: 'Entender la idea' },
@@ -17,17 +16,17 @@
   const courses = window.MATHBRAIN_COURSES;
   const lessons = window.MATHBRAIN_CONTENT || [];
   for (const course of courses) course.lessons = lessons.filter(lesson => lesson.courseId === course.id);
-  const resources = courses.flatMap(course => course.lessons.map((lesson, index) => ({ id: lesson.id, type: 'explanation', courseId: course.id, lessonIndex: index, topic: course.id === 'probabilidad' ? 'probabilidad' : course.category, color: course.color, art: course.art, level: course.level, title: lesson.title, description: lesson.description, key: lesson.key, html: lesson.html, practice: lesson.exercises, tags: lesson.tags, video: lesson.video })));
+  const resources = courses.flatMap(course => course.lessons.map((lesson, index) => ({ id: lesson.id, type: 'explanation', courseId: course.id, lessonIndex: index, topic: course.id === 'probabilidad' ? 'probabilidad' : course.category, color: course.color, art: course.art, level: course.level, title: lesson.title, description: lesson.description, key: lesson.key, html: lesson.html, practice: lesson.exercises, unit: lesson.unit, module: lesson.module, tags: lesson.tags, video: lesson.video })));
   const simulations = [
     { id: 'sim-derivada', courseId: 'calculo-diferencial', title: 'Mueve el punto. Descubre la derivada.', description: 'Una curva, una tangente y el cambio en tus manos.', tags: 'derivada derivadas tangente pendiente tasa cambio', simulation: 'derivative', key: 'En f(x) = x², la pendiente de la tangente en cada punto es f′(x) = 2x.' },
     { id: 'sim-riemann', courseId: 'calculo-integral', title: 'Construye un área, rectángulo a rectángulo', description: 'Cambia las piezas y acércate a la idea de integral.', tags: 'integral integrales riemann area rectangulos acumulacion', simulation: 'riemann', key: 'La integral de x² en [0,1] vale 1/3. Las sumas de Riemann se aproximan a ese valor.' },
-    { id: 'sim-circulo', courseId: 'trigonometria', title: 'Dale una vuelta al seno y al coseno', description: 'Gira un ángulo y conecta el círculo con sus coordenadas.', tags: 'circulo unitario seno coseno angulos grados radianes', simulation: 'circle', key: 'En un círculo de radio 1, las coordenadas del punto son (cos θ, sen θ).' },
+    { id: 'sim-circulo', courseId: 'fundamentos-matematicas', title: 'Dale una vuelta al seno y al coseno', description: 'Gira un ángulo y conecta el círculo con sus coordenadas.', tags: 'trigonometria circulo unitario seno coseno angulos grados radianes', simulation: 'circle', key: 'En un círculo de radio 1, las coordenadas del punto son (cos θ, sen θ).' },
     { id: 'sim-azar', courseId: 'probabilidad', title: '¿El azar tiene patrones?', description: 'Lanza una moneda virtual y observa la frecuencia de caras.', tags: 'azar moneda probabilidad frecuencia ley grandes numeros', simulation: 'probability', key: 'En lanzamientos independientes con la misma probabilidad de cara p, la frecuencia relativa tiende a p al aumentar el número de ensayos. No tiene que acercarse en cada paso.' },
-    { id: 'sim-sistema', courseId: 'algebra', title: '¿Dónde se cruzan dos rectas?', description: 'Cambia una pendiente y descubre cuántas soluciones tiene un sistema.', tags: 'sistemas sistema ecuaciones rectas interseccion cruce pendiente solucion lineal', simulation: 'system', key: 'La solución de un sistema de dos ecuaciones lineales es el punto común de sus rectas. Si las rectas son paralelas y distintas, el sistema no tiene solución.' },
+    { id: 'sim-sistema', courseId: 'fundamentos-matematicas', title: '¿Dónde se cruzan dos rectas?', description: 'Cambia una pendiente y descubre cuántas soluciones tiene un sistema.', tags: 'algebra sistemas sistema ecuaciones rectas interseccion cruce pendiente solucion lineal', simulation: 'system', key: 'La solución de un sistema de dos ecuaciones lineales es el punto común de sus rectas. Si las rectas son paralelas y distintas, el sistema no tiene solución.' },
     { id: 'sim-intervalos', courseId: 'inferencia-estadistica', title: '¿Qué significa «95 % de confianza»?', description: 'Toma muestras, construye intervalos y cuenta cuántos atrapan la media real.', tags: 'intervalo intervalos confianza media muestra cobertura estimacion margen error', simulation: 'confidence', key: 'Un procedimiento del 95 % produce intervalos que contienen el parámetro en cerca del 95 % de las repeticiones. Cada intervalo ya calculado lo contiene o no lo contiene.' }
   ];
   const exercises = [
-    { id: 'ej-ecuacion', courseId: 'algebra', title: 'Resuelve una ecuación sin perder el equilibrio', description: 'Despeja la incógnita y comprueba cada paso.', tags: 'ecuacion ecuaciones primer grado resolver despejar lineal', statement: 'Resuelve 3(x − 2) + 4 = 19. Encuentra x y verifica el resultado en la ecuación original.', key: 'Lo que haces en un miembro de la igualdad también debes hacerlo en el otro.', steps: [
+    { id: 'ej-ecuacion', courseId: 'fundamentos-matematicas', title: 'Resuelve una ecuación sin perder el equilibrio', description: 'Despeja la incógnita y comprueba cada paso.', tags: 'algebra ecuacion ecuaciones primer grado resolver despejar lineal', statement: 'Resuelve 3(x − 2) + 4 = 19. Encuentra x y verifica el resultado en la ecuación original.', key: 'Lo que haces en un miembro de la igualdad también debes hacerlo en el otro.', steps: [
       { title: 'Aplica la distributiva', text: 'Multiplica el 3 por cada término del paréntesis.', equation: '3x − 6 + 4 = 19' },
       { title: 'Agrupa las constantes', text: 'Suma −6 + 4 en el miembro izquierdo.', equation: '3x − 2 = 19' },
       { title: 'Aísla la incógnita', text: 'Suma 2 a ambos lados y divide entre 3.', equation: '3x = 21  →  x = 7' },
@@ -48,7 +47,7 @@
       { title: 'Aplica la fórmula', text: 'Divide la desviación estándar entre la raíz del tamaño de muestra.', equation: 'EE = 12/√36 = 12/6 = 2' },
       { title: 'Compara los tamaños', text: 'Cuadruplicar el tamaño reduce a la mitad el error estándar. No reduce la desviación estándar de los datos individuales.', equation: 'EE nuevo = 12/√144 = 12/12 = 1' }
     ], answer: 'El error estándar pasa de 2 a 1, en las unidades de la variable.', check: { label: 'Error estándar con n = 36', value: 2 } },
-    { id: 'ej-triangulo', courseId: 'trigonometria', title: 'Encuentra el cateto que falta', description: 'Del ángulo y la hipotenusa a una longitud.', tags: 'seno coseno tangente triangulo hipotenusa angulo', statement: 'Un triángulo rectángulo tiene una hipotenusa de 10 cm y un ángulo agudo de 30°. ¿Cuánto mide el cateto opuesto a ese ángulo?', key: 'sen θ = cateto opuesto / hipotenusa.', steps: [
+    { id: 'ej-triangulo', courseId: 'fundamentos-matematicas', title: 'Encuentra el cateto que falta', description: 'Del ángulo y la hipotenusa a una longitud.', tags: 'trigonometria seno coseno tangente triangulo hipotenusa angulo', statement: 'Un triángulo rectángulo tiene una hipotenusa de 10 cm y un ángulo agudo de 30°. ¿Cuánto mide el cateto opuesto a ese ángulo?', key: 'sen θ = cateto opuesto / hipotenusa.', steps: [
       { title: 'Elige la razón', text: 'Conoces la hipotenusa y buscas el cateto opuesto: usa el seno.', equation: 'sen 30° = opuesto/10' },
       { title: 'Despeja la longitud', text: 'Multiplica ambos lados por 10. El seno de 30° es 1/2.', equation: 'opuesto = 10·sen 30° = 10·0,5 = 5' },
       { title: 'Interpreta', text: 'El cateto resulta menor que la hipotenusa, como debe ocurrir en un triángulo rectángulo.', equation: '5 cm < 10 cm' }

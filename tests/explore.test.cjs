@@ -163,8 +163,8 @@ test('Explorar y su alias Cursos muestran primero el catálogo de cursos', () =>
 
 test('Las tarjetas calculan los formatos reales de cada curso y no inventan extras', () => {
   const app = environment('#explorar', library => {
-    const explanation = library.resources.find(resource => resource.courseId === 'algebra' && resource.type === 'explanation');
-    library.resources.push({ ...explanation, id: 'algebra-conteo-regresion' });
+    const explanation = library.resources.find(resource => resource.courseId === 'fundamentos-matematicas' && resource.type === 'explanation');
+    library.resources.push({ ...explanation, id: 'fundamentos-conteo-regresion' });
   });
   for (const course of app.courses) {
     const album = albums(app).find(value => value.includes(`href="#curso/${course.id}"`));
@@ -219,12 +219,12 @@ test('Restablecer cursos limpia ambos filtros y devuelve el foco a Todos', () =>
 
 test('Los controles de cursos actualizan la URL y el historial sin perder filtros', () => {
   const app = environment();
-  const topic = app.all('[data-course-topic]').find(button => button.dataset.courseTopic === 'algebra');
+  const topic = app.all('[data-course-topic]').find(button => button.dataset.courseTopic === 'fundamentos');
   app.click(topic);
-  assert.equal(app.location.hash, '#explorar?curso_tema=algebra');
+  assert.equal(app.location.hash, '#explorar?curso_tema=fundamentos');
   assertCourses(app, 1);
   app.change(app.node('#course-level-filter'), 'Inicial');
-  assert.equal(app.location.hash, '#explorar?curso_tema=algebra&curso_nivel=Inicial');
+  assert.equal(app.location.hash, '#explorar?curso_tema=fundamentos&curso_nivel=Inicial');
   assertCourses(app, 1);
   assert.ok(app.historyCalls.every(call => call.method === 'pushState'));
   app.navigate('#explorar?curso_tema=calculo', 'popstate');
@@ -239,7 +239,7 @@ test('Los filtros de cursos desconocidos no rompen la navegación', () => {
 });
 
 test('Las búsquedas y enlaces de contenidos no se convierten en cursos', () => {
-  for (const address of ['#explorar?q=derivadas', '#explorar?tipo=explanation', '#explorar?tema=algebra', '#explorar?nivel=Inicial', '#explorar?vista=contenidos', '#simulaciones', '#ejercicios', '#biblioteca']) {
+  for (const address of ['#explorar?q=derivadas', '#explorar?tipo=explanation', '#explorar?tema=fundamentos', '#explorar?nivel=Inicial', '#explorar?vista=contenidos', '#simulaciones', '#ejercicios', '#biblioteca']) {
     const app = environment(address);
     assert.equal(app.node('#courses-view').hidden, true, address);
     assert.equal(app.node('.discovery').hidden, false, address);
@@ -295,12 +295,39 @@ test('Inicio, detalle del curso y recursos siguen siendo accesibles', () => {
   assert.equal(app.node('#home-view').hidden, false);
   assert.equal(app.node('#courses-view').hidden, true);
   assert.match(app.node('#catalog-content').innerHTML, /Empieza por una idea/);
-  app.navigate('#curso/algebra');
+  app.navigate('#curso/fundamentos-matematicas');
   assert.equal(app.node('#courses-view').hidden, true);
   assert.equal(app.node('#detail-view').hidden, false);
-  assert.match(app.node('#detail-view').innerHTML, /href="#contenido\/algebra-1"/);
-  app.navigate('#contenido/algebra-1');
+  assert.match(app.node('#detail-view').innerHTML, /href="#contenido\/fundamentos-matematicas-1"/);
+  app.navigate('#contenido/fundamentos-matematicas-1');
   assert.equal(app.node('#detail-view').hidden, false);
   assert.match(app.node('#detail-view').innerHTML, /Primero, la intuición/);
   assert.equal(app.document.activeElement, app.node('#detail-title'));
+});
+
+test('Fundamentos de Matemáticas agrupa sus módulos por unidad en el orden del programa', () => {
+  const app = environment('#curso/fundamentos-matematicas');
+  const html = app.node('#detail-view').innerHTML;
+  const units = [...html.matchAll(/<h2 class="lesson-unit">([^<]+)<\/h2>/g)].map(match => match[1]);
+  assert.deepEqual(units, ['Unidad 1 · Números reales y aritmética', 'Unidad 2 · Álgebra fundamental', 'Unidad 3 · Funciones', 'Unidad 4 · Trigonometría', 'Unidad 5 · Números complejos']);
+  const modules = [...html.matchAll(/<span class="lesson-number">([^<]+)<\/span>/g)].map(match => match[1]);
+  assert.equal(modules.length, 31);
+  assert.deepEqual([modules[0], modules[5], modules[11], modules[18], modules[30]], ['1.1', '2.1', '3.1', '4.1', '5.4']);
+});
+
+test('Los enlaces de Álgebra y Trigonometría llevan a su módulo en Fundamentos de Matemáticas', () => {
+  for (const [address, expected] of [
+    ['#contenido/algebra-2', '#contenido/fundamentos-matematicas-11'],
+    ['#contenido/trigonometria-3', '#contenido/fundamentos-matematicas-21'],
+    ['#curso/algebra', '#curso/fundamentos-matematicas'],
+    ['#curso/trigonometria/2', '#curso/fundamentos-matematicas'],
+    ['#explorar?tema=trigonometria&nivel=Inicial', '#explorar?tema=fundamentos&nivel=Inicial'],
+    ['#explorar?curso_tema=algebra', '#explorar?curso_tema=fundamentos']
+  ]) {
+    const app = environment(address);
+    assert.equal(app.location.hash, expected, address);
+    assert.ok(app.historyCalls.length && app.historyCalls.every(call => call.method === 'replaceState'), address);
+  }
+  const app = environment('#contenido/algebra-2');
+  assert.match(app.node('#detail-view').innerHTML, /<h1 id="detail-title" tabindex="-1">Ecuaciones y desigualdades<\/h1>/);
 });

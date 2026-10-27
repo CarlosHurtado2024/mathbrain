@@ -260,3 +260,4 @@ html[data-theme="light"] .lesson-exercise[data-state=correct] { border-color: #0
 html[data-theme="light"] .lesson-exercise[data-state=correct] .answer-feedback { color: #076568; }
 html[data-theme="light"] .lesson-exercise[data-state=incorrect] { border-color: #b4547f; }
 html[data-theme="light"] .lesson-exercise[data-state=incorrect] .answer-feedback { color: #9b3d68; }
+html[data-theme="light"] .lesson-list .lesson-unit { color: #076568; }
