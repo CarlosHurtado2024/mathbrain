@@ -19,3 +19,27 @@ Un límite describe el valor al que se aproxima una función. Ese valor puede ex
 :::ejemplo
 Para x ≠ 1, (x² − 1)/(x − 1) = x + 1. Aunque la fracción no está definida en 1, cuando x se acerca a 1 su valor se acerca a 2.
 :::
+
+## Practica
+
+:::ejercicio
+Calcula $\displaystyle\lim_{x \to 3} \frac{x^2 - 9}{x - 3}$.
+respuesta: 6
+pista: Factoriza el numerador: $x^2 - 9 = (x - 3)(x + 3)$.
+solucion: Para $x \ne 3$, la fracción vale $x + 3$. Cuando $x \to 3$, se acerca a $6$.
+:::
+
+:::ejercicio
+Calcula $\displaystyle\lim_{x \to 2} (3x + 1)$.
+respuesta: 7
+pista: La función es continua: puedes sustituir directamente.
+solucion: $3 \cdot 2 + 1 = 7$.
+:::
+
+:::ejercicio
+Cerca de $x = a$, una función se acerca a $1$ por la izquierda y a $4$ por la derecha. ¿Qué podemos decir?
+- [x] El límite bilateral en $a$ no existe.
+- [ ] El límite vale $2{,}5$, el promedio.
+- [ ] El límite vale $4$.
+solucion: Para que exista el límite bilateral, los dos caminos deben llevar al mismo valor. Aquí llevan a valores distintos.
+:::

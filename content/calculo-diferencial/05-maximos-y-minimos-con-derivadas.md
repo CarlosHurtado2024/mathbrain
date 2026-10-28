@@ -19,3 +19,27 @@ En un extremo local interior de una función derivable, la derivada es cero. Una
 :::ejemplo
 Para f(x) = x² − 4x + 5, f′(x) = 2x − 4 se anula en x = 2. La derivada pasa de negativa a positiva, así que hay un mínimo: f(2) = 1.
 :::
+
+## Practica
+
+:::ejercicio
+Para $f(x) = x^2 - 6x + 2$, ¿en qué valor de $x$ está su punto crítico?
+respuesta: 3
+pista: Resuelve $f'(x) = 2x - 6 = 0$.
+solucion: $2x - 6 = 0$ da $x = 3$.
+:::
+
+:::ejercicio
+¿Cuál es el valor mínimo de $f(x) = x^2 - 6x + 2$?
+respuesta: -7
+pista: Evalúa la función en su punto crítico, $x = 3$.
+solucion: $f(3) = 9 - 18 + 2 = -7$. La derivada pasa de negativa a positiva, así que es un mínimo.
+:::
+
+:::ejercicio
+En $x = a$ se cumple $f'(a) = 0$ y la derivada pasa de positiva a negativa. ¿Qué hay en $a$?
+- [x] Un máximo local.
+- [ ] Un mínimo local.
+- [ ] No se puede saber nada.
+solucion: La función sube antes de $a$ y baja después: alcanza un máximo local.
+:::

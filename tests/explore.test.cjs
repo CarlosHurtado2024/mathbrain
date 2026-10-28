@@ -366,13 +366,25 @@ test('La lección se recorre paso a paso y los retos piden respuesta antes de co
   assert.match(app.node('#detail-view').innerHTML, /class="path-node is-done"[^>]*><a class="path-node-link" href="#contenido\/fundamentos-matematicas-6"/);
 });
 
-test('El repaso del nivel reúne un reto por lección y no existe en niveles sin retos', () => {
+test('El repaso del nivel reúne un reto por lección de cada nivel', () => {
   const app = environment('#repaso/fundamentos-matematicas/2');
   assert.match(app.node('#detail-view').innerHTML, /UNIDAD 2 · REPASO DEL NIVEL/);
   assert.equal((app.node('#player-meter').innerHTML.match(/is-challenge/g) || []).length, 6);
   assert.match(app.node('#player-stage').innerHTML, /Pon a prueba este nivel/);
   app.navigate('#repaso/calculo-diferencial/1');
+  assert.match(app.node('#detail-view').innerHTML, /MÓDULO 1 · REPASO DEL NIVEL/);
+  assert.equal((app.node('#player-meter').innerHTML.match(/is-challenge/g) || []).length, 2);
+  app.navigate('#repaso/calculo-diferencial/9');
   assert.match(app.node('#detail-view').innerHTML, /Esta idea no está en ese enlace/);
+});
+
+test('Todas las lecciones de los cursos tienen al menos dos retos y cada nivel tiene repaso', () => {
+  for (const course of environment('#').courses) {
+    const app = environment(`#curso/${course.id}`);
+    const html = app.node('#detail-view').innerHTML;
+    for (let level = 1; level <= course.modules.length; level += 1) assert.match(html, new RegExp(`href="#repaso/${course.id}/${level}"`), `${course.id} nivel ${level}`);
+    for (const lesson of app.library.resources.filter(resource => resource.courseId === course.id && resource.type === 'explanation')) assert.ok(lesson.practice >= 2, lesson.id);
+  }
 });
 
 test('La vista de lectura conserva el temario, la posición y la navegación entre lecciones', () => {

@@ -19,3 +19,28 @@ La inferencia depende del modo en que se recogen los datos. Una muestra grande n
 :::ejemplo
 Para conocer el tiempo de viaje de todo un colegio, preguntar solo a quienes llegan antes de las 7 puede excluir a quienes tienen trayectos más largos. Conviene seleccionar estudiantes de distintos horarios mediante un diseño adecuado.
 :::
+
+## Practica
+
+:::ejercicio
+Un colegio tiene $1200$ estudiantes y se encuestan $60$. ¿Qué porcentaje de la población está en la muestra?
+respuesta: 5%
+pista: Divide el tamaño de la muestra entre el de la población.
+solucion: $\dfrac{60}{1200} = 0{,}05$, es decir, el $5\,\%$.
+:::
+
+:::ejercicio
+Para estimar la opinión de todo un país, se encuesta solo a los seguidores de una cuenta en redes sociales. ¿Cuál es el problema principal?
+- [x] Un sesgo de selección: esos seguidores no representan a toda la población.
+- [ ] La muestra es demasiado grande.
+- [ ] Ninguno, si responden muchas personas.
+solucion: La forma de elegir los datos deja fuera a gran parte de la población; muchas respuestas no corrigen ese sesgo.
+:::
+
+:::ejercicio
+Si una muestra está sesgada, aumentar su tamaño…
+- [ ] elimina el sesgo.
+- [x] no corrige el sesgo; solo reduce la variación aleatoria.
+- [ ] convierte la muestra en aleatoria.
+solucion: El sesgo viene de cómo se seleccionan los datos, no de cuántos son.
+:::
