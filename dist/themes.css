@@ -288,3 +288,38 @@ html[data-theme="light"] .outline-item.is-current { background: #dff2ef; color: 
 html[data-theme="light"] .outline-state { color: #6b8094; }
 html[data-theme="light"] .outline-toggle { background: #f7fafc; border-color: #c6d3df; color: #16324a; }
 html[data-theme="light"] .course-module-chevron .icon { color: #52677c; }
+
+/* Aprendizaje interactivo en el tema claro. */
+html[data-theme="light"] .nebi-bubble { background: #ffffff; border-color: #c6d3df; color: #16324a; }
+html[data-theme="light"] :is(.stats-chip, .today-stats li, .course-card, .path-level-head, .course-about, .player-card, .player-end, .player-close, .player-back, .player-stats li, .path-node-pop) { background: #ffffffe6; border-color: #c6d3df; }
+html[data-theme="light"] .stats-chip { color: #16324a; }
+html[data-theme="light"] .stats-xp, html[data-theme="light"] :is(.today-stats span, .path-node-label small, .path-level-head p, .path-level-count, .player-stats span, .path-node-pop small, .player-reading, .course-row-levels span, .course-about h3) { color: #52677c; }
+html[data-theme="light"] .today-greeting { background: linear-gradient(120deg, #e3f0f2, #ffffffee); border-color: #c6d3df; }
+html[data-theme="light"] .course-card { background: linear-gradient(160deg, var(--topic-wash, #e3effa) 0%, #ffffffee 72%); }
+html[data-theme="light"] .course-card .eyebrow { color: var(--theme-accent, #076568); }
+html[data-theme="light"] :is(.course-card-description, .course-about > p:not(.prerequisite), .player-end > p, .course-card-facts li) { color: #294b62; }
+html[data-theme="light"] :is(.course-card-facts .icon, .today-stats .icon, .player-step-label, .continue-start) { color: #076568; }
+html[data-theme="light"] .path-level-head { border-color: #4a73c9; box-shadow: none; }
+html[data-theme="light"] .path-node-disc { background: radial-gradient(circle at 50% 32%, #ffffff, #e3ecf2); border-color: #c6d3df; color: #52677c; box-shadow: 0 6px 0 #b8c7d4, 0 10px 18px #16324a1f; }
+html[data-theme="light"] .path-node-label { color: #52677c; }
+html[data-theme="light"] .path-node.is-done .path-node-label, html[data-theme="light"] .path-node.is-current .path-node-label { color: #16324a; }
+html[data-theme="light"] .path-node.is-done .path-node-disc { background: radial-gradient(circle at 50% 30%, #6fd3c6, #0b8a86); border-color: #0b8a86; color: #ffffff; box-shadow: 0 6px 0 #076568, 0 10px 18px #16324a1f; }
+html[data-theme="light"] .path-review .path-node-disc { background: radial-gradient(circle at 50% 30%, #fff6e3, #f1dfb8); border-color: #c99c4f; color: #805623; }
+html[data-theme="light"] .path-review .path-node-label { color: #805623; }
+html[data-theme="light"] .path-extra .path-node-disc { background: #fffaf0; color: #805623; border-color: #c99c4f; }
+html[data-theme="light"] .course-row-levels span { background: #eef3f7; }
+html[data-theme="light"] .course-row-badge { background: #dff2ef; color: #076568; }
+html[data-theme="light"] .player-top { background: linear-gradient(#f4f8fbf2 72%, #f4f8fb00); }
+html[data-theme="light"] .player-segments li { background: #d6e2ea; }
+html[data-theme="light"] .player-segments li.is-current { background: #9fd8d2; }
+html[data-theme="light"] .player-segments li.is-done { background: linear-gradient(90deg, #0b8a86, #18a597); }
+html[data-theme="light"] .player-segments li.is-challenge.is-done { background: linear-gradient(90deg, #c99c4f, #e0b96b); }
+html[data-theme="light"] .player-xp { color: #805623; }
+html[data-theme="light"] .player-bar { background: #ffffffeb; border-top-color: #c6d3df; }
+html[data-theme="light"] .player-bar:has(.is-correct) { background: #e3f5f1f2; border-top-color: #0b8a86; }
+html[data-theme="light"] .player-bar:has(.is-retry) { background: #fbe9f0f2; border-top-color: #b4547f; }
+html[data-theme="light"] .is-correct .nebi-bubble strong { color: #076568; }
+html[data-theme="light"] .is-retry .nebi-bubble strong { color: #9b3d68; }
+html[data-theme="light"] .player-stats li:first-child strong { color: #805623; }
+html[data-theme="light"] .player-end { background: radial-gradient(circle at 50% 0%, #dff2ef, transparent 60%), #ffffffe6; }
+html[data-theme="light"] .player-card .lesson-exercise { background: none; border: 0; }

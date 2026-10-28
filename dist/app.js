@@ -20,6 +20,12 @@
   const plural = (count, singular, pluralForm) => `${count} ${count === 1 ? singular : pluralForm}`;
   let currentLessonId = null;
   let outlineOpen = false;
+  // Nebi, la mascota (dist/mascot.js). Sin ese archivo, los mensajes se muestran sin el dibujo.
+  const mascot = window.MATHBRAIN_MASCOT || { svg: () => '', say: (mood, html, className = '') => `<div class="nebi-say ${className}"><p class="nebi-bubble">${html}</p></div>` };
+  // Puntos (XP) y racha: días seguidos en los que se completó al menos una lección.
+  const stats = loadStats();
+  // Estado de la lección paso a paso que está abierta.
+  let player = null;
   let page = 'inicio';
   let filters = { query: '', type: 'all', topic: 'all', level: 'all' };
   let courseFilters = { topic: 'all', level: 'all' };
@@ -40,6 +46,9 @@
     link: '<path d="m10 13 4-4M8 15l-2 2a3 3 0 0 1-4-4l5-5a3 3 0 0 1 4 0M13 11a3 3 0 0 0 4 0l5-5a3 3 0 0 0-4-4l-2 2"/>',
     download: '<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>',
     check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+    flame: '<path d="M12 3c1 3.6 5.2 5.6 5.2 10.2a5.2 5.2 0 0 1-10.4 0c0-2.3 1-3.8 2.3-5 .2 1.8 1 2.9 2.4 3.4C10.9 9.1 10.6 5.9 12 3Z"/>',
+    close: '<path d="M6 6l12 12M18 6 6 18"/>',
+    star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/>',
     list: '<path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>'
   };
 
@@ -54,6 +63,55 @@
     } catch {
       return [];
     }
+  }
+
+  function dayKey(date = new Date()) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+
+  function loadStats() {
+    try {
+      const value = JSON.parse(localStorage.getItem('mathbrain-stats') || '{}');
+      const days = Array.isArray(value.days) ? value.days.filter(day => /^\d{4}-\d{2}-\d{2}$/.test(day)).slice(-120) : [];
+      const reviews = Array.isArray(value.reviews) ? value.reviews.filter(item => typeof item === 'string').slice(0, 200) : [];
+      return { xp: Number.isFinite(value.xp) && value.xp > 0 ? Math.round(value.xp) : 0, streak: Number.isInteger(value.streak) && value.streak > 0 ? value.streak : 0, lastDay: typeof value.lastDay === 'string' ? value.lastDay : null, days, reviews };
+    } catch {
+      return { xp: 0, streak: 0, lastDay: null, days: [], reviews: [] };
+    }
+  }
+
+  function saveStats() {
+    try { localStorage.setItem('mathbrain-stats', JSON.stringify(stats)); return true; }
+    catch { return false; }
+  }
+
+  // La racha sigue viva si la última lección completada fue hoy o ayer.
+  function currentStreak() {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return [dayKey(), dayKey(yesterday)].includes(stats.lastDay) ? stats.streak : 0;
+  }
+
+  function recordStudyDay() {
+    const today = dayKey();
+    if (stats.lastDay === today) return;
+    stats.streak = currentStreak() + 1;
+    stats.lastDay = today;
+    stats.days = [...stats.days, today].slice(-120);
+  }
+
+  function addXp(points) {
+    stats.xp += points;
+    saveStats();
+    updateStatsChip();
+  }
+
+  function updateStatsChip() {
+    const streak = select('#streak-count');
+    const xp = select('#xp-count');
+    if (streak) streak.textContent = String(currentStreak());
+    if (xp) xp.textContent = `${stats.xp} XP`;
+    select('#stats-chip')?.setAttribute('aria-label', `Racha de ${plural(currentStreak(), 'día', 'días')} y ${stats.xp} puntos de experiencia`);
   }
 
   function storeList(key, value) {
@@ -128,8 +186,10 @@
     const exercises = count('exercise');
     const symbol = { derivative: 'f′', integral: '∫', probability: 'P(A)', inference: 'x̄', algebra: 'x²', trigonometry: 'θ' }[course.art];
     const progress = courseProgress(course);
-    const modules = courseModules(course).length;
-    return `<article class="course-album ${course.color}"><a class="course-album-link" href="#curso/${course.id}" aria-labelledby="course-name-${course.id}"><div class="course-cover">${artwork(course, true)}<span class="course-cover-label">MATHBRAIN / CURSO</span><span class="course-cover-symbol" aria-hidden="true">${symbol}</span><span class="course-cover-open" aria-hidden="true">${icon('play')}</span></div><div class="course-album-copy"><p class="course-album-topic">${escape(course.label)}</p><h3 id="course-name-${course.id}">${escape(course.title)}</h3><p class="course-album-description">${escape(course.description)}</p><div class="course-album-meta"><span>${plural(modules, 'módulo', 'módulos')}</span><span>${count('explanation')} explicaciones</span><span>${course.level}</span></div><div class="course-album-extras">${simulations ? `<span>${simulations} ${simulations === 1 ? 'simulación' : 'simulaciones'}</span>` : ''}${exercises ? `<span>${exercises} ${exercises === 1 ? 'ejercicio' : 'ejercicios'}</span>` : ''}</div>${progress.done ? `<div class="course-album-progress">${progressBar(progress, false)}<span>${progress.percent} % completado</span></div>` : ''}</div></a></article>`;
+    const modules = courseModules(course);
+    const challenges = courseLessons(course).reduce((total, lesson) => total + (lesson.practice || 0), 0);
+    // Fila de catálogo: icono del curso, nivel, título, descripción y sus niveles, como un temario de un vistazo.
+    return `<article class="course-album course-row ${course.color}"><a class="course-album-link" href="#curso/${course.id}" aria-labelledby="course-name-${course.id}"><span class="course-row-icon" aria-hidden="true">${artwork(course, true)}<span class="course-cover-symbol">${symbol}</span></span><div class="course-album-copy"><p class="course-album-topic">NIVEL ${course.level.toUpperCase()} · ${escape(course.label)}</p><div class="course-row-title"><h3 id="course-name-${course.id}">${escape(course.title)}</h3>${progress.done === progress.total ? `<span class="course-row-badge is-done">${icon('check')}Completado</span>` : progress.done ? `<span class="course-row-badge">${progress.percent} %</span>` : ''}</div><p class="course-album-description">${escape(course.description)}</p><div class="course-album-meta"><span>${plural(modules.length, 'nivel', 'niveles')}</span><span>${count('explanation')} explicaciones</span><span>${plural(challenges, 'reto', 'retos')}</span></div><div class="course-album-extras">${simulations ? `<span>${simulations} ${simulations === 1 ? 'simulación' : 'simulaciones'}</span>` : ''}${exercises ? `<span>${exercises} ${exercises === 1 ? 'ejercicio' : 'ejercicios'}</span>` : ''}</div><div class="course-row-levels">${modules.map(module => `<span>${escape(module.name)}</span>`).join('')}</div>${progress.done ? `<div class="course-album-progress">${progressBar(progress, false)}<span>${progress.percent} % completado</span></div>` : ''}</div><span class="course-row-go" aria-hidden="true">${icon('right')}</span></a></article>`;
   }
 
   function renderCourses() {
@@ -142,7 +202,11 @@
     });
     select('#course-collection-title').textContent = courseFilters.topic === 'all' ? courseFilters.level === 'all' ? 'Todos los cursos' : 'Cursos de nivel ' + courseFilters.level.toLowerCase() : topicName(courseFilters.topic);
     select('#course-results').textContent = `${visibleCourses.length} ${visibleCourses.length === 1 ? 'curso' : 'cursos'} · Explicaciones y práctica a tu ritmo`;
-    select('#course-grid').innerHTML = visibleCourses.map(courseCard).join('');
+    // Los cursos se agrupan por área; cada área lista sus cursos en orden.
+    const areas = { fundamentos: 'Fundamentos', calculo: 'Cálculo', estadistica: 'Probabilidad y estadística' };
+    const groups = [...new Set(visibleCourses.map(course => course.category))].map(category => ({ category, items: visibleCourses.filter(course => course.category === category) }));
+    select('#course-grid').classList.add('is-list');
+    select('#course-grid').innerHTML = groups.map(({ category, items }) => `${groups.length > 1 ? `<h3 class="course-area">${escape(areas[category] || category)}</h3>` : ''}${items.map(courseCard).join('')}`).join('');
     select('#course-empty').hidden = visibleCourses.length > 0;
     document.title = 'Explorar cursos | MathBrain';
   }
@@ -156,10 +220,15 @@
     route(false);
   }
 
+  // Panel del día en el inicio: Nebi saluda según la racha, y se muestran XP, lecciones y los cursos en marcha.
   function continueLearning() {
     const active = courses.map(course => ({ course, progress: courseProgress(course) })).filter(({ progress }) => progress.done > 0 && progress.done < progress.total);
-    if (!active.length) return '';
-    return `<section class="shelf continue-learning" aria-labelledby="continue-title"><div class="section-heading"><div><h2 id="continue-title">Continúa aprendiendo</h2><p>Retoma tus cursos donde los dejaste.</p></div></div><div class="continue-grid">${active.map(({ course, progress }) => `<a class="continue-card ${course.color}" href="#contenido/${progress.next.id}"><small>${escape(course.label)}</small><strong>${escape(course.title)}</strong><span class="continue-next">Siguiente: ${escape(progress.next.title)}</span>${progressBar(progress)}</a>`).join('')}</div></section>`;
+    const streak = currentStreak();
+    const studiedToday = stats.lastDay === dayKey();
+    const suggestions = active.length ? active : [{ course: courses[0], progress: courseProgress(courses[0]) }];
+    const mood = studiedToday ? 'celebra' : streak ? 'animo' : active.length ? 'feliz' : 'saluda';
+    const message = studiedToday ? `<strong>¡Meta de hoy cumplida!</strong> Llevas ${plural(streak, 'día', 'días')} de racha.` : streak ? `Llevas <strong>${plural(streak, 'día', 'días')} de racha</strong>. Una lección hoy y la mantienes.` : active.length ? '<strong>¡Qué bueno verte!</strong> Sigamos donde lo dejaste.' : `<strong>¡Hola! Soy ${mascot.name || 'Nebi'}.</strong> Cada lección toma unos minutos: aprende resolviendo, una idea a la vez.`;
+    return `<section class="shelf today-panel" aria-labelledby="continue-title"><div class="today-greeting">${mascot.say(mood, message, 'today-nebi')}<ul class="today-stats" aria-label="Tu progreso"><li>${icon('flame')}<strong>${streak}</strong><span>${streak === 1 ? 'día de racha' : 'días de racha'}</span></li><li>${icon('star')}<strong>${stats.xp}</strong><span>XP</span></li><li>${icon('check')}<strong>${completed.size}</strong><span>${completed.size === 1 ? 'lección' : 'lecciones'}</span></li></ul></div><div class="section-heading"><div><h2 id="continue-title">${active.length ? 'Continúa aprendiendo' : 'Empieza tu camino'}</h2><p>${active.length ? 'Retoma tus cursos donde los dejaste.' : 'Te recomendamos empezar por aquí.'}</p></div></div><div class="continue-grid">${suggestions.map(({ course, progress }) => `<a class="continue-card ${course.color}" href="#contenido/${progress.next.id}"><small>${escape(course.label)}</small><strong>${escape(course.title)}</strong><span class="continue-next">${progress.done ? 'Siguiente' : 'Primera lección'}: ${escape(progress.next.title)}</span>${progress.done ? progressBar(progress) : `<span class="continue-start">${icon('play')}Empezar</span>`}</a>`).join('')}</div></section>`;
   }
 
   function shelf(id, title, description, resources, destination) {
@@ -198,7 +267,10 @@
     });
     if (page === 'inicio') {
       const featured = ['calculo-diferencial-3', 'fundamentos-matematicas-11', 'probabilidad-1', 'fundamentos-matematicas-20', 'calculo-integral-2', 'inferencia-estadistica-3', 'fundamentos-matematicas-13', 'probabilidad-4'].map(id => resourceById.get(id));
-      select('#recent-shelf').innerHTML = continueLearning() + shelf('recent', 'Vuelve a tus ideas', 'Los contenidos que exploraste recientemente en este navegador.', recent.slice(0, 6).map(id => resourceById.get(id)), '');
+      // Quien ya empezó ve su panel del día arriba; quien llega por primera vez lo ve después de la portada.
+      const today = continueLearning();
+      select('#today-panel').innerHTML = completed.size ? today : '';
+      select('#recent-shelf').innerHTML = (completed.size ? '' : today) + shelf('recent', 'Vuelve a tus ideas', 'Los contenidos que exploraste recientemente en este navegador.', recent.slice(0, 6).map(id => resourceById.get(id)), '');
       select('#catalog-content').innerHTML = shelf('start', 'Empieza por una idea', 'Explicaciones que van directo al «¿por qué?».', featured, '#explorar?tipo=explanation')
         + shelf('simulations', 'Menos imaginar. Más experimentar.', 'Mueve, cambia, prueba. Aquí tú tienes el control.', library.search({ type: 'simulation' }), '#simulaciones')
         + shelf('exercises', 'Del «no entiendo» al «ahora sí»', 'Ejercicios resueltos, una decisión a la vez.', library.search({ type: 'exercise' }), '#ejercicios')
@@ -261,14 +333,15 @@
     return /\.(mp4|webm)$/i.test(url.pathname) ? { type: 'video', src: url.href } : null;
   }
 
-  function renderResource(resource) {
+  function renderResource(resource, parameters = new URLSearchParams()) {
     recent = [resource.id, ...recent.filter(id => id !== resource.id)].slice(0, 8);
     storeList('mathbrain-recent', recent);
     const format = library.formats[resource.type];
     const source = videoSource(resource.video);
     const video = !source ? '' : `<div class="video-stage">${source.type === 'iframe' ? `<iframe title="${escape(resource.title)}" src="${escape(source.src)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>` : `<video controls playsinline preload="metadata" aria-label="${escape(resource.title)}"><source src="${escape(source.src)}"></video>`}</div>`;
     const course = courses.find(candidate => candidate.id === resource.courseId);
-    if (resource.type === 'explanation' && course) return renderLesson(resource, course, video);
+    // Las lecciones se recorren paso a paso; «?vista=lectura» las muestra completas en una sola página.
+    if (resource.type === 'explanation' && course) return parameters.get('vista') === 'lectura' ? renderLesson(resource, course, video) : renderPlayer(resource, course, video);
     currentLessonId = null;
     let body;
     if (resource.type === 'simulation') {
@@ -286,24 +359,31 @@
     if (resource.type === 'explanation') bindLessonExercises(resource);
   }
 
+  // Comprueba la respuesta de un ejercicio de lección y escribe la retroalimentación. Devuelve true, false o null (respuesta no válida).
+  function checkExercise(form) {
+    const feedback = select('.answer-feedback', form);
+    let result;
+    if (form.dataset.kind === 'choice') {
+      const chosen = select('input[type="radio"]:checked', form);
+      result = chosen ? chosen.hasAttribute('data-correct') : null;
+      if (result === null) { form.dataset.state = 'invalid'; feedback.textContent = 'Elige una de las opciones.'; return null; }
+    } else {
+      const input = select('input', form);
+      result = library.checkAnswer({ value: library.parseAnswer(form.dataset.answer), tolerance: Number(form.dataset.tolerance) || 1e-6, percent: /%\s*$/.test(form.dataset.answer) }, input.value);
+      input.setAttribute('aria-invalid', String(result !== true));
+      if (result === null) { form.dataset.state = 'invalid'; feedback.textContent = 'Escribe un número, una fracción como 8/3 o un porcentaje como 25 %.'; return null; }
+    }
+    form.dataset.state = result ? 'correct' : 'incorrect';
+    feedback.textContent = result ? '¡Correcto! Abre la solución si quieres comparar tu razonamiento.' : select('.lesson-hint', form) ? 'Todavía no. Abre la pista e inténtalo de nuevo.' : 'Todavía no. Revisa la explicación e inténtalo de nuevo.';
+    return result;
+  }
+
   function bindLessonExercises(resource) {
     const forms = selectAll('.lesson-exercise');
     forms.forEach(form => form.addEventListener('submit', event => {
       event.preventDefault();
-      const feedback = select('.answer-feedback', form);
-      let result;
-      if (form.dataset.kind === 'choice') {
-        const chosen = select('input[type="radio"]:checked', form);
-        result = chosen ? chosen.hasAttribute('data-correct') : null;
-        if (result === null) { form.dataset.state = 'invalid'; feedback.textContent = 'Elige una de las opciones.'; return; }
-      } else {
-        const input = select('input', form);
-        result = library.checkAnswer({ value: library.parseAnswer(form.dataset.answer), tolerance: Number(form.dataset.tolerance) || 1e-6, percent: /%\s*$/.test(form.dataset.answer) }, input.value);
-        input.setAttribute('aria-invalid', String(result !== true));
-        if (result === null) { form.dataset.state = 'invalid'; feedback.textContent = 'Escribe un número, una fracción como 8/3 o un porcentaje como 25 %.'; return; }
-      }
-      form.dataset.state = result ? 'correct' : 'incorrect';
-      feedback.textContent = result ? '¡Correcto! Abre la solución si quieres comparar tu razonamiento.' : select('.lesson-hint', form) ? 'Todavía no. Abre la pista e inténtalo de nuevo.' : 'Todavía no. Revisa la explicación e inténtalo de nuevo.';
+      const result = checkExercise(form);
+      if (result === null) return;
       // Resolver toda la práctica completa la lección, como al terminar un cuestionario.
       if (result && forms.every(entry => entry.dataset.state === 'correct') && !completed.has(resource.id)) {
         setCompleted(resource.id, true, false);
@@ -369,21 +449,30 @@
     const progress = courseProgress(course);
     const exercises = lessons.reduce((total, lesson) => total + (lesson.practice || 0), 0);
     const extras = modules.reduce((total, module) => total + module.extras.length, 0);
-    const openModule = modules.findIndex(module => module.lessons.some(({ lesson }) => lesson.id === progress.next.id));
-    const lessonItem = ({ lesson, label }) => `<li><a class="module-item${completed.has(lesson.id) ? ' is-done' : ''}" href="#contenido/${lesson.id}"><span class="module-item-icon">${icon(lesson.video ? 'play' : 'book')}</span><span class="module-item-copy"><strong>${escape(lesson.title)}</strong><small><span class="module-item-number">${escape(label)}</span> · ${lessonMeta(lesson)}</small></span><span class="module-item-state">${completed.has(lesson.id) ? `${icon('check')}<span class="sr-only">Completada</span>` : ''}</span></a></li>`;
-    const extraItem = resource => `<li><a class="module-item module-extra" href="#contenido/${resource.id}"><span class="module-item-icon">${icon(library.formats[resource.type].icon)}</span><span class="module-item-copy"><strong>${escape(resource.title)}</strong><small>${extraMeta(resource)}</small></span><span class="module-item-state"></span></a></li>`;
-    const moduleSection = module => {
-      const done = module.lessons.filter(({ lesson }) => completed.has(lesson.id)).length;
-      const practice = module.lessons.reduce((total, { lesson }) => total + (lesson.practice || 0), 0);
-      const meta = [plural(module.lessons.length, 'lección', 'lecciones'), practice ? plural(practice, 'ejercicio', 'ejercicios') : '', module.extras.length ? plural(module.extras.length, 'recurso interactivo', 'recursos interactivos') : ''].filter(Boolean).join(' · ');
-      return `<details class="course-module"${module.index === Math.max(0, openModule) ? ' open' : ''}><summary><span class="course-module-heading"><span class="course-module-kicker">${escape(module.kicker)}</span><span class="course-module-title">${escape(module.name)}</span><span class="course-module-meta">${meta}</span></span><span class="course-module-count${done === module.lessons.length ? ' is-done' : ''}">${done}/${module.lessons.length}</span><span class="course-module-chevron" aria-hidden="true">${icon('right')}</span></summary><div class="course-module-body">${module.summary ? `<p class="course-module-summary">${escape(module.summary)}</p>` : ''}${module.objectives.length ? `<h3>Lo que aprenderás en este módulo</h3><ul class="course-module-objectives">${module.objectives.map(objective => `<li>${icon('check')}<span>${escape(objective)}</span></li>`).join('')}</ul>` : ''}<ol class="module-items">${module.lessons.map(lessonItem).join('')}${module.extras.map(extraItem).join('')}</ol></div></details>`;
-    };
     const started = progress.done > 0;
+    const finished = progress.done === progress.total;
+    const current = finished ? null : progress.next.id;
+    // Las lecciones se dibujan como un camino en zigzag de nodos: completadas, la actual (con su tarjeta para empezar) y las siguientes.
+    const offsets = [0, 1, 1.6, 1, 0, -1, -1.6, -1];
+    let position = 0;
+    const node = (className, href, disc, label, title, popup = '') => `<li class="path-node ${className}" style="--offset:${offsets[position++ % offsets.length]}"><a class="path-node-link" href="${href}"><span class="path-node-disc">${disc}</span><span class="path-node-label"><small>${label}</small>${title}</span></a>${popup}</li>`;
+    const level = module => {
+      const done = module.lessons.filter(({ lesson }) => completed.has(lesson.id)).length;
+      const challenges = reviewSteps(module).length;
+      const reviewed = stats.reviews.includes(`${course.id}:${module.index}`);
+      const lessonNodes = module.lessons.map(({ lesson, label }) => {
+        const isDone = completed.has(lesson.id);
+        const isCurrent = lesson.id === current;
+        return node(`${isDone ? 'is-done' : ''}${isCurrent ? ' is-current' : ''}`, `#contenido/${lesson.id}`, `${icon(isDone ? 'check' : isCurrent ? 'play' : lesson.video ? 'play' : 'book')}${isDone ? '<span class="sr-only">Completada:</span>' : ''}`, `<span class="module-item-number">${escape(label)}</span> · ${lessonMeta(lesson)}`, escape(lesson.title), isCurrent ? `<div class="path-node-pop" role="group" aria-label="Lección actual"><strong>${escape(lesson.title)}</strong><small>${escape(lesson.description)}</small><a class="button button-primary" href="#contenido/${lesson.id}">${icon('play')}${started ? 'Continuar' : 'Empezar'}</a></div>` : '');
+      }).join('');
+      const review = challenges ? node(`path-review${reviewed ? ' is-done' : ''}`, `#repaso/${course.id}/${module.index + 1}`, icon(reviewed ? 'check' : 'star'), plural(challenges, 'reto', 'retos'), 'Repaso del nivel') : '';
+      const extraNodes = module.extras.map(resource => node('path-extra', `#contenido/${resource.id}`, icon(library.formats[resource.type].icon), extraMeta(resource), escape(resource.title))).join('');
+      return `<section class="path-level" aria-labelledby="level-${module.index}"><header class="path-level-head"><span class="course-module-kicker">${escape(module.kicker)}</span><h2 class="course-module-title" id="level-${module.index}">${escape(module.name)}</h2><span class="path-level-count${done === module.lessons.length ? ' is-done' : ''}">${done}/${module.lessons.length}</span>${module.summary ? `<p>${escape(module.summary)}</p>` : ''}</header><ol class="path-nodes">${lessonNodes}${review}${extraNodes}</ol></section>`;
+    };
     select('#detail-view').innerHTML = `<nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="#">Inicio</a><span aria-hidden="true">/</span><a href="#explorar">Explorar</a><span aria-hidden="true">/</span><span>Curso</span></nav>`
-      + `<header class="course-hero ${course.color}"><div class="course-hero-copy"><p class="eyebrow">CURSO · ${escape(course.label)} · NIVEL ${course.level.toUpperCase()}</p><h1 id="detail-title" tabindex="-1">${escape(course.title)}</h1><p class="course-hero-lead">${escape(course.description)}</p><p class="course-hero-intro">${escape(course.intro)}</p><div class="course-instructor"><img src="${instructor.photo}" alt="" width="40" height="40" loading="lazy" decoding="async"><span><small>Impartido por</small><strong>${instructor.name}</strong></span></div><div class="detail-actions"><a class="button button-primary" href="#contenido/${progress.next.id}">${icon(started ? 'play' : 'book')}${started ? (progress.done === progress.total ? 'Repasar el curso' : 'Continuar el curso') : 'Empezar el curso'}</a><button class="text-button" type="button" data-download="${course.id}">${icon('download')}Descargar programa</button></div>${started ? `<div class="course-hero-progress">${progressBar(progress)}<span class="course-hero-next">${progress.done === progress.total ? '¡Completaste todas las lecciones!' : `Siguiente: ${escape(progress.next.title)}`}</span></div>` : ''}</div><div class="course-hero-art" aria-hidden="true">${artwork(course, true)}</div></header>`
-      + `<ul class="course-facts" aria-label="Datos del curso"><li><strong>${modules.length}</strong><span>${modules.length === 1 ? 'módulo' : 'módulos'}</span></li><li><strong>${lessons.length}</strong><span>lecciones</span></li><li><strong>${exercises}</strong><span>ejercicios de práctica</span></li><li><strong>≈ ${studyHours(course)} h</strong><span>de estudio a tu ritmo</span></li><li><strong>${course.level}</strong><span>nivel</span></li></ul>`
-      + `<div class="course-page"><div class="course-page-main">${course.outcomes?.length ? `<section class="course-section" aria-labelledby="outcomes-title"><h2 id="outcomes-title">Lo que aprenderás</h2><ul class="course-outcomes">${course.outcomes.map(outcome => `<li>${icon('check')}<span>${escape(outcome)}</span></li>`).join('')}</ul></section>` : ''}${course.skills?.length ? `<section class="course-section" aria-labelledby="skills-title"><h2 id="skills-title">Habilidades que desarrollarás</h2><ul class="course-skills">${course.skills.map(skill => `<li>${escape(skill)}</li>`).join('')}</ul></section>` : ''}<section class="course-section" aria-labelledby="modules-title"><div class="course-section-heading"><h2 id="modules-title">Hay ${plural(modules.length, 'módulo', 'módulos')} en este curso</h2><p>${plural(lessons.length, 'lección', 'lecciones')} · ${plural(exercises, 'ejercicio', 'ejercicios')} de práctica${extras ? ` · ${plural(extras, 'recurso interactivo', 'recursos interactivos')}` : ''}</p></div>${modules.map(moduleSection).join('')}</section></div>`
-      + `<aside class="course-page-aside"><div class="instructor-card"><p class="eyebrow">INSTRUCTOR</p><div class="instructor-card-person"><img src="${instructor.photo}" alt="${instructor.name}" width="56" height="56" loading="lazy" decoding="async"><span><strong>${instructor.name}</strong><small>${instructor.role}</small></span></div><a href="#nosotros">Conoce al autor <span aria-hidden="true">↗</span></a></div><p class="prerequisite"><strong>Antes de empezar</strong>${escape(course.prerequisite)}</p><p class="prerequisite"><strong>Cómo funciona</strong>Cada lección combina lectura, video cuando está disponible y ejercicios con respuesta inmediata. Marca las lecciones como completadas para seguir tu progreso en este navegador.</p></aside></div>`;
+      + `<div class="course-layout"><aside class="course-card ${course.color}"><div class="course-card-art" aria-hidden="true">${artwork(course, true)}</div><p class="eyebrow">${escape(course.label)} · NIVEL ${course.level.toUpperCase()}</p><h1 id="detail-title" tabindex="-1">${escape(course.title)}</h1><p class="course-card-description">${escape(course.description)}</p><ul class="course-card-facts"><li>${icon('book')}${plural(lessons.length, 'lección', 'lecciones')}</li><li>${icon('exercise')}${plural(exercises, 'reto', 'retos')}</li><li>${icon('star')}${plural(modules.length, 'nivel', 'niveles')} · ≈ ${studyHours(course)} h</li></ul>${started ? progressBar(progress) : ''}<a class="button button-primary course-card-start" href="#contenido/${progress.next.id}">${icon('play')}${started ? (finished ? 'Repasar el curso' : 'Continuar el curso') : 'Empezar el curso'}</a><div class="course-instructor"><img src="${instructor.photo}" alt="" width="40" height="40" loading="lazy" decoding="async"><span><small>Impartido por</small><strong>${instructor.name}</strong></span></div><button class="text-button" type="button" data-download="${course.id}">${icon('download')}Descargar programa</button></aside>`
+      + `<div class="course-path-column"><h2 class="sr-only">Hay ${plural(modules.length, 'módulo', 'módulos')} en este curso</h2>${modules.map(level).join('')}`
+      + `<section class="course-about" aria-labelledby="about-course-title"><h2 id="about-course-title">Sobre este curso</h2><p>${escape(course.intro)}</p>${course.outcomes?.length ? `<h3>Lo que aprenderás</h3><ul class="course-outcomes">${course.outcomes.map(outcome => `<li>${icon('check')}<span>${escape(outcome)}</span></li>`).join('')}</ul>` : ''}${course.skills?.length ? `<h3>Habilidades que desarrollarás</h3><ul class="course-skills">${course.skills.map(skill => `<li>${escape(skill)}</li>`).join('')}</ul>` : ''}<p class="prerequisite"><strong>Antes de empezar</strong>${escape(course.prerequisite)}</p></section></div></div>`;
     document.title = `${course.title} | MathBrain`;
   }
 
@@ -438,8 +527,166 @@
     if (aside && current && aside.scrollHeight > aside.clientHeight) aside.scrollTop = Math.max(0, current.offsetTop - aside.clientHeight / 3);
   }
 
+  // ── Lección paso a paso ─────────────────────────────────────────────────────────────
+  // Cada lección se recorre una idea a la vez: un paso en pantalla, una barra de avance y,
+  // en los retos, retroalimentación inmediata de Nebi. Responder bien da XP; terminar la lección
+  // la completa, suma un bono y mantiene la racha.
+
+  function lessonPosition(course, resource) {
+    const module = courseModules(course).find(candidate => candidate.lessons.some(({ lesson }) => lesson.id === resource.id));
+    return { module, label: module.lessons.find(({ lesson }) => lesson.id === resource.id).label };
+  }
+
+  function startPlayer(state) {
+    player = { index: 0, results: {}, gains: {}, xp: 0, firstTry: 0, ...state };
+    select('#detail-view').innerHTML = `<section class="lesson-player ${player.color}" aria-labelledby="detail-title"><header class="player-top"><a class="player-close" href="${player.exit}" aria-label="Salir y volver al curso">${icon('close')}</a><div class="player-meter" id="player-meter"></div><span class="player-xp" id="player-xp" aria-live="polite"></span></header><div class="player-heading"><p class="eyebrow">${escape(player.eyebrow)}</p><h1 id="detail-title" tabindex="-1">${escape(player.title)}</h1>${player.reading ? `<a class="player-reading" href="${player.reading}">${icon('book')}Ver toda la lección en una página</a>` : ''}</div><div class="player-stage" id="player-stage"></div><div class="player-bar" id="player-bar"></div></section>`;
+    renderPlayerStep();
+  }
+
+  function renderPlayer(resource, course, video) {
+    currentLessonId = null;
+    const { module, label } = lessonPosition(course, resource);
+    document.title = `${resource.title} · ${course.title} | MathBrain`;
+    startPlayer({ kind: 'lesson', resource, course, color: resource.color, title: resource.title, eyebrow: `${module.kicker.toUpperCase()} · LECCIÓN ${label}`, exit: `#curso/${course.id}`, reading: `#contenido/${resource.id}?vista=lectura`, steps: [...(video ? [{ type: 'video', html: `<h2>Mira la clase</h2>${video}` }] : []), ...resource.steps] });
+  }
+
+  // Repaso del nivel: un reto de cada lección del módulo, para comprobar lo aprendido antes de seguir.
+  function reviewSteps(module) {
+    return module.lessons.map(({ lesson }) => (lesson.steps || []).find(step => step.type === 'exercise')).filter(Boolean).slice(0, 8)
+      .map(step => ({ type: 'exercise', html: step.html.replace(/^(?:<h2>[\s\S]*?<\/h2>)+/, '') }));
+  }
+
+  function renderReview(course, index) {
+    const module = courseModules(course)[index];
+    const steps = module && reviewSteps(module);
+    if (!steps?.length) return false;
+    document.title = `Repaso: ${module.name} · ${course.title} | MathBrain`;
+    startPlayer({ kind: 'review', course, module, color: course.color, title: `Repaso: ${module.name}`, eyebrow: `${module.kicker.toUpperCase()} · REPASO DEL NIVEL`, exit: `#curso/${course.id}`, reading: '', steps: [{ type: 'intro', html: `<h2>Pon a prueba este nivel</h2><p>${plural(steps.length, 'reto', 'retos')} de las lecciones de «${escape(module.name)}». Resuélvelos sin mirar la explicación; si te atascas, puedes ver la solución y seguir.</p>` }, ...steps] });
+    return true;
+  }
+
+  function playerMeter() {
+    const total = player.steps.length;
+    return `<ol class="player-segments" role="progressbar" aria-label="Avance de la lección" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${Math.min(player.index, total)}">${player.steps.map((step, index) => `<li class="${index < player.index ? 'is-done' : index === player.index ? 'is-current' : ''}${step.type === 'exercise' ? ' is-challenge' : ''}"></li>`).join('')}</ol>`;
+  }
+
+  function renderPlayerStep() {
+    const step = player.steps[player.index];
+    select('#player-meter').innerHTML = playerMeter();
+    select('#player-xp').textContent = player.xp ? `+${player.xp} XP` : '';
+    if (!step) return finishPlayer();
+    const labels = { exercise: 'Tu turno', idea: 'Idea clave', example: 'Ejemplo', note: 'Atención', video: 'Video', intro: 'Repaso' };
+    select('#player-stage').innerHTML = `<article class="player-card reader-body lesson-content step-${step.type}" id="player-card" tabindex="-1">${labels[step.type] ? `<p class="player-step-label">${labels[step.type]}</p>` : ''}${step.html}</article>`;
+    const form = document.querySelector('#player-stage .lesson-exercise');
+    form?.addEventListener('submit', event => {
+      event.preventDefault();
+      const result = checkExercise(form);
+      if (result !== null) answerStep(result);
+    });
+    renderPlayerBar();
+  }
+
+  function answerStep(result) {
+    const index = player.index;
+    const previous = player.results[index];
+    if (previous === 'correct' || previous === 'revealed') return renderPlayerBar();
+    if (result) {
+      const gain = previous === 'retry' ? 5 : 10;
+      if (!previous) player.firstTry += 1;
+      player.results[index] = 'correct';
+      player.gains[index] = gain;
+      player.xp += gain;
+      addXp(gain);
+      select('#player-xp').textContent = `+${player.xp} XP`;
+    } else {
+      player.results[index] = 'retry';
+    }
+    renderPlayerBar();
+  }
+
+  function revealStep() {
+    const form = document.querySelector('#player-stage .lesson-exercise');
+    if (player.results[player.index] !== 'correct') player.results[player.index] = 'revealed';
+    if (form) {
+      const solution = select('.lesson-solution', form);
+      if (solution) solution.open = true;
+      else if (form.dataset.kind === 'choice') select('input[data-correct]', form)?.closest('label')?.classList.add('is-answer');
+      else select('.answer-feedback', form).textContent = `La respuesta es ${form.dataset.answer}.`;
+    }
+    renderPlayerBar();
+  }
+
+  function renderPlayerBar() {
+    const step = player.steps[player.index];
+    const result = player.results[player.index];
+    const last = player.index === player.steps.length - 1;
+    const open = step.type !== 'exercise' || result === 'correct' || result === 'revealed';
+    const hint = step.type === 'exercise' && /lesson-hint/.test(step.html);
+    const back = player.index > 0 ? `<button class="player-back" type="button" data-player-back="1" aria-label="Paso anterior">${icon('left')}</button>` : '';
+    let message = '';
+    let state = '';
+    if (step.type === 'exercise') {
+      if (result === 'correct') { state = 'is-correct'; message = mascot.say('feliz', `<strong>¡Correcto!</strong> +${player.gains[player.index]} XP`); }
+      else if (result === 'revealed') { state = 'is-revealed'; message = mascot.say('animo', 'Revisa la solución con calma. El próximo reto sale.'); }
+      else if (result === 'retry') { state = 'is-retry'; message = mascot.say('animo', hint ? '<strong>Casi.</strong> Abre la pista y vuelve a intentarlo.' : '<strong>Casi.</strong> Revisa el planteamiento y vuelve a intentarlo.'); }
+      else message = mascot.say('piensa', 'Tu turno: resuelve el reto para continuar.');
+    }
+    const actions = open
+      ? `<button class="button button-primary player-continue" type="button" data-player-next="1">${last ? 'Terminar' : 'Continuar'}${icon('right')}</button>`
+      : '<button class="button button-secondary player-reveal" type="button" data-player-reveal="1">Ver solución</button>';
+    select('#player-bar').innerHTML = `<div class="player-bar-inner ${state}">${back}<div class="player-feedback" role="status" aria-live="polite">${message}</div><div class="player-actions">${actions}</div></div>`;
+  }
+
+  function movePlayer(step) {
+    if (!player) return;
+    const current = player.steps[player.index];
+    if (step > 0 && current?.type === 'exercise' && !['correct', 'revealed'].includes(player.results[player.index])) return;
+    player.index = Math.max(0, Math.min(player.steps.length, player.index + step));
+    renderPlayerStep();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    (select('#player-card') || select('#detail-title'))?.focus({ preventScroll: true });
+  }
+
+  function finishPlayer() {
+    const challenges = player.steps.filter(step => step.type === 'exercise').length;
+    let title;
+    let detail;
+    let actions;
+    if (player.kind === 'lesson') {
+      const { resource, course } = player;
+      const firstTime = !completed.has(resource.id);
+      setCompleted(resource.id, true, false);
+      if (firstTime) { player.xp += 20; addXp(20); }
+      recordStudyDay();
+      saveStats();
+      const lessons = courseLessons(course);
+      const next = lessons[lessons.findIndex(lesson => lesson.id === resource.id) + 1];
+      const progress = courseProgress(course);
+      title = '¡Lección completada!';
+      detail = progress.done === progress.total ? `Completaste todas las lecciones de ${escape(course.title)}.` : `Llevas el ${progress.percent} % de ${escape(course.title)}.`;
+      actions = `${next ? `<a class="button button-primary" href="#contenido/${next.id}">Siguiente lección${icon('right')}</a>` : ''}<a class="button ${next ? 'button-secondary' : 'button-primary'}" href="#curso/${course.id}">Volver al curso</a><a class="text-button" href="#contenido/${resource.id}?vista=lectura">${icon('book')}Repasar la lección completa</a>`;
+    } else {
+      const { course, module } = player;
+      const key = `${course.id}:${module.index}`;
+      const correct = Object.values(player.results).filter(result => result === 'correct').length;
+      const passed = challenges && correct / challenges >= .7;
+      if (passed && !stats.reviews.includes(key)) { stats.reviews = [...stats.reviews, key]; player.xp += 30; addXp(30); }
+      recordStudyDay();
+      saveStats();
+      title = passed ? '¡Nivel superado!' : 'Repaso terminado';
+      detail = passed ? `Resolviste ${correct} de ${challenges} retos de «${escape(module.name)}».` : `Resolviste ${correct} de ${challenges} retos. Repasa las lecciones del nivel y vuelve a intentarlo.`;
+      actions = `<a class="button button-primary" href="#curso/${course.id}">Volver al curso</a>`;
+    }
+    updateStatsChip();
+    select('#player-xp').textContent = player.xp ? `+${player.xp} XP` : '';
+    select('#player-meter').innerHTML = playerMeter();
+    select('#player-stage').innerHTML = `<div class="player-end" id="player-card" tabindex="-1"><span class="player-end-mascot">${mascot.svg('celebra')}</span><h2>${title}</h2><p>${detail}</p><ul class="player-stats"><li><strong>+${player.xp}</strong><span>XP ganados</span></li><li><strong>${icon('flame')}${currentStreak()}</strong><span>${currentStreak() === 1 ? 'día de racha' : 'días de racha'}</span></li><li><strong>${player.firstTry}/${challenges}</strong><span>retos a la primera</span></li></ul></div>`;
+    select('#player-bar').innerHTML = `<div class="player-bar-inner is-finished"><div class="player-actions player-end-actions">${actions}</div></div>`;
+    player.finished = true;
+  }
+
   function missingResource() {
-    select('#detail-view').innerHTML = '<div class="empty-state"><h1 id="detail-title" tabindex="-1">Esta idea no está en ese enlace.</h1><p>El enlace puede estar incompleto. Encuentra el tema en el catálogo.</p><a class="button button-primary" href="#explorar">Explorar contenidos</a></div>';
+    select('#detail-view').innerHTML = '<div class="empty-state">' + mascot.svg('piensa') + '<h1 id="detail-title" tabindex="-1">Esta idea no está en ese enlace.</h1><p>El enlace puede estar incompleto. Encuentra el tema en el catálogo.</p><a class="button button-primary" href="#explorar">Explorar contenidos</a></div>';
     document.title = 'Contenido no encontrado | MathBrain';
   }
 
@@ -473,13 +720,17 @@
     select('#detail-view').hidden = page !== 'detalle';
     select('#about-view').hidden = page !== 'nosotros';
     select('#content-search').value = filters.query;
+    player = null;
     if (page === 'detalle') {
       const resourceMatch = destination.match(/^contenido\/([\w-]+)$/);
       const courseMatch = destination.match(/^curso\/([\w-]+)(?:\/(\d+))?$/);
+      const reviewMatch = destination.match(/^repaso\/([\w-]+)\/(\d+)$/);
       const course = courseMatch && courses.find(candidate => candidate.id === courseMatch[1]);
+      const reviewCourse = reviewMatch && courses.find(candidate => candidate.id === reviewMatch[1]);
       const resource = resourceMatch ? resourceById.get(resourceMatch[1]) : course && courseMatch[2] ? resourceById.get(`${course.id}-${Math.min(course.lessons.length, Math.max(1, Number(courseMatch[2])))}`) : null;
-      if (resource) renderResource(resource);
+      if (resource) renderResource(resource, parameters);
       else if (course) renderCourse(course);
+      else if (reviewCourse && renderReview(reviewCourse, Number(reviewMatch[2]) - 1)) { /* repaso del nivel */ }
       else missingResource();
     } else if (page === 'cursos') {
       select('#detail-view').replaceChildren();
@@ -492,6 +743,9 @@
       renderCatalog();
       if (page === 'inicio') document.title = 'MathBrain — Dale play a tu curiosidad';
     }
+    // Durante una lección paso a paso, la interfaz se concentra en la lección, como en una app de aprendizaje.
+    document.body?.classList.toggle('lesson-mode', Boolean(player));
+    updateStatsChip();
     const activeNav = page === 'cursos' || (page === 'detalle' && destination.startsWith('curso/')) ? 'explorar' : page === 'explorar' ? filters.type === 'simulation' ? 'simulaciones' : filters.type === 'exercise' ? 'ejercicios' : 'explorar' : page;
     selectAll('[data-nav]').forEach(link => {
       const active = link.dataset.nav === activeNav;
@@ -692,6 +946,9 @@
     }
     const save = event.target.closest('[data-save]');
     if (save) { toggleSaved(save.dataset.save); return; }
+    if (event.target.closest('[data-player-next]')) { movePlayer(1); return; }
+    if (event.target.closest('[data-player-back]')) { movePlayer(-1); return; }
+    if (event.target.closest('[data-player-reveal]')) { revealStep(); return; }
     const complete = event.target.closest('[data-complete]');
     if (complete) { setCompleted(complete.dataset.complete, !completed.has(complete.dataset.complete)); select('[data-complete]')?.focus(); return; }
     // Avanzar a la siguiente lección completa la actual, sin interrumpir la navegación.

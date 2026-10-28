@@ -235,7 +235,26 @@ function compileLesson(source, file, id) {
   // Tiempo estimado de lectura: unas 120 palabras por minuto, ritmo de estudio; cada fórmula cuenta como una palabra (cuatro si va en bloque).
   const words = lines.slice(end + 1).join('\n').replace(/\$\$[\s\S]*?\$\$/g, ' f f f f ').replace(/\$[^$\n]*\$/g, ' f ').split(/\s+/).filter(word => /[\p{L}\p{N}]/u.test(word)).length;
   const minutes = Math.max(2, Math.round(words / 120));
-  return { id, title: data.titulo, description: data.descripcion, video: data.video || null, tags: data.etiquetas || '', unit: data.unidad || null, module: data.modulo || null, key, exercises, minutes, html: html.join('') };
+  const fullHtml = html.join('');
+  return { id, title: data.titulo, description: data.descripcion, video: data.video || null, tags: data.etiquetas || '', unit: data.unidad || null, module: data.modulo || null, key, exercises, minutes, html: fullHtml, steps: splitSteps(fullHtml) };
+}
+
+// Divide la lección en pasos cortos para recorrerla una idea a la vez: cada subtítulo ##, cada bloque
+// :::idea, :::ejemplo y :::nota, y cada ejercicio forman su propio paso. Un subtítulo que queda solo
+// (como «## Practica») se une al paso siguiente.
+function splitSteps(html) {
+  const steps = [];
+  let heading = '';
+  const push = (type, part) => { steps.push({ type, html: heading + part }); heading = ''; };
+  for (const piece of html.split(/(<form class="lesson-exercise"[\s\S]*?<\/form>)/).filter(Boolean)) {
+    if (piece.startsWith('<form class="lesson-exercise"')) { push('exercise', piece); continue; }
+    for (const part of piece.split(/(?=<h2>)|(?=<div class="(?:key-concept|example-box|lesson-note)">)/).filter(section => section.trim())) {
+      if (/^<h2>[\s\S]*?<\/h2>$/.test(part.trim())) heading += part;
+      else push(part.startsWith('<div class="key-concept">') ? 'idea' : part.startsWith('<div class="example-box">') ? 'example' : part.startsWith('<div class="lesson-note">') ? 'note' : 'concept', part);
+    }
+  }
+  if (heading) steps.push({ type: 'concept', html: heading });
+  return steps;
 }
 
 function compileAll() {
@@ -271,7 +290,9 @@ function compileAll() {
 }
 
 function render(lessons) {
-  return `// Archivo generado por scripts/build-content.cjs a partir de content/. No lo edites a mano.\nwindow.MATHBRAIN_CONTENT = ${JSON.stringify(lessons, null, 1)};\n`;
+  // El HTML completo se reconstruye en el navegador uniendo los pasos, así no se publica dos veces.
+  const published = lessons.map(({ html, ...lesson }) => lesson);
+  return `// Archivo generado por scripts/build-content.cjs a partir de content/. No lo edites a mano.\nwindow.MATHBRAIN_CONTENT = ${JSON.stringify(published, null, 1)};\n`;
 }
 
 if (require.main === module) {

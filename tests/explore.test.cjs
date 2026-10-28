@@ -295,17 +295,20 @@ test('Inicio, detalle del curso y recursos siguen siendo accesibles', () => {
   assert.equal(app.node('#home-view').hidden, false);
   assert.equal(app.node('#courses-view').hidden, true);
   assert.match(app.node('#catalog-content').innerHTML, /Empieza por una idea/);
+  assert.match(app.node('#recent-shelf').innerHTML, /Empieza tu camino[\s\S]*Primera lección: Sistemas numéricos y números reales/);
   app.navigate('#curso/fundamentos-matematicas');
   assert.equal(app.node('#courses-view').hidden, true);
   assert.equal(app.node('#detail-view').hidden, false);
   assert.match(app.node('#detail-view').innerHTML, /href="#contenido\/fundamentos-matematicas-1"/);
   app.navigate('#contenido/fundamentos-matematicas-1');
   assert.equal(app.node('#detail-view').hidden, false);
-  assert.match(app.node('#detail-view').innerHTML, /Primero, la intuición/);
+  assert.match(app.node('#player-stage').innerHTML, /Primero, la intuición/);
   assert.equal(app.document.activeElement, app.node('#detail-title'));
+  app.navigate('#contenido/fundamentos-matematicas-1?vista=lectura');
+  assert.match(app.node('#detail-view').innerHTML, /Primero, la intuición[\s\S]*Practica/);
 });
 
-test('La página del curso presenta objetivos, habilidades y módulos con sus lecciones en orden', () => {
+test('La página del curso es un camino de niveles con lecciones, repasos y la descripción del curso', () => {
   const app = environment('#curso/fundamentos-matematicas');
   const html = app.node('#detail-view').innerHTML;
   assert.match(html, /Lo que aprenderás/);
@@ -313,13 +316,15 @@ test('La página del curso presenta objetivos, habilidades y módulos con sus le
   assert.match(html, /Hay 5 módulos en este curso/);
   assert.match(html, /Impartido por<\/small><strong>Carlos Hurtado/);
   assert.match(html, />Empezar el curso</);
-  const kickers = [...html.matchAll(/<span class="course-module-kicker">([^<]+)<\/span><span class="course-module-title">([^<]+)<\/span>/g)].map(match => `${match[1]} · ${match[2]}`);
-  assert.deepEqual(kickers, ['Unidad 1 · Números reales y aritmética', 'Unidad 2 · Álgebra fundamental', 'Unidad 3 · Funciones', 'Unidad 4 · Trigonometría', 'Unidad 5 · Números complejos']);
+  const levels = [...html.matchAll(/<span class="course-module-kicker">([^<]+)<\/span><h2 class="course-module-title" id="level-\d+">([^<]+)<\/h2>/g)].map(match => `${match[1]} · ${match[2]}`);
+  assert.deepEqual(levels, ['Unidad 1 · Números reales y aritmética', 'Unidad 2 · Álgebra fundamental', 'Unidad 3 · Funciones', 'Unidad 4 · Trigonometría', 'Unidad 5 · Números complejos']);
   const numbers = [...html.matchAll(/<span class="module-item-number">([^<]+)<\/span>/g)].map(match => match[1]);
   assert.equal(numbers.length, 31);
   assert.deepEqual([numbers[0], numbers[5], numbers[11], numbers[18], numbers[30]], ['1.1', '2.1', '3.1', '4.1', '5.4']);
+  assert.equal((html.match(/class="path-node [^"]*is-current"/g) || []).length, 1);
+  assert.match(html, /is-current"[^>]*><a class="path-node-link" href="#contenido\/fundamentos-matematicas-1"/);
+  for (let level = 1; level <= 5; level += 1) assert.match(html, new RegExp(`href="#repaso/fundamentos-matematicas/${level}"`));
   assert.match(html, /href="#contenido\/sim-circulo"/);
-  assert.equal((html.match(/<details class="course-module" open>/g) || []).length, 1);
 });
 
 test('Los cursos sin módulo indicado en la lección numeran sus lecciones por módulo', () => {
@@ -327,41 +332,78 @@ test('Los cursos sin módulo indicado en la lección numeran sus lecciones por m
   const html = app.node('#detail-view').innerHTML;
   const numbers = [...html.matchAll(/<span class="module-item-number">([^<]+)<\/span>/g)].map(match => match[1]);
   assert.deepEqual(numbers, ['1.1', '1.2', '2.1', '2.2', '2.3']);
-  assert.match(html, /Módulo 2<\/span><span class="course-module-title">La derivada y sus aplicaciones/);
+  assert.match(html, /Módulo 2<\/span><h2 class="course-module-title" id="level-1">La derivada y sus aplicaciones/);
 });
 
-test('La lección muestra el temario del curso, su posición y la navegación entre lecciones', () => {
+test('La lección se recorre paso a paso y los retos piden respuesta antes de continuar', () => {
   const app = environment('#contenido/fundamentos-matematicas-6');
+  const lesson = app.library.resources.find(resource => resource.id === 'fundamentos-matematicas-6');
+  assert.match(app.node('#detail-view').innerHTML, /UNIDAD 2 · LECCIÓN 2\.1/);
+  assert.match(app.node('#detail-view').innerHTML, /href="#contenido\/fundamentos-matematicas-6\?vista=lectura"/);
+  assert.equal((app.node('#player-meter').innerHTML.match(/<li /g) || []).length, lesson.steps.length);
+  const next = () => app.click(app.all('[data-player-next]').at(-1));
+  const firstChallenge = lesson.steps.findIndex(step => step.type === 'exercise');
+  for (let step = 0; step < firstChallenge; step += 1) {
+    assert.match(app.node('#player-bar').innerHTML, /data-player-next/);
+    next();
+  }
+  assert.match(app.node('#player-stage').innerHTML, /Tu turno/);
+  assert.match(app.node('#player-bar').innerHTML, /data-player-reveal/);
+  assert.doesNotMatch(app.node('#player-bar').innerHTML, /data-player-next/, 'Sin responder no se puede continuar');
+  app.click(app.all('[data-player-back]').at(-1));
+  assert.doesNotMatch(app.node('#player-stage').innerHTML, /Tu turno/);
+  next();
+  for (let step = firstChallenge; step < lesson.steps.length; step += 1) {
+    if (lesson.steps[step].type === 'exercise') app.click(app.all('[data-player-reveal]').at(-1));
+    next();
+  }
+  assert.match(app.node('#player-stage').innerHTML, /¡Lección completada!/);
+  assert.match(app.node('#player-stage').innerHTML, /<strong>\+20<\/strong><span>XP ganados/);
+  assert.match(app.node('#player-bar').innerHTML, /href="#contenido\/fundamentos-matematicas-7">Siguiente lección/);
+  assert.equal(app.node('#streak-count').textContent, '1');
+  assert.equal(app.node('#xp-count').textContent, '20 XP');
+  app.navigate('#curso/fundamentos-matematicas');
+  assert.match(app.node('#detail-view').innerHTML, /class="path-node is-done"[^>]*><a class="path-node-link" href="#contenido\/fundamentos-matematicas-6"/);
+});
+
+test('El repaso del nivel reúne un reto por lección y no existe en niveles sin retos', () => {
+  const app = environment('#repaso/fundamentos-matematicas/2');
+  assert.match(app.node('#detail-view').innerHTML, /UNIDAD 2 · REPASO DEL NIVEL/);
+  assert.equal((app.node('#player-meter').innerHTML.match(/is-challenge/g) || []).length, 6);
+  assert.match(app.node('#player-stage').innerHTML, /Pon a prueba este nivel/);
+  app.navigate('#repaso/calculo-diferencial/1');
+  assert.match(app.node('#detail-view').innerHTML, /Esta idea no está en ese enlace/);
+});
+
+test('La vista de lectura conserva el temario, la posición y la navegación entre lecciones', () => {
+  const app = environment('#contenido/fundamentos-matematicas-6?vista=lectura');
   const html = app.node('#detail-view').innerHTML;
   assert.match(html, /UNIDAD 2 · LECCIÓN 2\.1/);
   assert.match(html, /class="outline-item is-current" href="#contenido\/fundamentos-matematicas-6" aria-current="page"/);
-  assert.match(html, /Lectura · \d+ min/);
   assert.match(html, /Práctica · 3 ejercicios/);
-  assert.match(html, /href="#contenido\/fundamentos-matematicas-5">.*Anterior/);
   assert.match(html, /href="#contenido\/fundamentos-matematicas-7" data-complete-on-leave="fundamentos-matematicas-6"/);
   assert.match(html, /data-complete="fundamentos-matematicas-6" aria-pressed="false"/);
 });
 
-test('Completar lecciones actualiza el temario, la página del curso, el catálogo y el inicio', () => {
-  const app = environment('#contenido/probabilidad-1');
+test('Completar lecciones actualiza el camino, el catálogo y el panel del inicio', () => {
+  const app = environment('#contenido/probabilidad-1?vista=lectura');
   app.click(app.all('[data-complete="probabilidad-1"]').at(-1));
   assert.match(app.node('#lesson-pager').innerHTML, /data-complete="probabilidad-1" aria-pressed="true"/);
-  assert.match(app.node('#lesson-outline').innerHTML, /class="outline-item is-current is-done"/);
   assert.match(app.node('#lesson-outline').innerHTML, /20 % completado · 1 de 5 lecciones/);
   app.click(app.all('[data-complete-on-leave="probabilidad-1"]').at(-1));
-  app.navigate('#contenido/probabilidad-2');
+  app.navigate('#contenido/probabilidad-2?vista=lectura');
   app.click(app.all('[data-complete-on-leave="probabilidad-2"]').at(-1));
   app.navigate('#curso/probabilidad');
   const course = app.node('#detail-view').innerHTML;
   assert.match(course, />Continuar el curso</);
-  assert.match(course, /href="#contenido\/probabilidad-3"/);
+  assert.match(course, /is-current"[^>]*><a class="path-node-link" href="#contenido\/probabilidad-3"/);
   assert.match(course, /40 % completado · 2 de 5 lecciones/);
-  assert.match(course, /<span class="course-module-count is-done">2\/2<\/span>/);
+  assert.match(course, /<span class="path-level-count is-done">2\/2<\/span>/);
   app.navigate('#explorar');
   assert.match(app.node('#course-grid').innerHTML, /40 % completado/);
   app.navigate('#');
-  assert.match(app.node('#recent-shelf').innerHTML, /Continúa aprendiendo[\s\S]*Siguiente: Probabilidad condicional e independencia/);
-  app.navigate('#contenido/probabilidad-1');
+  assert.match(app.node('#today-panel').innerHTML, /Continúa aprendiendo[\s\S]*Siguiente: Probabilidad condicional e independencia/);
+  app.navigate('#contenido/probabilidad-1?vista=lectura');
   app.click(app.all('[data-complete="probabilidad-1"]').at(-1));
   assert.match(app.node('#lesson-pager').innerHTML, /aria-pressed="false"/);
 });
