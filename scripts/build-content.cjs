@@ -232,7 +232,10 @@ function compileLesson(source, file, id) {
   }
   flush();
   if (!key) throw new ContentError(file, 1, 'Cada lección necesita un bloque :::idea con su idea clave.');
-  return { id, title: data.titulo, description: data.descripcion, video: data.video || null, tags: data.etiquetas || '', unit: data.unidad || null, module: data.modulo || null, key, exercises, html: html.join('') };
+  // Tiempo estimado de lectura: unas 120 palabras por minuto, ritmo de estudio; cada fórmula cuenta como una palabra (cuatro si va en bloque).
+  const words = lines.slice(end + 1).join('\n').replace(/\$\$[\s\S]*?\$\$/g, ' f f f f ').replace(/\$[^$\n]*\$/g, ' f ').split(/\s+/).filter(word => /[\p{L}\p{N}]/u.test(word)).length;
+  const minutes = Math.max(2, Math.round(words / 120));
+  return { id, title: data.titulo, description: data.descripcion, video: data.video || null, tags: data.etiquetas || '', unit: data.unidad || null, module: data.modulo || null, key, exercises, minutes, html: html.join('') };
 }
 
 function compileAll() {
@@ -245,11 +248,25 @@ function compileAll() {
     const folder = path.join(contentDirectory, course.id);
     const files = fs.existsSync(folder) ? fs.readdirSync(folder).filter(name => name.endsWith('.md')).sort() : [];
     if (!files.length) throw new ContentError(`content/${course.id}`, 0, 'El curso no tiene lecciones .md.');
-    return files.map((name, index) => {
+    const lessons = files.map((name, index) => {
       if (!/^\d{2}-[a-z0-9-]+\.md$/.test(name)) throw new ContentError(`content/${course.id}/${name}`, 0, 'El nombre debe tener la forma 01-tema-en-minusculas.md.');
       const file = `content/${course.id}/${name}`;
-      return { courseId: course.id, ...compileLesson(fs.readFileSync(path.join(folder, name), 'utf8'), file, `${course.id}-${index + 1}`) };
+      return { courseId: course.id, file, ...compileLesson(fs.readFileSync(path.join(folder, name), 'utf8'), file, `${course.id}-${index + 1}`) };
     });
+    // Si el curso define módulos, cada lección pertenece a uno de ellos y los módulos se recorren en orden.
+    if (course.modules?.length) {
+      const titles = course.modules.map(module => module.title);
+      let previous = 0;
+      for (const lesson of lessons) {
+        const position = titles.indexOf(lesson.unit);
+        if (position < 0) throw new ContentError(lesson.file, 1, `«unidad: ${lesson.unit || ''}» no coincide con ningún módulo de ${course.id} en dist/courses.js. Usa uno de: ${titles.join(' | ')}.`);
+        if (position < previous) throw new ContentError(lesson.file, 1, `La lección está en «${lesson.unit}», pero un archivo anterior ya pertenece a un módulo posterior. Ordena los archivos por módulo.`);
+        previous = position;
+      }
+      const empty = titles.find(title => !lessons.some(lesson => lesson.unit === title));
+      if (empty) throw new ContentError(`content/${course.id}`, 0, `El módulo «${empty}» no tiene lecciones.`);
+    }
+    return lessons.map(({ file, ...lesson }) => lesson);
   });
 }
 

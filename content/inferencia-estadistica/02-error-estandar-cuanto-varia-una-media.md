@@ -1,6 +1,7 @@
 ---
 titulo: Error estándar: cuánto varía una media
 descripcion: Distribuciones muestrales y error estándar.
+unidad: Módulo 1 · De la muestra a la población
 video: 
 etiquetas: media promedio error estandar distribucion muestral desviacion
 ---

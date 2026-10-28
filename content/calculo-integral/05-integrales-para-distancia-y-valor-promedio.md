@@ -1,6 +1,7 @@
 ---
 titulo: Integrales para distancia y valor promedio
 descripcion: Aplicaciones a distancia, volumen y valor promedio.
+unidad: Módulo 2 · El teorema fundamental y sus aplicaciones
 video: 
 etiquetas: integrales aplicaciones distancia desplazamiento promedio volumen
 ---

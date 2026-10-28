@@ -305,14 +305,65 @@ test('Inicio, detalle del curso y recursos siguen siendo accesibles', () => {
   assert.equal(app.document.activeElement, app.node('#detail-title'));
 });
 
-test('Fundamentos de Matemáticas agrupa sus módulos por unidad en el orden del programa', () => {
+test('La página del curso presenta objetivos, habilidades y módulos con sus lecciones en orden', () => {
   const app = environment('#curso/fundamentos-matematicas');
   const html = app.node('#detail-view').innerHTML;
-  const units = [...html.matchAll(/<h2 class="lesson-unit">([^<]+)<\/h2>/g)].map(match => match[1]);
-  assert.deepEqual(units, ['Unidad 1 · Números reales y aritmética', 'Unidad 2 · Álgebra fundamental', 'Unidad 3 · Funciones', 'Unidad 4 · Trigonometría', 'Unidad 5 · Números complejos']);
-  const modules = [...html.matchAll(/<span class="lesson-number">([^<]+)<\/span>/g)].map(match => match[1]);
-  assert.equal(modules.length, 31);
-  assert.deepEqual([modules[0], modules[5], modules[11], modules[18], modules[30]], ['1.1', '2.1', '3.1', '4.1', '5.4']);
+  assert.match(html, /Lo que aprenderás/);
+  assert.match(html, /Habilidades que desarrollarás/);
+  assert.match(html, /Hay 5 módulos en este curso/);
+  assert.match(html, /Impartido por<\/small><strong>Carlos Hurtado/);
+  assert.match(html, />Empezar el curso</);
+  const kickers = [...html.matchAll(/<span class="course-module-kicker">([^<]+)<\/span><span class="course-module-title">([^<]+)<\/span>/g)].map(match => `${match[1]} · ${match[2]}`);
+  assert.deepEqual(kickers, ['Unidad 1 · Números reales y aritmética', 'Unidad 2 · Álgebra fundamental', 'Unidad 3 · Funciones', 'Unidad 4 · Trigonometría', 'Unidad 5 · Números complejos']);
+  const numbers = [...html.matchAll(/<span class="module-item-number">([^<]+)<\/span>/g)].map(match => match[1]);
+  assert.equal(numbers.length, 31);
+  assert.deepEqual([numbers[0], numbers[5], numbers[11], numbers[18], numbers[30]], ['1.1', '2.1', '3.1', '4.1', '5.4']);
+  assert.match(html, /href="#contenido\/sim-circulo"/);
+  assert.equal((html.match(/<details class="course-module" open>/g) || []).length, 1);
+});
+
+test('Los cursos sin módulo indicado en la lección numeran sus lecciones por módulo', () => {
+  const app = environment('#curso/calculo-diferencial');
+  const html = app.node('#detail-view').innerHTML;
+  const numbers = [...html.matchAll(/<span class="module-item-number">([^<]+)<\/span>/g)].map(match => match[1]);
+  assert.deepEqual(numbers, ['1.1', '1.2', '2.1', '2.2', '2.3']);
+  assert.match(html, /Módulo 2<\/span><span class="course-module-title">La derivada y sus aplicaciones/);
+});
+
+test('La lección muestra el temario del curso, su posición y la navegación entre lecciones', () => {
+  const app = environment('#contenido/fundamentos-matematicas-6');
+  const html = app.node('#detail-view').innerHTML;
+  assert.match(html, /UNIDAD 2 · LECCIÓN 2\.1/);
+  assert.match(html, /class="outline-item is-current" href="#contenido\/fundamentos-matematicas-6" aria-current="page"/);
+  assert.match(html, /Lectura · \d+ min/);
+  assert.match(html, /Práctica · 3 ejercicios/);
+  assert.match(html, /href="#contenido\/fundamentos-matematicas-5">.*Anterior/);
+  assert.match(html, /href="#contenido\/fundamentos-matematicas-7" data-complete-on-leave="fundamentos-matematicas-6"/);
+  assert.match(html, /data-complete="fundamentos-matematicas-6" aria-pressed="false"/);
+});
+
+test('Completar lecciones actualiza el temario, la página del curso, el catálogo y el inicio', () => {
+  const app = environment('#contenido/probabilidad-1');
+  app.click(app.all('[data-complete="probabilidad-1"]').at(-1));
+  assert.match(app.node('#lesson-pager').innerHTML, /data-complete="probabilidad-1" aria-pressed="true"/);
+  assert.match(app.node('#lesson-outline').innerHTML, /class="outline-item is-current is-done"/);
+  assert.match(app.node('#lesson-outline').innerHTML, /20 % completado · 1 de 5 lecciones/);
+  app.click(app.all('[data-complete-on-leave="probabilidad-1"]').at(-1));
+  app.navigate('#contenido/probabilidad-2');
+  app.click(app.all('[data-complete-on-leave="probabilidad-2"]').at(-1));
+  app.navigate('#curso/probabilidad');
+  const course = app.node('#detail-view').innerHTML;
+  assert.match(course, />Continuar el curso</);
+  assert.match(course, /href="#contenido\/probabilidad-3"/);
+  assert.match(course, /40 % completado · 2 de 5 lecciones/);
+  assert.match(course, /<span class="course-module-count is-done">2\/2<\/span>/);
+  app.navigate('#explorar');
+  assert.match(app.node('#course-grid').innerHTML, /40 % completado/);
+  app.navigate('#');
+  assert.match(app.node('#recent-shelf').innerHTML, /Continúa aprendiendo[\s\S]*Siguiente: Probabilidad condicional e independencia/);
+  app.navigate('#contenido/probabilidad-1');
+  app.click(app.all('[data-complete="probabilidad-1"]').at(-1));
+  assert.match(app.node('#lesson-pager').innerHTML, /aria-pressed="false"/);
 });
 
 test('Los enlaces de Álgebra y Trigonometría llevan a su módulo en Fundamentos de Matemáticas', () => {

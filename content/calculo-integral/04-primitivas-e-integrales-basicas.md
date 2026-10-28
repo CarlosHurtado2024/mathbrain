@@ -1,6 +1,7 @@
 ---
 titulo: Primitivas e integrales básicas
 descripcion: Integrales básicas y sustitución.
+unidad: Módulo 2 · El teorema fundamental y sus aplicaciones
 video: 
 etiquetas: integrales basicas primitivas antiderivada sustitucion constante
 ---

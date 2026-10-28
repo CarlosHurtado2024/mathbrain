@@ -1,6 +1,7 @@
 ---
 titulo: Población, muestra y sesgos
 descripcion: Poblaciones, muestras y sesgos de selección.
+unidad: Módulo 1 · De la muestra a la población
 video: 
 etiquetas: poblacion muestra muestreo sesgo seleccion
 ---

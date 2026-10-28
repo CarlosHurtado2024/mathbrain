@@ -14,6 +14,12 @@
   const currentId = id => legacyLessons[id] ? `fundamentos-matematicas-${legacyLessons[id]}` : id;
   const saved = new Set(loadList('mathbrain-saved'));
   let recent = loadList('mathbrain-recent');
+  // Lecciones que la persona marcó como completadas en este navegador. El progreso de cada curso se calcula con ellas.
+  const completed = new Set(loadList('mathbrain-progress'));
+  const instructor = { name: 'Carlos Hurtado', role: 'Estadístico de la Universidad Nacional de Colombia', photo: 'assets/autor-carlos.jpeg' };
+  const plural = (count, singular, pluralForm) => `${count} ${count === 1 ? singular : pluralForm}`;
+  let currentLessonId = null;
+  let outlineOpen = false;
   let page = 'inicio';
   let filters = { query: '', type: 'all', topic: 'all', level: 'all' };
   let courseFilters = { topic: 'all', level: 'all' };
@@ -32,7 +38,9 @@
     left: '<path d="m14 5-7 7 7 7"/>',
     right: '<path d="m10 5 7 7-7 7"/>',
     link: '<path d="m10 13 4-4M8 15l-2 2a3 3 0 0 1-4-4l5-5a3 3 0 0 1 4 0M13 11a3 3 0 0 0 4 0l5-5a3 3 0 0 0-4-4l-2 2"/>',
-    download: '<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>'
+    download: '<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>',
+    check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+    list: '<path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>'
   };
 
   function icon(name) {
@@ -119,7 +127,9 @@
     const simulations = count('simulation');
     const exercises = count('exercise');
     const symbol = { derivative: 'f′', integral: '∫', probability: 'P(A)', inference: 'x̄', algebra: 'x²', trigonometry: 'θ' }[course.art];
-    return `<article class="course-album ${course.color}"><a class="course-album-link" href="#curso/${course.id}" aria-labelledby="course-name-${course.id}"><div class="course-cover">${artwork(course, true)}<span class="course-cover-label">MATHBRAIN / CURSO</span><span class="course-cover-symbol" aria-hidden="true">${symbol}</span><span class="course-cover-open" aria-hidden="true">${icon('play')}</span></div><div class="course-album-copy"><p class="course-album-topic">${escape(course.label)}</p><h3 id="course-name-${course.id}">${escape(course.title)}</h3><p class="course-album-description">${escape(course.description)}</p><div class="course-album-meta"><span>${count('explanation')} explicaciones</span><span>${course.level}</span></div><div class="course-album-extras">${simulations ? `<span>${simulations} ${simulations === 1 ? 'simulación' : 'simulaciones'}</span>` : ''}${exercises ? `<span>${exercises} ${exercises === 1 ? 'ejercicio' : 'ejercicios'}</span>` : ''}</div></div></a></article>`;
+    const progress = courseProgress(course);
+    const modules = courseModules(course).length;
+    return `<article class="course-album ${course.color}"><a class="course-album-link" href="#curso/${course.id}" aria-labelledby="course-name-${course.id}"><div class="course-cover">${artwork(course, true)}<span class="course-cover-label">MATHBRAIN / CURSO</span><span class="course-cover-symbol" aria-hidden="true">${symbol}</span><span class="course-cover-open" aria-hidden="true">${icon('play')}</span></div><div class="course-album-copy"><p class="course-album-topic">${escape(course.label)}</p><h3 id="course-name-${course.id}">${escape(course.title)}</h3><p class="course-album-description">${escape(course.description)}</p><div class="course-album-meta"><span>${plural(modules, 'módulo', 'módulos')}</span><span>${count('explanation')} explicaciones</span><span>${course.level}</span></div><div class="course-album-extras">${simulations ? `<span>${simulations} ${simulations === 1 ? 'simulación' : 'simulaciones'}</span>` : ''}${exercises ? `<span>${exercises} ${exercises === 1 ? 'ejercicio' : 'ejercicios'}</span>` : ''}</div>${progress.done ? `<div class="course-album-progress">${progressBar(progress, false)}<span>${progress.percent} % completado</span></div>` : ''}</div></a></article>`;
   }
 
   function renderCourses() {
@@ -144,6 +154,12 @@
     if (courseFilters.level !== 'all') parameters.set('curso_nivel', courseFilters.level);
     history.pushState(null, '', `#explorar${parameters.size ? `?${parameters}` : ''}`);
     route(false);
+  }
+
+  function continueLearning() {
+    const active = courses.map(course => ({ course, progress: courseProgress(course) })).filter(({ progress }) => progress.done > 0 && progress.done < progress.total);
+    if (!active.length) return '';
+    return `<section class="shelf continue-learning" aria-labelledby="continue-title"><div class="section-heading"><div><h2 id="continue-title">Continúa aprendiendo</h2><p>Retoma tus cursos donde los dejaste.</p></div></div><div class="continue-grid">${active.map(({ course, progress }) => `<a class="continue-card ${course.color}" href="#contenido/${progress.next.id}"><small>${escape(course.label)}</small><strong>${escape(course.title)}</strong><span class="continue-next">Siguiente: ${escape(progress.next.title)}</span>${progressBar(progress)}</a>`).join('')}</div></section>`;
   }
 
   function shelf(id, title, description, resources, destination) {
@@ -182,7 +198,7 @@
     });
     if (page === 'inicio') {
       const featured = ['calculo-diferencial-3', 'fundamentos-matematicas-11', 'probabilidad-1', 'fundamentos-matematicas-20', 'calculo-integral-2', 'inferencia-estadistica-3', 'fundamentos-matematicas-13', 'probabilidad-4'].map(id => resourceById.get(id));
-      select('#recent-shelf').innerHTML = shelf('recent', 'Vuelve a tus ideas', 'Los contenidos que exploraste recientemente en este navegador.', recent.slice(0, 6).map(id => resourceById.get(id)), '');
+      select('#recent-shelf').innerHTML = continueLearning() + shelf('recent', 'Vuelve a tus ideas', 'Los contenidos que exploraste recientemente en este navegador.', recent.slice(0, 6).map(id => resourceById.get(id)), '');
       select('#catalog-content').innerHTML = shelf('start', 'Empieza por una idea', 'Explicaciones que van directo al «¿por qué?».', featured, '#explorar?tipo=explanation')
         + shelf('simulations', 'Menos imaginar. Más experimentar.', 'Mueve, cambia, prueba. Aquí tú tienes el control.', library.search({ type: 'simulation' }), '#simulaciones')
         + shelf('exercises', 'Del «no entiendo» al «ahora sí»', 'Ejercicios resueltos, una decisión a la vez.', library.search({ type: 'exercise' }), '#ejercicios')
@@ -226,7 +242,7 @@
     const distance = candidate => Number.isInteger(candidate.lessonIndex) && Number.isInteger(resource.lessonIndex) ? Math.abs(candidate.lessonIndex - resource.lessonIndex) : Infinity;
     const related = [...otherFormats, ...candidates.filter(candidate => !selectedIds.has(candidate.id)).sort((first, second) => distance(first) - distance(second))].slice(0, 4);
     const course = courses.find(candidate => candidate.id === resource.courseId);
-    return `<aside class="detail-aside"><div class="related-panel"><h2>Conecta esta idea</h2><p>Otra forma de entender el mismo tema.</p>${related.map(candidate => `<a class="related-link" href="#contenido/${candidate.id}"><small>${library.formats[candidate.type].title}</small><strong>${escape(candidate.title)} <span aria-hidden="true">↗</span></strong></a>`).join('')}<a class="related-link" href="#curso/${course.id}"><small>Ruta de aprendizaje</small><strong>${escape(course.title)} →</strong></a></div><p class="prerequisite"><strong>Un buen punto de partida</strong>${escape(course.prerequisite)}</p></aside>`;
+    return `<aside class="detail-aside"><div class="related-panel"><h2>Conecta esta idea</h2><p>Otra forma de entender el mismo tema.</p>${related.map(candidate => `<a class="related-link" href="#contenido/${candidate.id}"><small>${library.formats[candidate.type].title}</small><strong>${escape(candidate.title)} <span aria-hidden="true">↗</span></strong></a>`).join('')}<a class="related-link" href="#curso/${course.id}"><small>Curso</small><strong>${escape(course.title)} →</strong></a></div><p class="prerequisite"><strong>Un buen punto de partida</strong>${escape(course.prerequisite)}</p></aside>`;
   }
 
   function videoSource(value) {
@@ -251,6 +267,9 @@
     const format = library.formats[resource.type];
     const source = videoSource(resource.video);
     const video = !source ? '' : `<div class="video-stage">${source.type === 'iframe' ? `<iframe title="${escape(resource.title)}" src="${escape(source.src)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>` : `<video controls playsinline preload="metadata" aria-label="${escape(resource.title)}"><source src="${escape(source.src)}"></video>`}</div>`;
+    const course = courses.find(candidate => candidate.id === resource.courseId);
+    if (resource.type === 'explanation' && course) return renderLesson(resource, course, video);
+    currentLessonId = null;
     let body;
     if (resource.type === 'simulation') {
       body = `<div class="simulation-panel">${simulationControls(resource)}</div><div class="reader-body"><h2>La idea detrás de lo que ves</h2><div class="key-concept"><h3>Quédate con esto</h3><p>${escape(resource.key)}</p></div><p>Modifica los controles y observa cómo cambian la gráfica y sus valores. Conecta lo que ves con las explicaciones y los ejercicios de esta misma ruta.</p></div>`;
@@ -264,11 +283,12 @@
     document.title = `${resource.title} | MathBrain`;
     if (resource.type === 'simulation') bindSimulation(resource);
     if (resource.type === 'exercise') bindAnswerCheck(resource);
-    if (resource.type === 'explanation') bindLessonExercises();
+    if (resource.type === 'explanation') bindLessonExercises(resource);
   }
 
-  function bindLessonExercises() {
-    selectAll('.lesson-exercise').forEach(form => form.addEventListener('submit', event => {
+  function bindLessonExercises(resource) {
+    const forms = selectAll('.lesson-exercise');
+    forms.forEach(form => form.addEventListener('submit', event => {
       event.preventDefault();
       const feedback = select('.answer-feedback', form);
       let result;
@@ -284,14 +304,138 @@
       }
       form.dataset.state = result ? 'correct' : 'incorrect';
       feedback.textContent = result ? '¡Correcto! Abre la solución si quieres comparar tu razonamiento.' : select('.lesson-hint', form) ? 'Todavía no. Abre la pista e inténtalo de nuevo.' : 'Todavía no. Revisa la explicación e inténtalo de nuevo.';
+      // Resolver toda la práctica completa la lección, como al terminar un cuestionario.
+      if (result && forms.every(entry => entry.dataset.state === 'correct') && !completed.has(resource.id)) {
+        setCompleted(resource.id, true, false);
+        toast('¡Práctica superada! Marcamos esta lección como completada.');
+      }
     }));
   }
 
+  function courseLessons(course) {
+    return library.resources.filter(resource => resource.courseId === course.id && resource.type === 'explanation');
+  }
+
+  // Módulos del curso con sus lecciones. Cada lección se numera como 1.1, 1.2… salvo que su archivo indique «modulo».
+  function courseModules(course) {
+    const lessons = courseLessons(course);
+    const definitions = course.modules?.length ? course.modules : [{ title: course.title, summary: course.intro, objectives: [], extras: [] }];
+    return definitions.map((definition, index) => {
+      const [kicker, ...rest] = definition.title.split(' · ');
+      const items = course.modules?.length ? lessons.filter(lesson => lesson.unit === definition.title) : lessons;
+      return {
+        index,
+        kicker: rest.length ? kicker : `Módulo ${index + 1}`,
+        name: rest.length ? rest.join(' · ') : definition.title,
+        summary: definition.summary || '',
+        objectives: definition.objectives || [],
+        lessons: items.map((lesson, position) => ({ lesson, label: lesson.module || `${index + 1}.${position + 1}` })),
+        extras: (definition.extras || []).map(id => resourceById.get(id)).filter(Boolean)
+      };
+    });
+  }
+
+  function courseProgress(course) {
+    const lessons = courseLessons(course);
+    const done = lessons.filter(lesson => completed.has(lesson.id)).length;
+    // Para continuar se propone la primera lección pendiente después de la más avanzada que se completó.
+    const furthest = lessons.reduce((last, lesson, index) => completed.has(lesson.id) ? index : last, -1);
+    const next = lessons.slice(furthest + 1).find(lesson => !completed.has(lesson.id)) || lessons.find(lesson => !completed.has(lesson.id)) || lessons[0];
+    return { done, total: lessons.length, percent: lessons.length ? Math.round(done / lessons.length * 100) : 0, next };
+  }
+
+  function progressBar(progress, label = true) {
+    return `<div class="course-progress"><span class="course-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress.percent}" aria-label="Progreso del curso: ${progress.percent} %"><span style="width:${progress.percent}%"></span></span>${label ? `<span class="course-progress-label">${progress.percent} % completado · ${progress.done} de ${progress.total} lecciones</span>` : ''}</div>`;
+  }
+
+  // Estimación real a partir del contenido: minutos de lectura de cada lección y unos tres minutos por ejercicio.
+  function studyHours(course) {
+    const minutes = courseLessons(course).reduce((total, lesson) => total + (lesson.minutes || 3) + (lesson.practice || 0) * 3, 0);
+    return Math.max(1, Math.round(minutes / 60));
+  }
+
+  function lessonMeta(lesson) {
+    return [lesson.video ? 'Video y lectura' : 'Lectura', `${lesson.minutes || 3} min`, lesson.practice ? plural(lesson.practice, 'ejercicio', 'ejercicios') : ''].filter(Boolean).join(' · ');
+  }
+
+  function extraMeta(resource) {
+    return `${library.formats[resource.type].title} · ${resource.type === 'simulation' ? 'Interactiva' : plural(resource.steps.length, 'paso', 'pasos')}`;
+  }
+
   function renderCourse(course) {
-    const lessons = library.resources.filter(resource => resource.courseId === course.id && resource.type === 'explanation');
-    const extras = library.resources.filter(resource => resource.courseId === course.id && resource.type !== 'explanation');
-    select('#detail-view').innerHTML = `<nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="#">Inicio</a><span aria-hidden="true">/</span><a href="#explorar">Explorar</a><span aria-hidden="true">/</span><span>Ruta de aprendizaje</span></nav><header class="detail-header"><p class="eyebrow">RUTA DE APRENDIZAJE · NIVEL ${course.level.toUpperCase()}</p><h1 id="detail-title" tabindex="-1">${escape(course.title)}</h1><p>${escape(course.intro)}</p><div class="detail-actions"><a class="button button-primary" href="#contenido/${lessons[0].id}">${icon('book')}Empezar la ruta</a><button class="text-button" type="button" data-download="${course.id}">${icon('download')}Descargar programa</button></div></header><div class="detail-layout"><div><div class="lesson-list">${lessons.map((lesson, index) => `${lesson.unit && lesson.unit !== lessons[index - 1]?.unit ? `<h2 class="lesson-unit">${escape(lesson.unit)}</h2>` : ''}<a href="#contenido/${lesson.id}"><span class="lesson-number">${escape(lesson.module || String(index + 1).padStart(2, '0'))}</span><span><strong>${escape(lesson.title)}</strong><small>${escape(lesson.description)}${lesson.practice ? ` · ${lesson.practice} ${lesson.practice === 1 ? 'ejercicio' : 'ejercicios'}` : ''}</small></span><span aria-hidden="true">↗</span></a>`).join('')}</div></div><aside class="detail-aside"><div class="related-panel"><h2>Practica esta ruta</h2><p>Entender, experimentar y resolver.</p>${extras.map(resource => `<a class="related-link" href="#contenido/${resource.id}"><small>${library.formats[resource.type].title}</small><strong>${escape(resource.title)} ↗</strong></a>`).join('')}</div><p class="prerequisite"><strong>Antes de empezar</strong>${escape(course.prerequisite)}</p></aside></div>`;
+    currentLessonId = null;
+    const modules = courseModules(course);
+    const lessons = courseLessons(course);
+    const progress = courseProgress(course);
+    const exercises = lessons.reduce((total, lesson) => total + (lesson.practice || 0), 0);
+    const extras = modules.reduce((total, module) => total + module.extras.length, 0);
+    const openModule = modules.findIndex(module => module.lessons.some(({ lesson }) => lesson.id === progress.next.id));
+    const lessonItem = ({ lesson, label }) => `<li><a class="module-item${completed.has(lesson.id) ? ' is-done' : ''}" href="#contenido/${lesson.id}"><span class="module-item-icon">${icon(lesson.video ? 'play' : 'book')}</span><span class="module-item-copy"><strong>${escape(lesson.title)}</strong><small><span class="module-item-number">${escape(label)}</span> · ${lessonMeta(lesson)}</small></span><span class="module-item-state">${completed.has(lesson.id) ? `${icon('check')}<span class="sr-only">Completada</span>` : ''}</span></a></li>`;
+    const extraItem = resource => `<li><a class="module-item module-extra" href="#contenido/${resource.id}"><span class="module-item-icon">${icon(library.formats[resource.type].icon)}</span><span class="module-item-copy"><strong>${escape(resource.title)}</strong><small>${extraMeta(resource)}</small></span><span class="module-item-state"></span></a></li>`;
+    const moduleSection = module => {
+      const done = module.lessons.filter(({ lesson }) => completed.has(lesson.id)).length;
+      const practice = module.lessons.reduce((total, { lesson }) => total + (lesson.practice || 0), 0);
+      const meta = [plural(module.lessons.length, 'lección', 'lecciones'), practice ? plural(practice, 'ejercicio', 'ejercicios') : '', module.extras.length ? plural(module.extras.length, 'recurso interactivo', 'recursos interactivos') : ''].filter(Boolean).join(' · ');
+      return `<details class="course-module"${module.index === Math.max(0, openModule) ? ' open' : ''}><summary><span class="course-module-heading"><span class="course-module-kicker">${escape(module.kicker)}</span><span class="course-module-title">${escape(module.name)}</span><span class="course-module-meta">${meta}</span></span><span class="course-module-count${done === module.lessons.length ? ' is-done' : ''}">${done}/${module.lessons.length}</span><span class="course-module-chevron" aria-hidden="true">${icon('right')}</span></summary><div class="course-module-body">${module.summary ? `<p class="course-module-summary">${escape(module.summary)}</p>` : ''}${module.objectives.length ? `<h3>Lo que aprenderás en este módulo</h3><ul class="course-module-objectives">${module.objectives.map(objective => `<li>${icon('check')}<span>${escape(objective)}</span></li>`).join('')}</ul>` : ''}<ol class="module-items">${module.lessons.map(lessonItem).join('')}${module.extras.map(extraItem).join('')}</ol></div></details>`;
+    };
+    const started = progress.done > 0;
+    select('#detail-view').innerHTML = `<nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="#">Inicio</a><span aria-hidden="true">/</span><a href="#explorar">Explorar</a><span aria-hidden="true">/</span><span>Curso</span></nav>`
+      + `<header class="course-hero ${course.color}"><div class="course-hero-copy"><p class="eyebrow">CURSO · ${escape(course.label)} · NIVEL ${course.level.toUpperCase()}</p><h1 id="detail-title" tabindex="-1">${escape(course.title)}</h1><p class="course-hero-lead">${escape(course.description)}</p><p class="course-hero-intro">${escape(course.intro)}</p><div class="course-instructor"><img src="${instructor.photo}" alt="" width="40" height="40" loading="lazy" decoding="async"><span><small>Impartido por</small><strong>${instructor.name}</strong></span></div><div class="detail-actions"><a class="button button-primary" href="#contenido/${progress.next.id}">${icon(started ? 'play' : 'book')}${started ? (progress.done === progress.total ? 'Repasar el curso' : 'Continuar el curso') : 'Empezar el curso'}</a><button class="text-button" type="button" data-download="${course.id}">${icon('download')}Descargar programa</button></div>${started ? `<div class="course-hero-progress">${progressBar(progress)}<span class="course-hero-next">${progress.done === progress.total ? '¡Completaste todas las lecciones!' : `Siguiente: ${escape(progress.next.title)}`}</span></div>` : ''}</div><div class="course-hero-art" aria-hidden="true">${artwork(course, true)}</div></header>`
+      + `<ul class="course-facts" aria-label="Datos del curso"><li><strong>${modules.length}</strong><span>${modules.length === 1 ? 'módulo' : 'módulos'}</span></li><li><strong>${lessons.length}</strong><span>lecciones</span></li><li><strong>${exercises}</strong><span>ejercicios de práctica</span></li><li><strong>≈ ${studyHours(course)} h</strong><span>de estudio a tu ritmo</span></li><li><strong>${course.level}</strong><span>nivel</span></li></ul>`
+      + `<div class="course-page"><div class="course-page-main">${course.outcomes?.length ? `<section class="course-section" aria-labelledby="outcomes-title"><h2 id="outcomes-title">Lo que aprenderás</h2><ul class="course-outcomes">${course.outcomes.map(outcome => `<li>${icon('check')}<span>${escape(outcome)}</span></li>`).join('')}</ul></section>` : ''}${course.skills?.length ? `<section class="course-section" aria-labelledby="skills-title"><h2 id="skills-title">Habilidades que desarrollarás</h2><ul class="course-skills">${course.skills.map(skill => `<li>${escape(skill)}</li>`).join('')}</ul></section>` : ''}<section class="course-section" aria-labelledby="modules-title"><div class="course-section-heading"><h2 id="modules-title">Hay ${plural(modules.length, 'módulo', 'módulos')} en este curso</h2><p>${plural(lessons.length, 'lección', 'lecciones')} · ${plural(exercises, 'ejercicio', 'ejercicios')} de práctica${extras ? ` · ${plural(extras, 'recurso interactivo', 'recursos interactivos')}` : ''}</p></div>${modules.map(moduleSection).join('')}</section></div>`
+      + `<aside class="course-page-aside"><div class="instructor-card"><p class="eyebrow">INSTRUCTOR</p><div class="instructor-card-person"><img src="${instructor.photo}" alt="${instructor.name}" width="56" height="56" loading="lazy" decoding="async"><span><strong>${instructor.name}</strong><small>${instructor.role}</small></span></div><a href="#nosotros">Conoce al autor <span aria-hidden="true">↗</span></a></div><p class="prerequisite"><strong>Antes de empezar</strong>${escape(course.prerequisite)}</p><p class="prerequisite"><strong>Cómo funciona</strong>Cada lección combina lectura, video cuando está disponible y ejercicios con respuesta inmediata. Marca las lecciones como completadas para seguir tu progreso en este navegador.</p></aside></div>`;
     document.title = `${course.title} | MathBrain`;
+  }
+
+  function lessonOutline(course, current) {
+    const progress = courseProgress(course);
+    return `<div class="player-outline${outlineOpen ? ' is-open' : ''}" id="player-outline"><a class="outline-course" href="#curso/${course.id}">${icon('left')}<span><small>Curso</small><strong>${escape(course.title)}</strong></span></a>${progressBar(progress)}<button class="outline-toggle" type="button" data-outline-toggle aria-expanded="${outlineOpen}" aria-controls="outline-modules">${icon('list')}<span>Contenido del curso</span><span class="outline-toggle-count">${progress.done}/${progress.total}</span></button><div class="outline-modules" id="outline-modules">${courseModules(course).map(module => `<section class="outline-module"><h2><small>${escape(module.kicker)}</small>${escape(module.name)}</h2><ol>${module.lessons.map(({ lesson, label }) => `<li><a class="outline-item${lesson.id === current.id ? ' is-current' : ''}${completed.has(lesson.id) ? ' is-done' : ''}" href="#contenido/${lesson.id}"${lesson.id === current.id ? ' aria-current="page"' : ''}><span class="outline-state">${completed.has(lesson.id) ? `${icon('check')}<span class="sr-only">Completada:</span>` : escape(label)}</span><span>${escape(lesson.title)}</span></a></li>`).join('')}${module.extras.map(resource => `<li><a class="outline-item outline-extra" href="#contenido/${resource.id}"><span class="outline-state">${icon(library.formats[resource.type].icon)}</span><span>${escape(resource.title)}</span></a></li>`).join('')}</ol></section>`).join('')}</div></div>`;
+  }
+
+  function lessonPager(course, lesson) {
+    const lessons = courseLessons(course);
+    const index = lessons.findIndex(candidate => candidate.id === lesson.id);
+    const previous = lessons[index - 1];
+    const next = lessons[index + 1];
+    const done = completed.has(lesson.id);
+    return `<nav class="lesson-pager" aria-label="Lecciones del curso">${previous ? `<a class="pager-link" href="#contenido/${previous.id}">${icon('left')}<span><small>Anterior</small><strong>${escape(previous.title)}</strong></span></a>` : `<a class="pager-link" href="#curso/${course.id}">${icon('left')}<span><small>Inicio</small><strong>Página del curso</strong></span></a>`}<button class="button ${done ? 'button-secondary' : 'button-primary'} pager-complete" type="button" data-complete="${lesson.id}" aria-pressed="${done}">${icon('check')}${done ? 'Completada' : 'Marcar como completada'}</button>${next ? `<a class="pager-link pager-next" href="#contenido/${next.id}" data-complete-on-leave="${lesson.id}"><span><small>Siguiente</small><strong>${escape(next.title)}</strong></span>${icon('right')}</a>` : `<a class="pager-link pager-next" href="#curso/${course.id}" data-complete-on-leave="${lesson.id}"><span><small>Última lección</small><strong>Terminar y volver al curso</strong></span>${icon('right')}</a>`}</nav>`;
+  }
+
+  function refreshLessonProgress() {
+    const lesson = resourceById.get(currentLessonId);
+    const course = lesson && courses.find(candidate => candidate.id === lesson.courseId);
+    if (!course) return;
+    const outline = select('#lesson-outline');
+    const pager = select('#lesson-pager');
+    if (outline) outline.innerHTML = lessonOutline(course, lesson);
+    if (pager) pager.innerHTML = lessonPager(course, lesson);
+  }
+
+  function setCompleted(id, value, announce = true) {
+    const lesson = resourceById.get(id);
+    if (!lesson || lesson.type !== 'explanation' || completed.has(id) === value) return;
+    if (value) completed.add(id); else completed.delete(id);
+    const persisted = storeList('mathbrain-progress', [...completed]);
+    if (id === currentLessonId) refreshLessonProgress();
+    if (!announce) return;
+    const progress = courseProgress(courses.find(course => course.id === lesson.courseId));
+    toast(!persisted ? 'Progreso guardado durante esta visita. El navegador no permite guardarlo para la próxima.' : !value ? 'Lección marcada como pendiente.' : progress.done === progress.total ? '¡Completaste todas las lecciones del curso!' : `Lección completada. Llevas el ${progress.percent} % del curso.`);
+  }
+
+  function renderLesson(resource, course, video) {
+    currentLessonId = resource.id;
+    const module = courseModules(course).find(candidate => candidate.lessons.some(({ lesson }) => lesson.id === resource.id));
+    const label = module.lessons.find(({ lesson }) => lesson.id === resource.id).label;
+    select('#detail-view').innerHTML = `<nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="#">Inicio</a><span aria-hidden="true">/</span><a href="#curso/${course.id}">${escape(course.title)}</a><span aria-hidden="true">/</span><span>${escape(module.kicker)}</span></nav>`
+      + `<div class="course-player"><aside class="player-aside" id="lesson-outline" aria-label="Contenido del curso">${lessonOutline(course, resource)}</aside><div class="player-main">`
+      + `<header class="detail-header player-header"><p class="eyebrow">${escape(module.kicker.toUpperCase())} · LECCIÓN ${escape(label)}</p><h1 id="detail-title" tabindex="-1">${escape(resource.title)}</h1><p>${escape(resource.description)}</p><ul class="lesson-items" aria-label="Contenido de la lección">${video ? `<li>${icon('play')}Video</li>` : ''}<li>${icon('book')}Lectura · ${resource.minutes || 3} min</li>${resource.practice ? `<li>${icon('exercise')}Práctica · ${plural(resource.practice, 'ejercicio', 'ejercicios')}</li>` : ''}</ul><div class="detail-actions">${saveButton(resource, true)}<button type="button" class="text-button" data-copy>${icon('link')}Copiar enlace</button></div></header>`
+      + `<article class="reader ${resource.color}">${video || `<div class="reader-art">${artwork(resource)}</div>`}<div class="reader-body lesson-content">${resource.html}</div></article><div id="lesson-pager">${lessonPager(course, resource)}</div></div></div>`;
+    document.title = `${resource.title} · ${course.title} | MathBrain`;
+    bindLessonExercises(resource);
+    // En cursos largos, el temario lateral se desplaza hasta la lección actual.
+    const aside = select('#lesson-outline');
+    const current = document.querySelector('#lesson-outline .is-current');
+    if (aside && current && aside.scrollHeight > aside.clientHeight) aside.scrollTop = Math.max(0, current.offsetTop - aside.clientHeight / 3);
   }
 
   function missingResource() {
@@ -504,7 +648,9 @@
   function downloadCourse(id) {
     const course = courses.find(candidate => candidate.id === id);
     if (!course) return;
-    const contents = `MATHBRAIN — ${course.title}\n\n${course.intro}\nNivel: ${course.level}\nAntes de empezar: ${course.prerequisite}\n\n${library.resources.filter(resource => resource.courseId === id && resource.type === 'explanation').map((resource, index) => `${index + 1}. ${resource.title}\n${resource.description}\nIdea clave: ${resource.key}\n`).join('\n')}`;
+    const outcomes = course.outcomes?.length ? `\nLO QUE APRENDERÁS\n${course.outcomes.map(outcome => `- ${outcome}`).join('\n')}\n` : '';
+    const modules = courseModules(course).map(module => `${module.kicker.toUpperCase()} · ${module.name}\n${module.summary ? `${module.summary}\n` : ''}${module.objectives.map(objective => `- ${objective}`).join('\n')}${module.objectives.length ? '\n' : ''}\n${module.lessons.map(({ lesson, label }) => `${label}. ${lesson.title}\n${lesson.description}\nIdea clave: ${lesson.key}\n`).join('\n')}${module.extras.length ? `\nPráctica interactiva: ${module.extras.map(resource => resource.title).join('; ')}\n` : ''}`).join('\n\n');
+    const contents = `MATHBRAIN — ${course.title}\n\n${course.description}\n${course.intro}\nNivel: ${course.level}\nImpartido por: ${instructor.name}\nAntes de empezar: ${course.prerequisite}\n${outcomes}\n${modules}`;
     const address = URL.createObjectURL(new Blob([contents], { type: 'text/plain;charset=utf-8' }));
     const anchor = document.createElement('a');
     anchor.href = address;
@@ -546,6 +692,17 @@
     }
     const save = event.target.closest('[data-save]');
     if (save) { toggleSaved(save.dataset.save); return; }
+    const complete = event.target.closest('[data-complete]');
+    if (complete) { setCompleted(complete.dataset.complete, !completed.has(complete.dataset.complete)); select('[data-complete]')?.focus(); return; }
+    // Avanzar a la siguiente lección completa la actual, sin interrumpir la navegación.
+    const leaving = event.target.closest('[data-complete-on-leave]');
+    if (leaving) setCompleted(leaving.dataset.completeOnLeave, true, false);
+    if (event.target.closest('[data-outline-toggle]')) {
+      outlineOpen = !outlineOpen;
+      select('#player-outline')?.classList.toggle('is-open', outlineOpen);
+      select('[data-outline-toggle]')?.setAttribute('aria-expanded', String(outlineOpen));
+      return;
+    }
     const arrow = event.target.closest('[data-rail]');
     if (arrow) {
       const rail = document.getElementById(arrow.dataset.rail);

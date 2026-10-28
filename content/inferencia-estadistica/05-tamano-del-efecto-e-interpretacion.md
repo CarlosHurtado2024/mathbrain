@@ -1,6 +1,7 @@
 ---
 titulo: Tamaño del efecto e interpretación
 descripcion: Tamaño del efecto, supuestos e interpretación.
+unidad: Módulo 2 · Estimar y contrastar
 video: 
 etiquetas: efecto supuestos interpretacion importancia practica causalidad
 ---

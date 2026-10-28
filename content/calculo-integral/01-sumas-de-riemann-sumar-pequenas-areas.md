@@ -1,6 +1,7 @@
 ---
 titulo: Sumas de Riemann: sumar pequeñas áreas
 descripcion: Áreas, aproximaciones y sumas de Riemann.
+unidad: Módulo 1 · Acumular y medir áreas
 video: 
 etiquetas: sumas riemann rectangulos area aproximacion
 ---

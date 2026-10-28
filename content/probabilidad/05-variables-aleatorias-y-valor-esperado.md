@@ -1,6 +1,7 @@
 ---
 titulo: Variables aleatorias y valor esperado
 descripcion: Variables aleatorias, esperanza y distribuciones.
+unidad: Módulo 2 · Información, evidencia y variables
 video: 
 etiquetas: variables aleatorias esperanza distribuciones valor esperado media
 ---

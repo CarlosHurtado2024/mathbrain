@@ -1,6 +1,7 @@
 ---
 titulo: Límites: acercarse a una idea
 descripcion: Observa qué sucede cuando dos puntos de una curva se acercan.
+unidad: Módulo 1 · El cambio y los límites
 video: 
 etiquetas: limites limite continuidad indeterminacion
 ---

@@ -1,6 +1,7 @@
 ---
 titulo: Reglas de derivación y regla de la cadena
 descripcion: La regla de la potencia, el producto y la cadena.
+unidad: Módulo 2 · La derivada y sus aplicaciones
 video: 
 etiquetas: derivadas potencia producto cadena composicion
 ---

@@ -1,6 +1,7 @@
 ---
 titulo: ¿Qué significa un valor p?
 descripcion: Hipótesis nula, valores p y errores de decisión.
+unidad: Módulo 2 · Estimar y contrastar
 video: 
 etiquetas: hipotesis nula contraste prueba valor p significacion
 ---

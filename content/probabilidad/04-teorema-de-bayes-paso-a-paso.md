@@ -1,6 +1,7 @@
 ---
 titulo: Teorema de Bayes, paso a paso
 descripcion: Combina la información previa con nueva evidencia.
+unidad: Módulo 2 · Información, evidencia y variables
 video: 
 etiquetas: bayes teorema condicional evidencia previa
 ---

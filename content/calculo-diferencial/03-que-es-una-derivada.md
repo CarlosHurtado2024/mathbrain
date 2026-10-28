@@ -1,6 +1,7 @@
 ---
 titulo: ¿Qué es una derivada?
 descripcion: Construye la pendiente instantánea a partir de pendientes de rectas secantes.
+unidad: Módulo 2 · La derivada y sus aplicaciones
 # Pega aquí el enlace de YouTube de la clase (puede ser «No listado»), por ejemplo:
 # video: https://www.youtube.com/watch?v=XXXXXXXXXXX
 video:

@@ -14,7 +14,11 @@ La biblioteca incluye 51 explicaciones con ejemplos, seis ejercicios resueltos c
 
 Cada ejercicio permite comprobar el resultado antes de abrir la solución. La respuesta acepta enteros, decimales con coma o punto, fracciones como `8/3`, porcentajes y unidades sencillas; el valor esperado y su tolerancia se definen en el campo `check` de cada ejercicio en `dist/library.js`. Los videos se muestran cuando se incorpora una URL compatible; no son necesarios para leer las explicaciones.
 
-Los marcadores guardan contenidos en «Mi biblioteca» mediante el almacenamiento del navegador. La portada muestra los contenidos consultados recientemente, sin simular porcentajes de progreso. Los guardados y el historial son locales al navegador; no hay cuentas ni sincronización entre dispositivos. Si el almacenamiento está bloqueado, el catálogo y los guardados de la visita siguen funcionando.
+Los cursos siguen la estructura de una plataforma de cursos en línea. La página de cada curso muestra quién lo imparte, el botón «Empezar el curso» (o «Continuar», con la siguiente lección), los datos clave (módulos, lecciones, ejercicios, horas estimadas y nivel), «Lo que aprenderás», las habilidades y los módulos desplegables con su resumen, sus objetivos y sus lecciones, simulaciones y ejercicios resueltos. Cada lección se abre en una vista con el temario del curso a un lado (en el móvil, desplegable), sus partes (video, lectura y práctica, con el tiempo de lectura estimado) y los botones «Anterior», «Marcar como completada» y «Siguiente».
+
+El progreso es real: una lección queda completada al marcarla, al avanzar con «Siguiente» o al resolver correctamente todos sus ejercicios, y se puede volver a marcar como pendiente. Con esas lecciones se calculan el porcentaje de cada curso, los contadores de cada módulo, la barra de progreso de las portadas y la sección «Continúa aprendiendo» del inicio. Las horas de estudio se estiman con el texto de cada lección (unas 120 palabras por minuto) y unos tres minutos por ejercicio.
+
+Los marcadores guardan contenidos en «Mi biblioteca» mediante el almacenamiento del navegador. La portada muestra los contenidos consultados recientemente. Los guardados, el progreso y el historial son locales al navegador; no hay cuentas ni sincronización entre dispositivos. Si el almacenamiento está bloqueado, el catálogo y los guardados de la visita siguen funcionando.
 
 El selector de tema de la cabecera permite elegir Oscuro, Claro o Sistema. La preferencia se conserva en el mismo navegador y se sincroniza entre sus pestañas; Sistema sigue los cambios de apariencia del dispositivo. Sin una preferencia guardada se mantiene el aspecto oscuro original. El tema claro conserva las constelaciones, las estrellas y las estelas con una paleta azul y petróleo visible sobre el fondo claro, y los diagramas sobre sus paneles de contraste. El fondo adapta su paleta al cambiar de tema incluso cuando está pausado o se utiliza movimiento reducido. La elección se aplica antes de mostrar la página y funciona también sin conexión en la aplicación instalada.
 
@@ -119,7 +123,13 @@ KaTeX 0.16.22 (licencia MIT) está incluido en el proyecto. `vendor/katex/katex.
 
 ## Editar los programas
 
-En `dist/courses.js` se modifican el título, la descripción, el nivel, los prerrequisitos y la presentación de cada ruta. Las lecciones de una ruta son los archivos de su carpeta en `content/`. El programa descargable se genera con los títulos, descripciones e ideas clave de esos archivos.
+En `dist/courses.js` se modifican el título, la descripción, el nivel, los prerrequisitos y la presentación de cada curso, además de:
+
+- `outcomes`: la lista «Lo que aprenderás» del curso.
+- `skills`: las habilidades que se muestran como etiquetas.
+- `modules`: los módulos en orden. Cada uno tiene `title` (por ejemplo, `Módulo 1 · El cambio y los límites`), `summary`, `objectives` y `extras`, la lista de identificadores de simulaciones o ejercicios resueltos de `dist/library.js` que se ofrecen en ese módulo.
+
+Cada lección indica su módulo con `unidad:` en su archivo `.md`, escrito exactamente igual que el `title` del módulo. La compilación se detiene si una lección nombra un módulo que no existe, si un módulo queda sin lecciones o si los archivos no siguen el orden de los módulos. Las lecciones se numeran por módulo (1.1, 1.2, 2.1…), salvo que indiquen su propio número con `modulo:`. El programa descargable incluye los objetivos, los módulos y sus lecciones.
 
 ## Identidad visual
 

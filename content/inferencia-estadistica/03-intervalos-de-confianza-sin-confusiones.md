@@ -1,6 +1,7 @@
 ---
 titulo: Intervalos de confianza sin confusiones
 descripcion: Estimadores e intervalos de confianza.
+unidad: Módulo 2 · Estimar y contrastar
 video: 
 etiquetas: intervalo confianza estimacion estimadores margen incertidumbre
 ---

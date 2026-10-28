@@ -1,6 +1,7 @@
 ---
 titulo: ¿Qué es una tasa de cambio?
 descripcion: Del movimiento cotidiano a la tasa de cambio: qué significa comparar dos cantidades.
+unidad: Módulo 1 · El cambio y los límites
 video: 
 etiquetas: tasa cambio velocidad pendiente secante
 ---

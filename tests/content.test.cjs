@@ -65,6 +65,21 @@ test('Los errores de contenido indican el archivo, la línea y el motivo', () =>
   assert.throws(() => compileLesson('---\ntitulo: X\ndescripcion: Y\nvideo: http://inseguro.com/v\n---\n:::idea\nZ\n:::', 'a.md', 'a-1'), /enlace https/);
 });
 
+test('Cada lección declara un módulo existente de su curso y estima su tiempo de lectura', () => {
+  const context = require('node:vm').createContext({ window: {} });
+  require('node:vm').runInContext(fs.readFileSync(path.join(__dirname, '../dist/courses.js'), 'utf8'), context);
+  const courses = context.window.MATHBRAIN_COURSES;
+  for (const lesson of compileAll()) {
+    const course = courses.find(candidate => candidate.id === lesson.courseId);
+    assert.ok(course.modules.some(module => module.title === lesson.unit), lesson.id);
+    assert.ok(lesson.minutes >= 2 && lesson.minutes <= 30, lesson.id);
+  }
+  for (const course of courses) {
+    assert.ok(course.outcomes.length >= 3 && course.skills.length >= 3, course.id);
+    assert.ok(course.modules.every(module => module.summary && module.objectives.length >= 2), course.id);
+  }
+});
+
 test('La idea clave se guarda como texto legible para la búsqueda y la descarga', () => {
   const result = compileLesson('---\ntitulo: X\ndescripcion: Y\n---\n:::idea\nLa derivada es $\\frac{\\Delta y}{\\Delta x}$ cuando $h \\to 0$.\n:::', 'a.md', 'a-1');
   assert.equal(result.key, 'La derivada es (Δ y)/(Δ x) cuando h → 0.');

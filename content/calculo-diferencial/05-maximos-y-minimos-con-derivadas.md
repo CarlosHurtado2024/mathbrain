@@ -1,6 +1,7 @@
 ---
 titulo: Máximos y mínimos con derivadas
 descripcion: Usa las derivadas para interpretar y optimizar.
+unidad: Módulo 2 · La derivada y sus aplicaciones
 video: 
 etiquetas: optimizacion maximos minimos derivadas extremos
 ---

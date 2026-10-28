@@ -1,6 +1,7 @@
 ---
 titulo: Probabilidad condicional e independencia
 descripcion: Probabilidad condicional e independencia.
+unidad: Módulo 2 · Información, evidencia y variables
 video: 
 etiquetas: condicional independencia eventos interseccion
 ---

@@ -1,6 +1,7 @@
 ---
 titulo: Combinaciones y permutaciones
 descripcion: Principios de conteo, permutaciones y combinaciones.
+unidad: Módulo 1 · Contar y medir el azar
 video: 
 etiquetas: conteo contar combinaciones permutaciones factorial
 ---

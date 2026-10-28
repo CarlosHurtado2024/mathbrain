@@ -1,6 +1,7 @@
 ---
 titulo: ¿Qué es una integral definida?
 descripcion: La integral definida y el área con signo.
+unidad: Módulo 1 · Acumular y medir áreas
 video: 
 etiquetas: integral integrales definida acumulacion area signo
 ---

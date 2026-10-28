@@ -1,6 +1,7 @@
 ---
 titulo: Probabilidad: darle un número al azar
 descripcion: Experimentos, resultados y espacios muestrales.
+unidad: Módulo 1 · Contar y medir el azar
 video: 
 etiquetas: azar eventos espacio muestral dado moneda
 ---
