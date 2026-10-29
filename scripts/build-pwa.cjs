@@ -27,4 +27,4 @@ for (const filename of filesIn(directory)) {
 const revision = hash.digest('hex').slice(0, 16);
 const output = worker.replace(workerPattern, `const CACHE_NAME = 'mathbrain-shell-${revision}';`);
 fs.writeFileSync(workerPath, output);
-console.log(`MathBrain PWA preparada: ${revision}`);
+console.log(`Euly PWA preparada: ${revision}`);

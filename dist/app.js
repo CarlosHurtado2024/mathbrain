@@ -174,7 +174,7 @@
 
   function card(resource) {
     const format = library.formats[resource.type];
-    return `<article class="content-card ${resource.color}"><a href="#contenido/${resource.id}" class="card-art" tabindex="-1" aria-hidden="true">${artwork(resource)}<span class="art-label">MATHBRAIN / EXPLORA LAS IDEAS</span><span class="art-type">${icon(format.icon)}${format.title}</span><span class="card-open">↗</span></a>${saveButton(resource)}<div class="card-copy"><p class="card-topic">${topicName(resource.topic)}</p><h3><a href="#contenido/${resource.id}">${escape(resource.title)}</a></h3><p>${escape(resource.description)}</p><div class="card-meta"><span class="level-indicator ${resource.level === 'Inicial' ? 'initial' : ''}" aria-hidden="true"><i></i><i></i><i></i></span>${resource.level}<span>${resource.type === 'exercise' ? `${resource.steps.length} pasos` : resource.type === 'simulation' ? 'Interactiva' : resource.practice ? 'Lectura y práctica' : 'Lectura'}</span></div></div></article>`;
+    return `<article class="content-card ${resource.color}"><a href="#contenido/${resource.id}" class="card-art" tabindex="-1" aria-hidden="true">${artwork(resource)}<span class="art-label">EULY / EXPLORA LAS IDEAS</span><span class="art-type">${icon(format.icon)}${format.title}</span><span class="card-open">↗</span></a>${saveButton(resource)}<div class="card-copy"><p class="card-topic">${topicName(resource.topic)}</p><h3><a href="#contenido/${resource.id}">${escape(resource.title)}</a></h3><p>${escape(resource.description)}</p><div class="card-meta"><span class="level-indicator ${resource.level === 'Inicial' ? 'initial' : ''}" aria-hidden="true"><i></i><i></i><i></i></span>${resource.level}<span>${resource.type === 'exercise' ? `${resource.steps.length} pasos` : resource.type === 'simulation' ? 'Interactiva' : resource.practice ? 'Lectura y práctica' : 'Lectura'}</span></div></div></article>`;
   }
 
   function courseSymbol(course) {
@@ -217,7 +217,7 @@
     select('#course-grid').classList.add('is-list');
     select('#course-grid').innerHTML = groups.map(({ category, items }) => `${groups.length > 1 ? `<h3 class="course-area">${escape(areas[category] || category)}</h3>` : ''}${items.map(courseCard).join('')}`).join('');
     select('#course-empty').hidden = visibleCourses.length > 0;
-    document.title = 'Explorar cursos | MathBrain';
+    document.title = 'Explorar cursos | Euly';
   }
 
   function updateCourseCatalog(changes) {
@@ -290,7 +290,7 @@
       const resources = library.search({ ...filters, ids: page === 'biblioteca' ? saved : null });
       const title = page === 'biblioteca' ? 'Tu biblioteca de ideas.' : filters.query ? `Resultados para «${filters.query}»` : filters.type === 'simulation' ? 'Aprende haciendo.' : filters.type === 'exercise' ? 'Una solución, paso a paso.' : filters.topic !== 'all' ? `Explora ${topicName(filters.topic).toLowerCase()}.` : 'Encuentra esa idea.';
       select('#catalog-title').textContent = title;
-      select('#catalog-eyebrow').textContent = page === 'biblioteca' ? 'LO QUE QUIERES TENER CERCA' : filters.type === 'simulation' ? 'EL LABORATORIO MATHBRAIN' : 'EXPLORA A TU MANERA';
+      select('#catalog-eyebrow').textContent = page === 'biblioteca' ? 'LO QUE QUIERES TENER CERCA' : filters.type === 'simulation' ? 'EL LABORATORIO EULY' : 'EXPLORA A TU MANERA';
       select('#catalog-description').textContent = page === 'biblioteca' ? 'Tus contenidos guardados en este navegador. Vuelve a ellos cuando quieras.' : 'Elige un tema, encuentra la explicación y pasa de entender a experimentar.';
       select('#results-count').textContent = `${resources.length} ${resources.length === 1 ? 'contenido encontrado' : 'contenidos encontrados'}`;
       select('#catalog-content').innerHTML = `<div class="resource-grid">${resources.map(card).join('')}</div>`;
@@ -299,7 +299,7 @@
         select('#empty-title').textContent = page === 'biblioteca' && !saved.size ? 'Tu próxima gran idea puede empezar aquí.' : 'Todavía no encontramos esa idea.';
         select('#empty-description').textContent = page === 'biblioteca' && !saved.size ? 'Pulsa el marcador de cualquier contenido para guardarlo en tu biblioteca.' : 'Prueba con «derivadas», «ecuaciones» o «probabilidad», o cambia los filtros.';
       }
-      document.title = `${title} | MathBrain`;
+      document.title = `${title} | Euly`;
     }
     bindRails();
   }
@@ -364,7 +364,7 @@
       body = `${video || `<div class="reader-art">${artwork(resource)}</div>`}<div class="reader-body lesson-content">${resource.html}<div class="reader-next">${next ? `<a class="button button-secondary" href="#contenido/${next.id}">Siguiente idea ${icon('right')}</a>` : `<a class="button button-secondary" href="#curso/${resource.courseId}">Volver a la ruta ${icon('right')}</a>`}</div></div>`;
     }
     select('#detail-view').innerHTML = `<nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="#">Inicio</a><span aria-hidden="true">/</span><a href="#explorar?tema=${resource.topic}">${topicName(resource.topic)}</a><span aria-hidden="true">/</span><span>${format.title}</span></nav><header class="detail-header"><p class="eyebrow">${topicName(resource.topic).toUpperCase()} · ${format.title.toUpperCase()} · ${resource.level.toUpperCase()}</p><h1 id="detail-title" tabindex="-1">${escape(resource.title)}</h1><p>${escape(resource.description)}</p><div class="detail-actions">${saveButton(resource, true)}<button type="button" class="text-button" data-copy>${icon('link')}Copiar enlace</button></div></header><div class="detail-layout"><article class="reader ${resource.color}">${body}</article>${relatedPanel(resource)}</div>`;
-    document.title = `${resource.title} | MathBrain`;
+    document.title = `${resource.title} | Euly`;
     if (resource.type === 'simulation') bindSimulation(resource);
     if (resource.type === 'exercise') bindAnswerCheck(resource);
     if (resource.type === 'explanation') bindLessonExercises(resource);
@@ -484,7 +484,7 @@
       + `<div class="course-layout"><aside class="course-card ${course.color}"><div class="course-card-art" aria-hidden="true">${artwork(course, true)}<span class="course-card-symbol">${courseSymbol(course)}</span></div><p class="eyebrow">${escape(course.label)} · NIVEL ${course.level.toUpperCase()}</p><h1 id="detail-title" tabindex="-1">${escape(course.title)}</h1><p class="course-card-description">${escape(course.description)}</p><ul class="course-card-facts"><li>${icon('book')}${plural(lessons.length, 'lección', 'lecciones')}</li><li>${icon('exercise')}${plural(exercises, 'reto', 'retos')}</li><li>${icon('star')}${plural(modules.length, 'nivel', 'niveles')} · ≈ ${studyHours(course)} h</li></ul>${started ? progressBar(progress) : ''}<a class="button button-primary course-card-start" href="#contenido/${progress.next.id}">${icon('play')}${started ? (finished ? 'Repasar el curso' : 'Continuar el curso') : 'Empezar el curso'}</a><div class="course-instructor"><img src="${instructor.photo}" alt="" width="40" height="40" loading="lazy" decoding="async"><span><small>Impartido por</small><strong>${instructor.name}</strong></span></div><button class="text-button" type="button" data-download="${course.id}">${icon('download')}Descargar programa</button></aside>`
       + `<div class="course-path-column"><h2 class="sr-only">Hay ${plural(modules.length, 'módulo', 'módulos')} en este curso</h2>${modules.map(level).join('')}`
       + `<section class="course-about" aria-labelledby="about-course-title"><h2 id="about-course-title">Sobre este curso</h2><p>${escape(course.intro)}</p>${course.outcomes?.length ? `<h3>Lo que aprenderás</h3><ul class="course-outcomes">${course.outcomes.map(outcome => `<li>${icon('check')}<span>${escape(outcome)}</span></li>`).join('')}</ul>` : ''}${course.skills?.length ? `<h3>Habilidades que desarrollarás</h3><ul class="course-skills">${course.skills.map(skill => `<li>${escape(skill)}</li>`).join('')}</ul>` : ''}<p class="prerequisite"><strong>Antes de empezar</strong>${escape(course.prerequisite)}</p></section></div></div>`;
-    document.title = `${course.title} | MathBrain`;
+    document.title = `${course.title} | Euly`;
   }
 
   function lessonOutline(course, current) {
@@ -530,7 +530,7 @@
       + `<div class="course-player"><aside class="player-aside" id="lesson-outline" aria-label="Contenido del curso">${lessonOutline(course, resource)}</aside><div class="player-main">`
       + `<header class="detail-header player-header"><p class="eyebrow">${escape(module.kicker.toUpperCase())} · LECCIÓN ${escape(label)}</p><h1 id="detail-title" tabindex="-1">${escape(resource.title)}</h1><p>${escape(resource.description)}</p><ul class="lesson-items" aria-label="Contenido de la lección">${video ? `<li>${icon('play')}Video</li>` : ''}<li>${icon('book')}Lectura · ${resource.minutes || 3} min</li>${resource.practice ? `<li>${icon('exercise')}Práctica · ${plural(resource.practice, 'ejercicio', 'ejercicios')}</li>` : ''}</ul><div class="detail-actions">${saveButton(resource, true)}<button type="button" class="text-button" data-copy>${icon('link')}Copiar enlace</button></div></header>`
       + `<article class="reader ${resource.color}">${video || `<div class="reader-art">${artwork(resource)}</div>`}<div class="reader-body lesson-content">${resource.html}</div></article><div id="lesson-pager">${lessonPager(course, resource)}</div></div></div>`;
-    document.title = `${resource.title} · ${course.title} | MathBrain`;
+    document.title = `${resource.title} · ${course.title} | Euly`;
     bindLessonExercises(resource);
     // En cursos largos, el temario lateral se desplaza hasta la lección actual.
     const aside = select('#lesson-outline');
@@ -557,7 +557,7 @@
   function renderPlayer(resource, course, video) {
     currentLessonId = null;
     const { module, label } = lessonPosition(course, resource);
-    document.title = `${resource.title} · ${course.title} | MathBrain`;
+    document.title = `${resource.title} · ${course.title} | Euly`;
     startPlayer({ kind: 'lesson', resource, course, color: resource.color, title: resource.title, eyebrow: `${module.kicker.toUpperCase()} · LECCIÓN ${label}`, exit: `#curso/${course.id}`, reading: `#contenido/${resource.id}?vista=lectura`, steps: [...(video ? [{ type: 'video', html: `<h2>Mira la clase</h2>${video}` }] : []), ...resource.steps] });
   }
 
@@ -571,7 +571,7 @@
     const module = courseModules(course)[index];
     const steps = module && reviewSteps(module);
     if (!steps?.length) return false;
-    document.title = `Repaso: ${module.name} · ${course.title} | MathBrain`;
+    document.title = `Repaso: ${module.name} · ${course.title} | Euly`;
     startPlayer({ kind: 'review', course, module, color: course.color, title: `Repaso: ${module.name}`, eyebrow: `${module.kicker.toUpperCase()} · REPASO DEL NIVEL`, exit: `#curso/${course.id}`, reading: '', steps: [{ type: 'intro', html: `<h2>Pon a prueba este nivel</h2><p>${plural(steps.length, 'reto', 'retos')} de las lecciones de «${escape(module.name)}». Resuélvelos sin mirar la explicación; si te atascas, puedes ver la solución y seguir.</p>` }, ...steps] });
     return true;
   }
@@ -698,7 +698,7 @@
 
   function missingResource() {
     select('#detail-view').innerHTML = '<div class="empty-state">' + mascot.svg('piensa') + '<h1 id="detail-title" tabindex="-1">Esta idea no está en ese enlace.</h1><p>El enlace puede estar incompleto. Encuentra el tema en el catálogo.</p><a class="button button-primary" href="#explorar">Explorar contenidos</a></div>';
-    document.title = 'Contenido no encontrado | MathBrain';
+    document.title = 'Contenido no encontrado | Euly';
   }
 
   // Los cursos de Álgebra y Trigonometría forman ahora Fundamentos de Matemáticas: sus enlaces antiguos siguen funcionando.
@@ -748,11 +748,11 @@
       renderCourses();
     } else if (page === 'nosotros') {
       select('#detail-view').replaceChildren();
-      document.title = 'Sobre MathBrain | MathBrain';
+      document.title = 'Sobre Euly | Euly';
     } else {
       select('#detail-view').replaceChildren();
       renderCatalog();
-      if (page === 'inicio') document.title = 'MathBrain — Aprende matemáticas de forma divertida';
+      if (page === 'inicio') document.title = 'Euly — Aprende matemáticas paso a paso';
     }
     // Durante una lección paso a paso, la interfaz se concentra en la lección, como en una app de aprendizaje.
     document.body?.classList.toggle('lesson-mode', Boolean(player));
@@ -915,11 +915,11 @@
     if (!course) return;
     const outcomes = course.outcomes?.length ? `\nLO QUE APRENDERÁS\n${course.outcomes.map(outcome => `- ${outcome}`).join('\n')}\n` : '';
     const modules = courseModules(course).map(module => `${module.kicker.toUpperCase()} · ${module.name}\n${module.summary ? `${module.summary}\n` : ''}${module.objectives.map(objective => `- ${objective}`).join('\n')}${module.objectives.length ? '\n' : ''}\n${module.lessons.map(({ lesson, label }) => `${label}. ${lesson.title}\n${lesson.description}\nIdea clave: ${lesson.key}\n`).join('\n')}${module.extras.length ? `\nPráctica interactiva: ${module.extras.map(resource => resource.title).join('; ')}\n` : ''}`).join('\n\n');
-    const contents = `MATHBRAIN — ${course.title}\n\n${course.description}\n${course.intro}\nNivel: ${course.level}\nImpartido por: ${instructor.name}\nAntes de empezar: ${course.prerequisite}\n${outcomes}\n${modules}`;
+    const contents = `EULY — ${course.title}\n\n${course.description}\n${course.intro}\nNivel: ${course.level}\nImpartido por: ${instructor.name}\nAntes de empezar: ${course.prerequisite}\n${outcomes}\n${modules}`;
     const address = URL.createObjectURL(new Blob([contents], { type: 'text/plain;charset=utf-8' }));
     const anchor = document.createElement('a');
     anchor.href = address;
-    anchor.download = `MathBrain-${id}-programa.txt`;
+    anchor.download = `Euly-${id}-programa.txt`;
     document.body.append(anchor);
     anchor.click();
     anchor.remove();

@@ -1,7 +1,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'mathbrain-shell-';
-const CACHE_NAME = 'mathbrain-shell-3fa4faa95c252282';
+const CACHE_NAME = 'mathbrain-shell-ef6cec0c3fbf488e';
 const APP_ROOT = new URL('./', self.location.href);
 const SHELL_FILES = [
   './', './index.html', './styles.css', './space.css', './themes.css', './explore.css', './fresh.css', './theme.js',
@@ -69,7 +69,7 @@ self.addEventListener('fetch', event => {
       return response;
     } catch {
       if (!navigation) return Response.error();
-      return new Response('<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>MathBrain · Sin conexión</title><body style="background:#070b18;color:#edf3ff;font:16px/1.7 system-ui;padding:10vw"><h1>Tu universo de ideas estará aquí.</h1><p>Conéctate a internet y vuelve a abrir MathBrain para preparar el contenido de la aplicación.</p><a href="./" style="color:#8ce5df">Volver a intentar</a></body></html>', { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+      return new Response('<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Euly · Sin conexión</title><body style="background:#070b18;color:#edf3ff;font:16px/1.7 system-ui;padding:10vw"><h1>Tu universo de ideas estará aquí.</h1><p>Conéctate a internet y vuelve a abrir Euly para preparar el contenido de la aplicación.</p><a href="./" style="color:#8ce5df">Volver a intentar</a></body></html>', { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
     }
   })());
 });

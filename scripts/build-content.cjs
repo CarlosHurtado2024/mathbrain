@@ -299,7 +299,7 @@ if (require.main === module) {
   try {
     const lessons = compileAll();
     fs.writeFileSync(outputPath, render(lessons));
-    console.log(`MathBrain contenido: ${lessons.length} lecciones, ${lessons.reduce((total, lesson) => total + lesson.exercises, 0)} ejercicios interactivos.`);
+    console.log(`Euly contenido: ${lessons.length} lecciones, ${lessons.reduce((total, lesson) => total + lesson.exercises, 0)} ejercicios interactivos.`);
   } catch (error) {
     console.error(error instanceof ContentError ? `Error en el contenido · ${error.message}` : error);
     process.exit(1);

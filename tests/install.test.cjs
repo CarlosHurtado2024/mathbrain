@@ -97,7 +97,7 @@ const platforms = [
   { name: 'iPad con agente de escritorio', userAgent: 'Mozilla/5.0 (Macintosh) AppleWebKit Safari', platform: 'MacIntel', maxTouchPoints: 5, title: 'En tu iPhone o iPad', step: /pantalla de inicio/ },
   { name: 'Safari de Mac', userAgent: 'Mozilla/5.0 (Macintosh) AppleWebKit Version/17 Safari', title: 'En Safari para Mac', step: /Añadir al Dock/ },
   { name: 'Android', userAgent: 'Mozilla/5.0 (Linux; Android 14) Chrome Safari', title: 'En tu celular o tableta', step: /Instalar app/ },
-  { name: 'Chrome de escritorio', userAgent: 'Mozilla/5.0 (Macintosh) AppleWebKit Chrome Safari', title: 'En tu computador', step: /Instalar MathBrain/ }
+  { name: 'Chrome de escritorio', userAgent: 'Mozilla/5.0 (Macintosh) AppleWebKit Chrome Safari', title: 'En tu computador', step: /Instalar Euly/ }
 ];
 
 for (const platform of platforms) {

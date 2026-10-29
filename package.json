@@ -2,7 +2,7 @@
   "name": "mathbrain",
   "version": "1.0.0",
   "private": true,
-  "description": "Biblioteca visual de matemáticas y estadística en español",
+  "description": "Euly: aprende matemáticas y estadística en español, paso a paso",
   "scripts": {
     "dev": "node server.cjs",
     "build": "npm run check && node scripts/build-content.cjs && node scripts/build-pwa.cjs",
