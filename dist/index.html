@@ -3,28 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#070b18">
+  <meta name="theme-color" content="#ffffff">
   <meta name="color-scheme" content="dark light">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="MathBrain">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="description" content="Encuentra explicaciones de matemáticas, explora simulaciones y aprende con ejercicios resueltos. Tu universo de ideas, a tu ritmo.">
-  <meta property="og:title" content="MathBrain — Dale play a tu curiosidad">
+  <meta property="og:title" content="MathBrain — Aprende matemáticas de forma divertida">
   <meta property="og:description" content="Explicaciones, simulaciones y ejercicios resueltos. Encuentra la idea que necesitas entender.">
-  <title>MathBrain — Dale play a tu curiosidad</title>
+  <title>MathBrain — Aprende matemáticas de forma divertida</title>
   <script src="theme.js"></script>
   <link rel="icon" type="image/svg+xml" href="assets/mark.svg">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=Lora:ital,wght@400;500;600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&family=DM+Sans:wght@400;450;500;550;600;650;700&family=Lora:ital,wght@400;500;600;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="space.css">
   <link rel="stylesheet" href="themes.css">
   <link rel="stylesheet" href="explore.css">
+  <link rel="stylesheet" href="fresh.css">
   <script defer src="courses.js"></script>
   <script defer src="content.js"></script>
   <script defer src="library.js"></script>
@@ -58,11 +59,18 @@
     </header>
     <main id="main" tabindex="-1">
       <div id="home-view"><div id="today-panel"></div>
-        <section class="feature" aria-labelledby="hero-title">
-          <div class="feature-copy"><p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> TU UNIVERSO DE APRENDIZAJE</p><h1 id="hero-title">Dale play a tu<br><em>curiosidad.</em></h1><p class="feature-description">Esa idea que no te quedó clara está aquí.<br>Encuéntrala, experiméntala y hazla tuya.</p><div class="feature-actions"><a class="button button-primary" href="#explorar"><span data-icon="search"></span>Encuentra tu tema</a><a class="button button-secondary" href="#contenido/sim-derivada"><span data-icon="play"></span>Prueba una simulación</a></div><div class="feature-footnote"><span>Sin prisas.</span><span>Sin memorizar por memorizar.</span></div></div>
-          <a class="feature-art" href="#contenido/sim-derivada" aria-label="Explorar la simulación de la derivada"><div class="feature-art-label"><span class="live-dot" aria-hidden="true"></span> UNA IDEA EN MOVIMIENTO <span class="art-index">01 / 06</span></div><div id="hero-art"></div><div class="feature-art-caption"><div><small>EXPLORA LA INTUICIÓN</small><strong>El cambio también tiene forma.</strong></div><span class="round-play" data-icon="play"></span></div></a>
-          <span class="feature-orbit" aria-hidden="true"></span>
+        <section class="landing-hero landing-only" aria-labelledby="hero-title">
+          <div class="landing-art" aria-hidden="true"><div class="landing-stage"><span class="landing-mascot" data-mascot="saluda"></span></div><span class="float-chip chip-a">x²</span><span class="float-chip chip-b">π</span><span class="float-chip chip-c">∫</span><span class="float-chip chip-d">√</span><span class="float-chip chip-e">Σ</span></div>
+          <div class="landing-copy"><h1 id="hero-title">¡La forma divertida y efectiva de aprender <span class="landing-highlight">matemáticas</span>!</h1><p class="landing-lead">Lecciones cortas, retos con respuesta inmediata y un pulpo muy curioso que te acompaña en cada paso. Gratis y a tu ritmo.</p><div class="landing-actions"><a class="button button-primary button-big" href="#curso/fundamentos-matematicas">Empieza ahora</a><a class="button button-outline button-big" href="#explorar">Explorar los cursos</a></div></div>
         </section>
+        <nav class="course-strip" id="course-strip" aria-label="Cursos de MathBrain"></nav>
+        <div class="landing-features landing-only">
+          <section class="landing-feature tone-violet"><div class="landing-feature-copy"><h2>divertido, efectivo y gratis</h2><p>Aprender con MathBrain se siente como un juego: lecciones de pocos minutos, puntos por cada reto y niveles que se desbloquean mientras entiendes de verdad cada idea.</p></div><div class="landing-feature-art" aria-hidden="true"><div class="mock-card mock-quiz"><p class="mock-label">Tu turno</p><p class="mock-question">Si f(x) = x², ¿cuánto vale f′(3)?</p><span class="mock-option">9</span><span class="mock-option is-right">6</span><span class="mock-option">3</span></div><span class="landing-feature-mascot" data-mascot="celebra"></span></div></section>
+          <section class="landing-feature tone-blue"><div class="landing-feature-copy"><h2>aprendes haciendo</h2><p>Primero la intuición, después la fórmula. Cada tema se explora con ejemplos, simulaciones que puedes mover y retos con retroalimentación inmediata, una idea a la vez.</p></div><div class="landing-feature-art" aria-hidden="true"><div class="mock-card mock-graph"><svg viewBox="0 0 220 140"><path d="M20 120H205M40 132V12" stroke="#c9cfe0" stroke-width="2" fill="none"/><path d="M45 20Q110 230 175 20" stroke="#1cb0f6" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M95 130 190 40" stroke="#ff9f1c" stroke-width="4" stroke-linecap="round"/><circle cx="143" cy="80" r="8" fill="#6c4df6"/></svg><span class="mock-slider"><i></i></span></div><span class="landing-feature-mascot" data-mascot="piensa"></span></div></section>
+          <section class="landing-feature tone-coral"><div class="landing-feature-copy"><h2>mantén tu motivación</h2><p>Las rachas, los puntos de experiencia y los repasos de cada nivel te ayudan a crear el hábito de estudiar un poco cada día. Octavio, nuestro pulpo, te anima en cada reto.</p></div><div class="landing-feature-art" aria-hidden="true"><div class="mock-card mock-streak"><span class="mock-flame">🔥</span><strong>7</strong><span>días de racha</span><div class="mock-week"><i></i><i></i><i></i><i></i><i></i><i></i><i class="is-today"></i></div></div><span class="landing-feature-mascot" data-mascot="animo"></span></div></section>
+          <section class="landing-feature tone-green"><div class="landing-feature-copy"><h2>a tu ritmo, donde quieras</h2><p>Cursos con niveles claros, desde los fundamentos hasta el cálculo y la estadística. Instala MathBrain en tu celular o computador y sigue estudiando incluso sin conexión.</p></div><div class="landing-feature-art" aria-hidden="true"><div class="mock-card mock-path"><span class="mock-node is-done">✓</span><span class="mock-node is-done">✓</span><span class="mock-node is-current">▶</span><span class="mock-node"></span><span class="mock-node is-star">★</span></div><span class="landing-feature-mascot" data-mascot="saluda"></span></div></section>
+        </div>
+        <section class="landing-cta landing-only" aria-labelledby="cta-title"><span class="landing-cta-mascot" data-mascot="celebra" aria-hidden="true"></span><h2 id="cta-title">aprende matemáticas con MathBrain</h2><a class="button button-light button-big" href="#curso/fundamentos-matematicas">Empieza ahora</a></section>
         <div class="home-intro"><span><span class="tiny-spark" aria-hidden="true">✳</span> Un tema. Distintas formas de entenderlo.</span><span id="library-stats"></span></div>
         <div id="recent-shelf"></div>
       </div>

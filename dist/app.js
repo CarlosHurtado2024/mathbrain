@@ -20,7 +20,7 @@
   const plural = (count, singular, pluralForm) => `${count} ${count === 1 ? singular : pluralForm}`;
   let currentLessonId = null;
   let outlineOpen = false;
-  // Nebi, la mascota (dist/mascot.js). Sin ese archivo, los mensajes se muestran sin el dibujo.
+  // Octavio, la mascota (dist/mascot.js). Sin ese archivo, los mensajes se muestran sin el dibujo.
   const mascot = window.MATHBRAIN_MASCOT || { svg: () => '', say: (mood, html, className = '') => `<div class="nebi-say ${className}"><p class="nebi-bubble">${html}</p></div>` };
   // Puntos (XP) y racha: días seguidos en los que se completó al menos una lección.
   const stats = loadStats();
@@ -128,11 +128,17 @@
 
   function artwork(resource, square = false) {
     artworkSequence += 1;
-    const palette = {
+    // En el tema claro, las ilustraciones usan fondos suaves y trazos de colores vivos.
+    const light = document.documentElement?.dataset?.theme === 'light';
+    const palette = (light ? {
+      blue: ['#e1f5fe', '#1899d6', '#ff9f1c'], sand: ['#fff2e0', '#f08a00', '#7c5cff'],
+      green: ['#e3f9ec', '#1a9e56', '#1cb0f6'], purple: ['#f1ecff', '#6d3fe0', '#ff6f91'],
+      rose: ['#ffe6f1', '#e0457f', '#1cb0f6'], slate: ['#ddf7f3', '#0f9488', '#ff9f1c']
+    } : {
       blue: ['#11263d', '#8dc8ed', '#b0e7df'], sand: ['#30253b', '#e1bd99', '#b7a9ed'],
       green: ['#12312f', '#9fd6be', '#d8d9a1'], purple: ['#241e42', '#bca5ed', '#8adbd8'],
       rose: ['#322039', '#e2a6c4', '#9ac8e9'], slate: ['#12313c', '#9bd7d5', '#dcd0a5']
-    }[resource.color];
+    })[resource.color];
     const [background, primary, accent] = palette;
     const patternId = `art-grid-${artworkSequence}`;
     const grid = `<defs><pattern id="${patternId}" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="${primary}" stroke-opacity=".085" stroke-width=".7"/></pattern></defs><rect y="${square ? -85 : 0}" width="400" height="${square ? 400 : 230}" fill="${background}"/><rect y="${square ? -85 : 0}" width="400" height="${square ? 400 : 230}" fill="url(#${patternId})"/>`;
@@ -161,14 +167,6 @@
     return `<svg viewBox="${square ? '0 -85 400 400' : '0 0 400 230'}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${grid}${drawing}</svg>`;
   }
 
-  function heroArt() {
-    const project = (horizontal, depth) => [250 + 44 * horizontal + 23 * depth, 217 - 29 * (.24 * horizontal ** 2 + .13 * depth ** 2) - 12 * depth];
-    let mesh = '';
-    for (let depth = -3; depth <= 3; depth += .5) mesh += `<path d="${linePath(Array.from({ length: 51 }, (_, index) => project(-3 + index * .12, depth)))}"/>`;
-    for (let horizontal = -3; horizontal <= 3; horizontal += .5) mesh += `<path d="${linePath(Array.from({ length: 51 }, (_, index) => project(horizontal, -3 + index * .12)))}"/>`;
-    return `<svg class="hero-diagram" viewBox="0 0 500 270" aria-hidden="true"><defs><linearGradient id="hero-mesh" x1="50" y1="220" x2="400" y2="30" gradientUnits="userSpaceOnUse"><stop stop-color="#3c7e94"/><stop offset=".5" stop-color="#89d7c2"/><stop offset="1" stop-color="#becab8"/></linearGradient><radialGradient id="hero-glow"><stop stop-color="#8ed7ca" stop-opacity=".08"/><stop offset="1" stop-color="#8ed7ca" stop-opacity="0"/></radialGradient></defs><ellipse cx="260" cy="150" rx="235" ry="120" fill="url(#hero-glow)"/><g fill="none" stroke="#a1c4c8" stroke-opacity=".19"><path d="M55 239H442M250 258V21M120 260 385 51" stroke-width=".7"/></g><g fill="none" stroke="url(#hero-mesh)" stroke-width=".8" opacity=".9">${mesh}</g><path d="M173 216 328 91" stroke="#d5d3aa" stroke-width="1.5"/><circle cx="250" cy="154" r="4" fill="#e0debb"/><circle cx="250" cy="154" r="11" fill="none" stroke="#cfe1c1" opacity=".25"/><path d="M258 151 335 122" stroke="#b9cdb5" stroke-dasharray="2 5" opacity=".5"/><text x="343" y="124" fill="#c0d3be" font-size="23" font-family="Georgia,serif" font-style="italic">f′(x)</text><text x="64" y="66" fill="#80acae" font-size="18" font-family="Georgia,serif" font-style="italic">Δy / Δx</text><text x="443" y="251" fill="#608898" font-size="12" font-family="Georgia,serif">x</text><text x="259" y="28" fill="#608898" font-size="12" font-family="Georgia,serif">y</text></svg>`;
-  }
-
   function saveButton(resource, detailed = false) {
     const active = saved.has(resource.id);
     return `<button class="save-button" type="button" data-save="${resource.id}" data-detailed="${detailed}" aria-pressed="${active}" aria-label="${active ? 'Quitar de' : 'Guardar en'} mi biblioteca: ${escape(resource.title)}">${icon('bookmark')}${detailed ? `<span class="save-label">${active ? 'Guardado en mi biblioteca' : 'Guardar en mi biblioteca'}</span>` : ''}</button>`;
@@ -179,12 +177,23 @@
     return `<article class="content-card ${resource.color}"><a href="#contenido/${resource.id}" class="card-art" tabindex="-1" aria-hidden="true">${artwork(resource)}<span class="art-label">MATHBRAIN / EXPLORA LAS IDEAS</span><span class="art-type">${icon(format.icon)}${format.title}</span><span class="card-open">↗</span></a>${saveButton(resource)}<div class="card-copy"><p class="card-topic">${topicName(resource.topic)}</p><h3><a href="#contenido/${resource.id}">${escape(resource.title)}</a></h3><p>${escape(resource.description)}</p><div class="card-meta"><span class="level-indicator ${resource.level === 'Inicial' ? 'initial' : ''}" aria-hidden="true"><i></i><i></i><i></i></span>${resource.level}<span>${resource.type === 'exercise' ? `${resource.steps.length} pasos` : resource.type === 'simulation' ? 'Interactiva' : resource.practice ? 'Lectura y práctica' : 'Lectura'}</span></div></div></article>`;
   }
 
+  function courseSymbol(course) {
+    return { derivative: 'f′', integral: '∫', probability: 'P(A)', inference: 'x̄', algebra: 'x²', trigonometry: 'θ' }[course.art] || 'π';
+  }
+
+  // Portada: Octavio en las ilustraciones y la franja de cursos bajo el héroe.
+  function renderLanding() {
+    selectAll('[data-mascot]').forEach(element => { element.innerHTML = mascot.svg(element.dataset.mascot); });
+    const strip = select('#course-strip');
+    if (strip) strip.innerHTML = `<div class="course-strip-track">${courses.map(course => `<a class="strip-course ${course.color}" href="#curso/${course.id}"><span class="strip-icon" aria-hidden="true">${courseSymbol(course)}</span><span>${escape(course.title)}</span></a>`).join('')}</div>`;
+  }
+
   function courseCard(course) {
     const resources = library.resources.filter(resource => resource.courseId === course.id);
     const count = type => resources.filter(resource => resource.type === type).length;
     const simulations = count('simulation');
     const exercises = count('exercise');
-    const symbol = { derivative: 'f′', integral: '∫', probability: 'P(A)', inference: 'x̄', algebra: 'x²', trigonometry: 'θ' }[course.art];
+    const symbol = courseSymbol(course);
     const progress = courseProgress(course);
     const modules = courseModules(course);
     const challenges = courseLessons(course).reduce((total, lesson) => total + (lesson.practice || 0), 0);
@@ -220,14 +229,14 @@
     route(false);
   }
 
-  // Panel del día en el inicio: Nebi saluda según la racha, y se muestran XP, lecciones y los cursos en marcha.
+  // Panel del día en el inicio: Octavio saluda según la racha, y se muestran XP, lecciones y los cursos en marcha.
   function continueLearning() {
     const active = courses.map(course => ({ course, progress: courseProgress(course) })).filter(({ progress }) => progress.done > 0 && progress.done < progress.total);
     const streak = currentStreak();
     const studiedToday = stats.lastDay === dayKey();
     const suggestions = active.length ? active : [{ course: courses[0], progress: courseProgress(courses[0]) }];
     const mood = studiedToday ? 'celebra' : streak ? 'animo' : active.length ? 'feliz' : 'saluda';
-    const message = studiedToday ? `<strong>¡Meta de hoy cumplida!</strong> Llevas ${plural(streak, 'día', 'días')} de racha.` : streak ? `Llevas <strong>${plural(streak, 'día', 'días')} de racha</strong>. Una lección hoy y la mantienes.` : active.length ? '<strong>¡Qué bueno verte!</strong> Sigamos donde lo dejaste.' : `<strong>¡Hola! Soy ${mascot.name || 'Nebi'}.</strong> Cada lección toma unos minutos: aprende resolviendo, una idea a la vez.`;
+    const message = studiedToday ? `<strong>¡Meta de hoy cumplida!</strong> Llevas ${plural(streak, 'día', 'días')} de racha.` : streak ? `Llevas <strong>${plural(streak, 'día', 'días')} de racha</strong>. Una lección hoy y la mantienes.` : active.length ? '<strong>¡Qué bueno verte!</strong> Sigamos donde lo dejaste.' : `<strong>¡Hola! Soy ${mascot.name || 'Octavio'}.</strong> Cada lección toma unos minutos: aprende resolviendo, una idea a la vez.`;
     return `<section class="shelf today-panel" aria-labelledby="continue-title"><div class="today-greeting">${mascot.say(mood, message, 'today-nebi')}<ul class="today-stats" aria-label="Tu progreso"><li>${icon('flame')}<strong>${streak}</strong><span>${streak === 1 ? 'día de racha' : 'días de racha'}</span></li><li>${icon('star')}<strong>${stats.xp}</strong><span>XP</span></li><li>${icon('check')}<strong>${completed.size}</strong><span>${completed.size === 1 ? 'lección' : 'lecciones'}</span></li></ul></div><div class="section-heading"><div><h2 id="continue-title">${active.length ? 'Continúa aprendiendo' : 'Empieza tu camino'}</h2><p>${active.length ? 'Retoma tus cursos donde los dejaste.' : 'Te recomendamos empezar por aquí.'}</p></div></div><div class="continue-grid">${suggestions.map(({ course, progress }) => `<a class="continue-card ${course.color}" href="#contenido/${progress.next.id}"><small>${escape(course.label)}</small><strong>${escape(course.title)}</strong><span class="continue-next">${progress.done ? 'Siguiente' : 'Primera lección'}: ${escape(progress.next.title)}</span>${progress.done ? progressBar(progress) : `<span class="continue-start">${icon('play')}Empezar</span>`}</a>`).join('')}</div></section>`;
   }
 
@@ -270,6 +279,8 @@
       // Quien ya empezó ve su panel del día arriba; quien llega por primera vez lo ve después de la portada.
       const today = continueLearning();
       select('#today-panel').innerHTML = completed.size ? today : '';
+      // Quien ya empezó ve su panel y sus cursos; la presentación de la portada es para quien llega por primera vez.
+      select('#home-view').dataset.returning = String(completed.size > 0);
       select('#recent-shelf').innerHTML = (completed.size ? '' : today) + shelf('recent', 'Vuelve a tus ideas', 'Los contenidos que exploraste recientemente en este navegador.', recent.slice(0, 6).map(id => resourceById.get(id)), '');
       select('#catalog-content').innerHTML = shelf('start', 'Empieza por una idea', 'Explicaciones que van directo al «¿por qué?».', featured, '#explorar?tipo=explanation')
         + shelf('simulations', 'Menos imaginar. Más experimentar.', 'Mueve, cambia, prueba. Aquí tú tienes el control.', library.search({ type: 'simulation' }), '#simulaciones')
@@ -470,7 +481,7 @@
       return `<section class="path-level" aria-labelledby="level-${module.index}"><header class="path-level-head"><span class="course-module-kicker">${escape(module.kicker)}</span><h2 class="course-module-title" id="level-${module.index}">${escape(module.name)}</h2><span class="path-level-count${done === module.lessons.length ? ' is-done' : ''}">${done}/${module.lessons.length}</span>${module.summary ? `<p>${escape(module.summary)}</p>` : ''}</header><ol class="path-nodes">${lessonNodes}${review}${extraNodes}</ol></section>`;
     };
     select('#detail-view').innerHTML = `<nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="#">Inicio</a><span aria-hidden="true">/</span><a href="#explorar">Explorar</a><span aria-hidden="true">/</span><span>Curso</span></nav>`
-      + `<div class="course-layout"><aside class="course-card ${course.color}"><div class="course-card-art" aria-hidden="true">${artwork(course, true)}</div><p class="eyebrow">${escape(course.label)} · NIVEL ${course.level.toUpperCase()}</p><h1 id="detail-title" tabindex="-1">${escape(course.title)}</h1><p class="course-card-description">${escape(course.description)}</p><ul class="course-card-facts"><li>${icon('book')}${plural(lessons.length, 'lección', 'lecciones')}</li><li>${icon('exercise')}${plural(exercises, 'reto', 'retos')}</li><li>${icon('star')}${plural(modules.length, 'nivel', 'niveles')} · ≈ ${studyHours(course)} h</li></ul>${started ? progressBar(progress) : ''}<a class="button button-primary course-card-start" href="#contenido/${progress.next.id}">${icon('play')}${started ? (finished ? 'Repasar el curso' : 'Continuar el curso') : 'Empezar el curso'}</a><div class="course-instructor"><img src="${instructor.photo}" alt="" width="40" height="40" loading="lazy" decoding="async"><span><small>Impartido por</small><strong>${instructor.name}</strong></span></div><button class="text-button" type="button" data-download="${course.id}">${icon('download')}Descargar programa</button></aside>`
+      + `<div class="course-layout"><aside class="course-card ${course.color}"><div class="course-card-art" aria-hidden="true">${artwork(course, true)}<span class="course-card-symbol">${courseSymbol(course)}</span></div><p class="eyebrow">${escape(course.label)} · NIVEL ${course.level.toUpperCase()}</p><h1 id="detail-title" tabindex="-1">${escape(course.title)}</h1><p class="course-card-description">${escape(course.description)}</p><ul class="course-card-facts"><li>${icon('book')}${plural(lessons.length, 'lección', 'lecciones')}</li><li>${icon('exercise')}${plural(exercises, 'reto', 'retos')}</li><li>${icon('star')}${plural(modules.length, 'nivel', 'niveles')} · ≈ ${studyHours(course)} h</li></ul>${started ? progressBar(progress) : ''}<a class="button button-primary course-card-start" href="#contenido/${progress.next.id}">${icon('play')}${started ? (finished ? 'Repasar el curso' : 'Continuar el curso') : 'Empezar el curso'}</a><div class="course-instructor"><img src="${instructor.photo}" alt="" width="40" height="40" loading="lazy" decoding="async"><span><small>Impartido por</small><strong>${instructor.name}</strong></span></div><button class="text-button" type="button" data-download="${course.id}">${icon('download')}Descargar programa</button></aside>`
       + `<div class="course-path-column"><h2 class="sr-only">Hay ${plural(modules.length, 'módulo', 'módulos')} en este curso</h2>${modules.map(level).join('')}`
       + `<section class="course-about" aria-labelledby="about-course-title"><h2 id="about-course-title">Sobre este curso</h2><p>${escape(course.intro)}</p>${course.outcomes?.length ? `<h3>Lo que aprenderás</h3><ul class="course-outcomes">${course.outcomes.map(outcome => `<li>${icon('check')}<span>${escape(outcome)}</span></li>`).join('')}</ul>` : ''}${course.skills?.length ? `<h3>Habilidades que desarrollarás</h3><ul class="course-skills">${course.skills.map(skill => `<li>${escape(skill)}</li>`).join('')}</ul>` : ''}<p class="prerequisite"><strong>Antes de empezar</strong>${escape(course.prerequisite)}</p></section></div></div>`;
     document.title = `${course.title} | MathBrain`;
@@ -529,7 +540,7 @@
 
   // ── Lección paso a paso ─────────────────────────────────────────────────────────────
   // Cada lección se recorre una idea a la vez: un paso en pantalla, una barra de avance y,
-  // en los retos, retroalimentación inmediata de Nebi. Responder bien da XP; terminar la lección
+  // en los retos, retroalimentación inmediata de Octavio. Responder bien da XP; terminar la lección
   // la completa, suma un bono y mantiene la racha.
 
   function lessonPosition(course, resource) {
@@ -741,7 +752,7 @@
     } else {
       select('#detail-view').replaceChildren();
       renderCatalog();
-      if (page === 'inicio') document.title = 'MathBrain — Dale play a tu curiosidad';
+      if (page === 'inicio') document.title = 'MathBrain — Aprende matemáticas de forma divertida';
     }
     // Durante una lección paso a paso, la interfaz se concentra en la lección, como en una app de aprendizaje.
     document.body?.classList.toggle('lesson-mode', Boolean(player));
@@ -917,7 +928,7 @@
   }
 
   selectAll('[data-icon]').forEach(element => { element.innerHTML = icon(element.dataset.icon); });
-  select('#hero-art').innerHTML = heroArt();
+  renderLanding();
   select('#library-stats').textContent = `${library.search({ type: 'explanation' }).length} explicaciones · ${library.search({ type: 'simulation' }).length} simulaciones · ${library.search({ type: 'exercise' }).length} ejercicios`;
   select('#course-paths').innerHTML = courses.map(course => `<a class="path-card ${course.color}" href="#curso/${course.id}"><span class="path-symbol" aria-hidden="true">${course.art === 'derivative' ? 'f′' : course.art === 'integral' ? '∫' : course.art === 'probability' ? 'P' : course.art === 'inference' ? 'x̄' : course.art === 'algebra' ? 'x²' : 'θ'}</span><span><strong>${course.title}</strong><small>${course.lessons.length} explicaciones · ${course.level}</small></span><span aria-hidden="true">↗</span></a>`).join('');
   select('#saved-count').textContent = saved.size;
@@ -972,6 +983,12 @@
       try { await navigator.clipboard.writeText(location.href); toast('Enlace copiado. Comparte esta idea.'); }
       catch { toast('Puedes copiar el enlace desde la barra de direcciones.'); }
     }
+  });
+  // Al cambiar de tema se vuelve a dibujar la página para que las ilustraciones usen su paleta, salvo en mitad de una lección.
+  document.addEventListener('mathbrain:themechange', () => {
+    if (player) return;
+    lastRoutedHash = null;
+    route(false);
   });
   window.addEventListener('hashchange', () => route());
   window.addEventListener('popstate', () => route());

@@ -89,7 +89,7 @@ function assertTheme(env, theme, preference = theme, controlsMounted = true) {
   assert.equal(env.root.dataset.theme, theme);
   assert.equal(env.root.dataset.themePreference, preference);
   assert.equal(env.root.style.colorScheme, theme);
-  assert.equal(env.meta.content, theme === 'light' ? '#edf3fa' : '#070b18');
+  assert.equal(env.meta.content, theme === 'light' ? '#ffffff' : '#070b18');
   if (controlsMounted) {
     assert.ok(env.controls.every(control => control.value === preference));
     assert.deepEqual(env.icons.filter(icon => !icon.hidden).map(icon => icon.dataset.themeIcon), [preference === 'system' ? 'system' : theme]);
@@ -100,10 +100,10 @@ function assertTheme(env, theme, preference = theme, controlsMounted = true) {
   assert.equal(event.detail.preference, preference);
 }
 
-test('Sin preferencia guardada conserva el tema oscuro independientemente del sistema', () => {
+test('Sin preferencia guardada se usa el tema claro independientemente del sistema', () => {
   for (const systemDark of [false, true]) {
     const env = environment({ systemDark });
-    assertTheme(env, 'dark');
+    assertTheme(env, 'light');
     assert.equal(env.status.textContent, '');
     assert.equal(env.writes.length, 0);
   }
@@ -120,18 +120,18 @@ test('La preferencia clara se aplica antes de cargar el cuerpo y sincroniza los 
   assert.equal(env.stored.get(storageKey), 'dark');
 });
 
-test('Una preferencia guardada inválida vuelve al tema oscuro', () => {
-  for (const saved of ['', 'sepia', 'LIGHT', 'null']) {
-    assertTheme(environment({ saved }), 'dark');
+test('Una preferencia guardada inválida vuelve al tema claro', () => {
+  for (const saved of ['', 'sepia', 'DARK', 'null']) {
+    assertTheme(environment({ saved }), 'light');
   }
 });
 
 test('Leer un almacenamiento bloqueado no impide cargar ni cambiar el tema', () => {
-  const env = environment({ saved: 'light', readFails: true });
-  assertTheme(env, 'dark');
-  env.select('light');
+  const env = environment({ saved: 'dark', readFails: true });
   assertTheme(env, 'light');
-  assert.equal(env.stored.get(storageKey), 'light');
+  env.select('dark');
+  assertTheme(env, 'dark');
+  assert.equal(env.stored.get(storageKey), 'dark');
 });
 
 test('Guardar un almacenamiento bloqueado aplica el tema durante la visita e informa de su alcance', () => {
@@ -203,31 +203,31 @@ test('Salir del modo sistema mantiene el tema elegido ante cambios posteriores d
   assert.equal(env.status.textContent, 'Tema claro activado.');
 });
 
-test('Otra pestaña sincroniza la preferencia y el borrado de almacenamiento recupera el tema oscuro', () => {
+test('Otra pestaña sincroniza la preferencia y el borrado de almacenamiento recupera el tema claro', () => {
   const env = environment();
-  env.window.emit('storage', { key: storageKey, newValue: 'light' });
-  assertTheme(env, 'light');
-  assert.equal(env.status.textContent, 'Tema claro activado.');
+  env.window.emit('storage', { key: storageKey, newValue: 'dark' });
+  assertTheme(env, 'dark');
+  assert.equal(env.status.textContent, 'Tema oscuro activado.');
   env.window.emit('storage', { key: storageKey, newValue: 'system' });
   assertTheme(env, 'light', 'system');
   env.setSystem(true);
   assertTheme(env, 'dark', 'system');
   env.window.emit('storage', { key: storageKey, newValue: null });
-  assertTheme(env, 'dark');
-  env.window.emit('storage', { key: storageKey, newValue: 'light' });
+  assertTheme(env, 'light');
+  env.window.emit('storage', { key: storageKey, newValue: 'dark' });
   env.window.emit('storage', { key: null, newValue: null });
-  assertTheme(env, 'dark');
+  assertTheme(env, 'light');
   assert.equal(env.writes.length, 0);
 });
 
-test('Un evento de almacenamiento ajeno no altera el tema y un valor inválido vuelve al oscuro', () => {
-  const env = environment({ saved: 'light' });
+test('Un evento de almacenamiento ajeno no altera el tema y un valor inválido vuelve al claro', () => {
+  const env = environment({ saved: 'dark' });
   const eventCount = env.events.length;
-  env.window.emit('storage', { key: 'mathbrain-saved', newValue: 'dark' });
-  assertTheme(env, 'light');
+  env.window.emit('storage', { key: 'mathbrain-saved', newValue: 'light' });
+  assertTheme(env, 'dark');
   assert.equal(env.events.length, eventCount);
   env.window.emit('storage', { key: storageKey, newValue: 'sepia' });
-  assertTheme(env, 'dark');
+  assertTheme(env, 'light');
   assert.equal(env.writes.length, 0);
 });
 

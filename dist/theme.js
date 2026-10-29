@@ -5,8 +5,8 @@
   const preferences = ['dark', 'light', 'system'];
   const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
   const root = document.documentElement;
-  const validPreference = value => preferences.includes(value) ? value : 'dark';
-  let preference = 'dark';
+  const validPreference = value => preferences.includes(value) ? value : 'light';
+  let preference = 'light';
   try { preference = validPreference(localStorage.getItem(storageKey)); } catch {}
 
   function applyTheme(announce = false) {
@@ -14,7 +14,7 @@
     root.dataset.theme = theme;
     root.dataset.themePreference = preference;
     root.style.colorScheme = theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'light' ? '#edf3fa' : '#070b18');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'light' ? '#ffffff' : '#070b18');
     document.querySelectorAll('[data-theme-select]').forEach(control => { control.value = preference; });
     document.querySelectorAll('[data-theme-icon]').forEach(element => {
       if (element.dataset.themeIcon === (preference === 'system' ? 'system' : theme)) element.removeAttribute('hidden');

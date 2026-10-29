@@ -1,46 +1,50 @@
-// Nebi, la mascota de MathBrain: un pequeño cerebro de cristal facetado, como el símbolo de la marca,
-// con una chispa de idea encima. window.MATHBRAIN_MASCOT.svg(estado) devuelve su dibujo SVG.
-// Estados: saluda, feliz, piensa, animo, celebra.
+// Octavio, la mascota de MathBrain: un pulpo curioso con gafas redondas. Los pulpos tienen un cerebro central
+// y neuronas en cada uno de sus ocho brazos, por eso se dice que tienen «nueve cerebros».
+// window.MATHBRAIN_MASCOT.svg(estado) devuelve su dibujo SVG. Estados: saluda, feliz, piensa, animo, celebra.
 (() => {
   'use strict';
 
   const moods = ['saluda', 'feliz', 'piensa', 'animo', 'celebra'];
   let sequence = 0;
 
-  function svg(mood = 'feliz', { label = 'Nebi, la mascota de MathBrain' } = {}) {
+  // Brazos que asoman bajo la cabeza. Cada estado levanta o mueve algunos.
+  const arms = {
+    resting: ['M34 80c-9 9-17 15-25 12-4-2-3-7 1-7', 'M44 84c-3 12-8 21-16 24-4 1-6-3-3-6', 'M55 86c0 12-2 22-7 27-3 3-7 0-5-3', 'M65 86c0 12 2 22 7 27 3 3 7 0 5-3', 'M76 84c3 12 8 21 16 24 4 1 6-3 3-6', 'M86 80c9 9 17 15 25 12 4-2 3-7-1-7'],
+    saluda: ['M34 80c-9 9-17 15-25 12-4-2-3-7 1-7', 'M44 84c-3 12-8 21-16 24-4 1-6-3-3-6', 'M55 86c0 12-2 22-7 27-3 3-7 0-5-3', 'M65 86c0 12 2 22 7 27 3 3 7 0 5-3', 'M76 84c3 12 8 21 16 24 4 1 6-3 3-6', 'M88 74c10-6 18-16 20-28 1-5 6-5 7-1'],
+    celebra: ['M32 74c-10-6-18-16-20-28-1-5-6-5-7-1', 'M44 84c-3 12-8 21-16 24-4 1-6-3-3-6', 'M55 86c0 12-2 22-7 27-3 3-7 0-5-3', 'M65 86c0 12 2 22 7 27 3 3 7 0 5-3', 'M76 84c3 12 8 21 16 24 4 1 6-3 3-6', 'M88 74c10-6 18-16 20-28 1-5 6-5 7-1'],
+    piensa: ['M34 80c-9 9-17 15-25 12-4-2-3-7 1-7', 'M44 84c-3 12-8 21-16 24-4 1-6-3-3-6', 'M55 86c0 12-2 22-7 27-3 3-7 0-5-3', 'M65 86c0 12 2 22 7 27 3 3 7 0 5-3', 'M76 84c3 12 8 21 16 24 4 1 6-3 3-6', 'M86 78c6 6 6 14-2 16-6 1-10-3-12-7']
+  };
+
+  function svg(mood = 'feliz', { label = 'Octavio, la mascota de MathBrain' } = {}) {
     const state = moods.includes(mood) ? mood : 'feliz';
     sequence += 1;
-    const body = `nebi-body-${sequence}`;
-    const glow = `nebi-glow-${sequence}`;
+    const skin = `octavio-skin-${sequence}`;
+    const shine = `octavio-shine-${sequence}`;
     const look = { piensa: [2, -3], animo: [0, 1], saluda: [1, 0], feliz: [0, 0], celebra: [0, 0] }[state];
     const eyes = state === 'celebra'
-      ? '<path d="M41 63q7-8 14 0M65 63q7-8 14 0" fill="none" stroke="#0b1426" stroke-width="3.4" stroke-linecap="round"/>'
-      : `<g><circle cx="48" cy="62" r="9.5" fill="#fff"/><circle cx="72" cy="62" r="9.5" fill="#fff"/><circle cx="${48 + look[0]}" cy="${62 + look[1]}" r="4.8" fill="#0b1426"/><circle cx="${72 + look[0]}" cy="${62 + look[1]}" r="4.8" fill="#0b1426"/><circle cx="${49.6 + look[0]}" cy="${60.2 + look[1]}" r="1.7" fill="#fff"/><circle cx="${73.6 + look[0]}" cy="${60.2 + look[1]}" r="1.7" fill="#fff"/></g>`;
-    const brows = state === 'animo' ? '<path d="M41 50l12 3M79 50l-12 3" stroke="#0b1426" stroke-width="2.6" stroke-linecap="round"/>' : state === 'piensa' ? '<path d="M42 49q6-4 12-1" fill="none" stroke="#0b1426" stroke-width="2.4" stroke-linecap="round"/>' : '';
+      ? '<path d="M39 54q7-8 14 0M67 54q7-8 14 0" fill="none" stroke="#2b2240" stroke-width="3.4" stroke-linecap="round"/>'
+      : `<circle cx="46" cy="54" r="9.5" fill="#fff"/><circle cx="74" cy="54" r="9.5" fill="#fff"/><circle cx="${46 + look[0]}" cy="${54 + look[1]}" r="5" fill="#2b2240"/><circle cx="${74 + look[0]}" cy="${54 + look[1]}" r="5" fill="#2b2240"/><circle cx="${47.8 + look[0]}" cy="${52 + look[1]}" r="1.8" fill="#fff"/><circle cx="${75.8 + look[0]}" cy="${52 + look[1]}" r="1.8" fill="#fff"/>`;
+    const glasses = '<g fill="none" stroke="#2b2240" stroke-width="2.6"><circle cx="46" cy="54" r="12.5"/><circle cx="74" cy="54" r="12.5"/><path d="M58.5 53q1.5-2 3 0M33.5 52l-6-3M86.5 52l6-3" stroke-linecap="round"/></g>';
+    const brows = state === 'animo' ? '<path d="M38 37l12 3M82 37l-12 3" stroke="#2b2240" stroke-width="2.8" stroke-linecap="round"/>' : state === 'piensa' ? '<path d="M38 38q7-5 14-1" fill="none" stroke="#2b2240" stroke-width="2.6" stroke-linecap="round"/>' : '';
     const mouth = {
-      feliz: '<path d="M52 76q8 8 16 0" fill="none" stroke="#0b1426" stroke-width="3.2" stroke-linecap="round"/>',
-      saluda: '<path d="M51 75q9 10 18 0z" fill="#0b1426"/><path d="M56 80q4 3 8 0" fill="#f28fb0"/>',
-      piensa: '<circle cx="62" cy="79" r="3.2" fill="#0b1426"/>',
-      animo: '<path d="M53 78q7 5 14-1" fill="none" stroke="#0b1426" stroke-width="3.2" stroke-linecap="round"/>',
-      celebra: '<path d="M49 73q11 15 22 0z" fill="#0b1426"/><path d="M55 80q5 4 10 0" fill="#f28fb0"/>'
-    }[state];
-    const arms = {
-      feliz: '<path d="M24 70q-8 7-6 16M96 70q8 7 6 16"/>',
-      saluda: '<path d="M24 70q-8 7-6 16M97 66q12-9 9-24"/>',
-      piensa: '<path d="M24 70q-8 7-6 16M95 76q-6 9-17 7"/>',
-      animo: '<path d="M24 72q-10 2-12-8M96 72q10 2 12-8"/>',
-      celebra: '<path d="M25 64q-12-8-10-24M95 64q12-8 10-24"/>'
+      feliz: '<path d="M52 71q8 8 16 0" fill="none" stroke="#2b2240" stroke-width="3.2" stroke-linecap="round"/>',
+      saluda: '<path d="M51 70q9 11 18 0z" fill="#2b2240"/><path d="M56 75q4 3 8 0" fill="#ff8fb3"/>',
+      piensa: '<ellipse cx="62" cy="73" rx="3.4" ry="3" fill="#2b2240"/>',
+      animo: '<path d="M53 73q7 5 14-1" fill="none" stroke="#2b2240" stroke-width="3.2" stroke-linecap="round"/>',
+      celebra: '<path d="M48 68q12 16 24 0z" fill="#2b2240"/><path d="M54 75q6 4 12 0" fill="#ff8fb3"/>'
     }[state];
     const extras = state === 'celebra'
-      ? '<g fill="#e9cd9c"><path d="M14 22l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/><path d="M104 18l1.6 4 4 1.6-4 1.6-1.6 4-1.6-4-4-1.6 4-1.6z"/><circle cx="20" cy="104" r="2.4"/><circle cx="104" cy="100" r="2"/></g>'
-      : state === 'piensa' ? '<text x="98" y="30" fill="#e9cd9c" font-size="20" font-weight="700" font-family="Georgia,serif">?</text>' : '';
-    return `<svg class="nebi" data-mood="${state}" viewBox="0 0 120 124" role="img" aria-label="${label}"><defs><linearGradient id="${body}" x1="20" y1="14" x2="100" y2="110" gradientUnits="userSpaceOnUse"><stop stop-color="#a4ecdc"/><stop offset=".55" stop-color="#63b7e6"/><stop offset="1" stop-color="#4f73e3"/></linearGradient><radialGradient id="${glow}"><stop stop-color="#fff6c9"/><stop offset="1" stop-color="#e9cd9c" stop-opacity="0"/></radialGradient></defs>${extras}<circle cx="60" cy="6" r="9" fill="url(#${glow})" class="nebi-spark"/><path d="M60 14V6" stroke="#a4ecdc" stroke-width="2.4" stroke-linecap="round"/><circle cx="60" cy="5" r="3" fill="#fff6c9"/><g class="nebi-arms" fill="none" stroke="url(#${body})" stroke-width="7" stroke-linecap="round">${arms}</g><ellipse cx="47" cy="112" rx="9" ry="5" fill="#3f5fc4"/><ellipse cx="73" cy="112" rx="9" ry="5" fill="#3f5fc4"/><path d="M60 15 91 27l12 31-13 35-30 14-30-14-13-35 12-31z" fill="url(#${body})" stroke="url(#${body})" stroke-width="8" stroke-linejoin="round"/><g fill="none" stroke="#fff" stroke-opacity=".32" stroke-width="1.5" stroke-linejoin="round"><path d="M60 15v24M29 27l15 16M91 27 76 43M17 58l20 3M103 58l-20 3"/><path d="M44 43h32l8 18-8 22H44l-8-22z"/></g><path d="M36 30 52 22" stroke="#fff" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/><circle cx="38" cy="73" r="4.5" fill="#f28fb0" opacity=".45"/><circle cx="82" cy="73" r="4.5" fill="#f28fb0" opacity=".45"/>${brows}${eyes}${mouth}</svg>`;
+      ? '<g fill="#ffc233"><path d="M12 18l2.2 5.2 5.2 2.2-5.2 2.2L12 33l-2.2-5.2-5.2-2.2 5.2-2.2z"/><path d="M108 12l1.8 4.2 4.2 1.8-4.2 1.8-1.8 4.2-1.8-4.2-4.2-1.8 4.2-1.8z"/></g><circle cx="22" cy="44" r="2.6" fill="#1cb0f6"/><circle cx="100" cy="40" r="2.4" fill="#23c16b"/>'
+      : state === 'piensa' ? '<text x="96" y="26" fill="#6c4df6" font-size="22" font-weight="800" font-family="Nunito,Arial,sans-serif">?</text>'
+        : state === 'saluda' ? '<path d="M106 30q4 2 5 6M110 24q6 3 7 9" fill="none" stroke="#ffc233" stroke-width="2.4" stroke-linecap="round"/>' : '';
+    const pose = arms[state] || arms.resting;
+    return `<svg class="octavio" data-mood="${state}" viewBox="0 0 120 124" role="img" aria-label="${label}"><defs><linearGradient id="${skin}" x1="24" y1="8" x2="96" y2="112" gradientUnits="userSpaceOnUse"><stop stop-color="#ff9a6b"/><stop offset=".6" stop-color="#ff6f61"/><stop offset="1" stop-color="#f2507a"/></linearGradient><radialGradient id="${shine}" cx="42" cy="22" r="30" gradientUnits="userSpaceOnUse"><stop stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs><ellipse cx="60" cy="118" rx="34" ry="4.5" fill="#2b2240" opacity=".08"/>${extras}<g class="octavio-arms" fill="none" stroke="url(#${skin})" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">${pose.map(path => `<path d="${path}"/>`).join('')}</g><g fill="#ffd2c2">${state === 'celebra' ? '' : '<circle cx="12" cy="88" r="1.6"/><circle cx="108" cy="88" r="1.6"/>'}<circle cx="31" cy="102" r="1.6"/><circle cx="89" cy="102" r="1.6"/></g><path d="M60 8C83 8 99 26 99 50c0 18-9 30-23 35H44C30 80 21 68 21 50 21 26 37 8 60 8Z" fill="url(#${skin})"/><path d="M60 8C83 8 99 26 99 50c0 18-9 30-23 35H44C30 80 21 68 21 50 21 26 37 8 60 8Z" fill="url(#${shine})"/><g fill="#ffb59a" opacity=".85"><circle cx="77" cy="22" r="4"/><circle cx="87" cy="31" r="2.6"/><circle cx="33" cy="30" r="2.2"/></g><circle cx="35" cy="66" r="5" fill="#ff8fb3" opacity=".55"/><circle cx="85" cy="66" r="5" fill="#ff8fb3" opacity=".55"/>${brows}${eyes}${glasses}${mouth}${state === 'piensa' ? '<g transform="rotate(-35 70 92)"><rect x="66" y="78" width="6" height="22" rx="1.5" fill="#ffc233"/><path d="M66 100h6l-3 6z" fill="#2b2240"/><rect x="66" y="78" width="6" height="4" rx="1" fill="#ff8fb3"/></g>' : ''}</svg>`;
   }
 
-  // Nebi con un globo de diálogo. El texto llega ya escapado desde quien lo usa.
+  // Octavio con un globo de diálogo. El texto llega ya escapado desde quien lo usa.
   function say(mood, html, className = '') {
-    return `<div class="nebi-say ${className}"><span class="nebi-figure">${svg(mood, { label: 'Nebi' })}</span><p class="nebi-bubble">${html}</p></div>`;
+    return `<div class="nebi-say mascot-say ${className}"><span class="nebi-figure mascot-figure">${svg(mood, { label: 'Octavio' })}</span><p class="nebi-bubble mascot-bubble">${html}</p></div>`;
   }
 
-  window.MATHBRAIN_MASCOT = { name: 'Nebi', moods, svg, say };
+  window.MATHBRAIN_MASCOT = { name: 'Octavio', moods, svg, say };
 })();
