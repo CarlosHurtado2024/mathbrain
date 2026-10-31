@@ -100,11 +100,13 @@
     stats.streak = currentStreak() + 1;
     stats.lastDay = today;
     stats.days = [...stats.days, today].slice(-120);
+    cloudRecord('day', { day: today });
   }
 
   function addXp(points) {
     stats.xp += points;
     saveStats();
+    cloudRecord('xp', { amount: points });
     updateStatsChip();
   }
 
@@ -254,7 +256,7 @@
       + `<article class="home-next ${course.color}" aria-labelledby="home-next-title"><p class="home-next-course"><span class="home-next-symbol" aria-hidden="true">${courseSymbol(course)}</span>${escape(course.title)} · ${escape(unit.kicker)}</p><h2 id="home-next-title"><small>${progress.done ? 'Siguiente lección' : 'Primera lección'}${label ? ` · ${escape(label)}` : ''}</small>${escape(next.title)}</h2><p class="home-next-description">${escape(next.description)}</p><p class="home-next-meta">${lessonMeta(next)}</p>${progress.done ? progressBar(progress) : ''}<a class="button button-primary button-big home-next-button" href="#contenido/${next.id}">${icon('play')}${started ? 'Continuar aprendiendo' : 'Empezar a aprender'}</a></article>`
       + `<section class="home-path" aria-labelledby="home-path-title"><div class="home-section-head"><h2 id="home-path-title">Tu camino</h2><a class="text-button" href="#curso/${course.id}">Ver el curso completo${icon('right')}</a></div>${pathUnit(course, unit, state, { popup: false })}</section>`
       + (others.length ? `<section class="home-others" aria-labelledby="home-others-title"><h2 id="home-others-title">También estudias</h2><ul>${others.map(other => { const otherProgress = courseProgress(other); return `<li class="${other.color}"><a href="#curso/${other.id}"><span class="home-next-symbol" aria-hidden="true">${courseSymbol(other)}</span><span><strong>${escape(other.title)}</strong>${progressBar(otherProgress, false)}</span><small>${otherProgress.percent} %</small></a></li>`; }).join('')}</ul></section>` : '')
-      + `<p class="home-explore">¿Buscas otro tema? <a href="#explorar">Explora los cursos</a></p></div>`;
+      + `<p class="home-explore">¿Buscas otro tema? <a href="#explorar">Explora los cursos</a></p>${started && cloud()?.state.available && cloud()?.state.ready && !cloud()?.state.user ? '<p class="home-explore home-account">Guarda tu progreso en la nube: <a href="#perfil">crea tu cuenta gratis</a></p>' : ''}</div>`;
     document.title = 'Zuka — Aprende matemáticas paso a paso';
   }
 
@@ -522,6 +524,7 @@
     if (!lesson || lesson.type !== 'explanation' || completed.has(id) === value) return;
     if (value) completed.add(id); else completed.delete(id);
     const persisted = storeList('mathbrain-progress', [...completed]);
+    cloudRecord('lesson', { id, done: value });
     if (id === currentLessonId) refreshLessonProgress();
     if (!announce) return;
     const progress = courseProgress(courses.find(course => course.id === lesson.courseId));
@@ -695,7 +698,7 @@
       const key = `${course.id}:${module.index}`;
       const correct = Object.values(player.results).filter(result => result === 'correct').length;
       const passed = challenges && correct / challenges >= .7;
-      if (passed && !stats.reviews.includes(key)) { stats.reviews = [...stats.reviews, key]; player.xp += 30; addXp(30); }
+      if (passed && !stats.reviews.includes(key)) { stats.reviews = [...stats.reviews, key]; cloudRecord('review', { key }); player.xp += 30; addXp(30); }
       recordStudyDay();
       saveStats();
       mood = passed ? 'celebra' : 'animo';
@@ -712,7 +715,95 @@
     player.finished = true;
   }
 
-  // Perfil del estudiante (#perfil). No hay cuentas: todo se calcula con los datos guardados en este navegador.
+  // Cuenta (opcional) en Supabase: src/cloud.js. Sin ese módulo o sin conexión, el perfil sigue funcionando en el dispositivo.
+  const cloud = () => window.ZUKA_CLOUD;
+  const cloudRecord = (kind, data) => { cloud()?.record(kind, data); };
+  let authMode = 'signup';
+  let authNotice = '';
+
+  // Vuelve a leer el progreso del dispositivo después de unirlo con la cuenta.
+  function reloadLocalState() {
+    completed.clear();
+    loadList('mathbrain-progress').forEach(id => completed.add(id));
+    saved.clear();
+    loadList('mathbrain-saved').forEach(id => saved.add(id));
+    Object.assign(stats, loadStats());
+    select('#saved-count').textContent = saved.size;
+  }
+
+  function syncLabel(service) {
+    const { status, lastSync, message } = service.state;
+    if (status === 'syncing') return 'Sincronizando tu progreso…';
+    if (status === 'offline') return 'Sin conexión: tus avances se guardarán en la cuenta al volver a estar en línea.';
+    if (status === 'error') return message || 'No se pudo sincronizar. Lo intentaremos de nuevo.';
+    return lastSync ? 'Tu progreso está guardado en tu cuenta.' : 'Tu progreso se guarda en tu cuenta.';
+  }
+
+  function accountCard() {
+    const service = cloud();
+    const heading = '<div class="profile-card-heading"><h2 id="profile-account-title">Tu cuenta</h2>';
+    if (!service?.state.available) return `<section class="profile-card profile-account" aria-labelledby="profile-account-title">${heading}<p>Las cuentas no están disponibles en este momento. Tu progreso sigue guardado en este dispositivo.</p></div></section>`;
+    const { ready, user, recovery } = service.state;
+    const notice = authNotice || service.state.message;
+    const noticeHtml = `<p class="profile-auth-notice" id="profile-auth-notice" role="status" aria-live="polite">${notice ? escape(notice) : ''}</p>`;
+    if (!ready) return `<section class="profile-card profile-account" aria-labelledby="profile-account-title">${heading}<p>Comprobando tu sesión…</p></div></section>`;
+    if (user && recovery) {
+      return `<section class="profile-card profile-account" aria-labelledby="profile-account-title">${heading}<p>Escribe tu nueva contraseña para <strong>${escape(user.email)}</strong>.</p></div><form class="profile-auth" data-auth-form="recovery"><div class="profile-field"><label for="auth-password">Nueva contraseña</label><input id="auth-password" name="password" type="password" autocomplete="new-password" minlength="8" required></div><button class="button button-primary" type="submit">Guardar contraseña</button></form>${noticeHtml}</section>`;
+    }
+    if (user) {
+      return `<section class="profile-card profile-account is-signed-in" aria-labelledby="profile-account-title">${heading}<p>Conectado como <strong>${escape(user.email)}</strong></p></div><p class="profile-sync is-${service.state.status}" id="profile-sync-status" role="status" aria-live="polite">${icon(service.state.status === 'error' || service.state.status === 'offline' ? 'close' : 'check')}<span>${escape(syncLabel(service))}</span></p><div class="profile-actions"><button type="button" class="button button-secondary" data-auth-signout="1">Cerrar sesión</button><button type="button" class="text-button profile-reset" data-auth-delete="1">Eliminar mi cuenta</button></div>${authNotice ? noticeHtml : ''}</section>`;
+    }
+    const modes = { signup: ['Crear cuenta', 'new-password'], signin: ['Iniciar sesión', 'current-password'], reset: ['Enviar enlace', ''] };
+    const [submit, passwordAutocomplete] = modes[authMode];
+    const intro = authMode === 'reset' ? 'Escribe tu correo y te enviaremos un enlace para crear una nueva contraseña.' : 'Gratis. Guarda tu progreso en la nube y continúa en tu celular o en tu computador.';
+    return `<section class="profile-card profile-account" aria-labelledby="profile-account-title">${heading}<p>${intro}</p></div>`
+      + (authMode === 'reset' ? '' : `<div class="profile-auth-tabs" role="group" aria-label="Tipo de acceso"><button type="button" data-auth-mode="signup" aria-pressed="${authMode === 'signup'}">Crear cuenta</button><button type="button" data-auth-mode="signin" aria-pressed="${authMode === 'signin'}">Iniciar sesión</button></div>`)
+      + `<form class="profile-auth" data-auth-form="${authMode}"><div class="profile-field"><label for="auth-email">Correo</label><input id="auth-email" name="email" type="email" autocomplete="email" inputmode="email" required></div>${passwordAutocomplete ? `<div class="profile-field"><label for="auth-password">Contraseña${authMode === 'signup' ? ' <span>(mínimo 8 caracteres)</span>' : ''}</label><input id="auth-password" name="password" type="password" autocomplete="${passwordAutocomplete}"${authMode === 'signup' ? ' minlength="8"' : ''} required></div>` : ''}<button class="button button-primary" type="submit">${submit}</button></form>`
+      + `<div class="profile-auth-links">${authMode === 'signin' ? '<button type="button" class="text-button" data-auth-mode="reset">¿Olvidaste tu contraseña?</button>' : authMode === 'reset' ? '<button type="button" class="text-button" data-auth-mode="signin">Volver a iniciar sesión</button>' : ''}</div>${noticeHtml}</section>`;
+  }
+
+  async function submitAuth(form) {
+    const service = cloud();
+    if (!service) return;
+    const mode = form.dataset.authForm;
+    const email = (select('#auth-email')?.value || '').trim();
+    const password = select('#auth-password')?.value || '';
+    if (mode !== 'recovery' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showAuthNotice('Revisa que el correo esté bien escrito.'); return; }
+    if (['signup', 'recovery'].includes(mode) && password.length < 8) { showAuthNotice('La contraseña debe tener al menos 8 caracteres.'); return; }
+    const button = select('button[type="submit"]', form);
+    if (button) button.disabled = true;
+    service.state.message = '';
+    try {
+      if (mode === 'signup') {
+        const { needsConfirmation } = await service.signUp(email, password);
+        authNotice = needsConfirmation ? `Te enviamos un correo a ${email}. Ábrelo y pulsa el enlace para activar tu cuenta.` : '';
+        if (needsConfirmation) authMode = 'signin';
+      } else if (mode === 'signin') {
+        await service.signIn(email, password);
+        authNotice = '';
+        toast('Sesión iniciada. Uniendo tu progreso con tu cuenta…');
+      } else if (mode === 'reset') {
+        await service.requestPasswordReset(email);
+        authNotice = `Si hay una cuenta con ${email}, te llegará un enlace para crear una nueva contraseña.`;
+        authMode = 'signin';
+      } else {
+        await service.updatePassword(password);
+        authNotice = '';
+        toast('Contraseña actualizada.');
+      }
+    } catch (error) {
+      authNotice = service.describe(error);
+    }
+    if (page === 'perfil') renderProfile();
+  }
+
+  function showAuthNotice(message) {
+    authNotice = message;
+    const notice = select('#profile-auth-notice');
+    if (notice) notice.textContent = message;
+  }
+
+  // Perfil del estudiante (#perfil). Todo se calcula con los datos guardados en este dispositivo (y unidos con la cuenta, si hay sesión).
   const storageKeys = ['mathbrain-progress', 'mathbrain-stats', 'mathbrain-saved', 'mathbrain-recent', 'mathbrain-profile', 'mathbrain-theme'];
 
   function loadProfile() {
@@ -784,12 +875,13 @@
     const statItems = [['flame', streak, streak === 1 ? 'día de racha' : 'días de racha'], ['star', bestStreak(), 'mejor racha'], ['check', completed.size, completed.size === 1 ? 'lección completada' : 'lecciones completadas'], ['bookmark', saved.size, saved.size === 1 ? 'contenido guardado' : 'contenidos guardados']];
     select('#detail-view').innerHTML = `<section class="profile-view" aria-labelledby="detail-title">`
       + `<header class="profile-header"><span class="profile-avatar" aria-hidden="true">${mascot.svg(streak ? 'celebra' : 'feliz')}</span><div class="profile-identity"><p class="eyebrow">TU PERFIL</p><h1 id="detail-title" tabindex="-1">${profile.name ? `Hola, ${escape(profile.name)}` : 'Hola'}</h1><p class="profile-level"><strong>Nivel ${level.level}</strong> · ${stats.xp} XP</p><div class="profile-level-bar"><span class="course-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="${level.need}" aria-valuenow="${level.into}" aria-label="Progreso hacia el nivel ${level.level + 1}"><span style="width:${level.percent}%"></span></span><small>${level.need - level.into} XP para el nivel ${level.level + 1}</small></div></div></header>`
+      + accountCard()
       + `<form class="profile-name" data-profile-form="1"><div class="profile-field"><label for="profile-name">¿Cómo quieres que te llamemos?</label><input id="profile-name" name="name" type="text" maxlength="40" autocomplete="nickname" placeholder="Tu nombre o apodo" value="${escape(profile.name)}"></div><div class="profile-field"><label for="profile-goal">Meta semanal <span>(opcional)</span></label><select id="profile-goal" name="goal">${[[0, 'Sin meta'], [2, '2 días por semana'], [3, '3 días por semana'], [5, '5 días por semana'], [7, 'Todos los días']].map(([value, label]) => `<option value="${value}"${profile.goal === value ? ' selected' : ''}>${label}</option>`).join('')}</select></div><button class="button button-secondary" type="submit">Guardar</button></form>`
       + `<ul class="profile-stats" aria-label="Tus números">${statItems.map(([name, value, label]) => `<li>${icon(name)}<strong>${value}</strong><span>${label}</span></li>`).join('')}</ul>`
       + `<section class="profile-card" aria-labelledby="profile-week-title"><div class="profile-card-heading"><h2 id="profile-week-title">Últimos 7 días</h2><p>${studiedWeek ? `Estudiaste ${plural(studiedWeek, 'día', 'días')}${profile.goal ? ` de tu meta de ${profile.goal}` : ' de 7'}.` : 'Completa una lección y aparecerá aquí.'}</p></div><ol class="profile-week">${week.map(day => `<li class="${day.done ? 'is-done' : ''}${day.today ? ' is-today' : ''}"><span aria-hidden="true">${day.done ? icon('check') : ''}</span><small aria-hidden="true">${escape(day.short)}</small><span class="sr-only">${escape(day.long)}: ${day.done ? 'estudiaste' : 'sin estudio'}</span></li>`).join('')}</ol></section>`
       + `<section class="profile-card" aria-labelledby="profile-courses-title"><div class="profile-card-heading"><h2 id="profile-courses-title">Tus cursos</h2><p>${progress.some(item => item.progress.done) ? 'Tu avance en cada ruta.' : 'Todavía no empiezas ningún curso. Elige uno y da el primer paso.'}</p></div><ul class="profile-courses">${progress.map(({ course, progress: courseState }) => `<li class="${course.color}"><span class="profile-course-symbol" aria-hidden="true">${courseSymbol(course)}</span><div><a href="#curso/${course.id}"><strong>${escape(course.title)}</strong></a>${progressBar(courseState)}</div><a class="text-button" href="#contenido/${courseState.next.id}">${courseState.done === courseState.total ? 'Repasar' : courseState.done ? 'Continuar' : 'Empezar'}${icon('right')}</a></li>`).join('')}</ul></section>`
       + `<section class="profile-card" aria-labelledby="profile-badges-title"><div class="profile-card-heading"><h2 id="profile-badges-title">Logros</h2><p>${achievements().filter(([, , earned]) => earned).length} de ${achievements().length} conseguidos.</p></div><ul class="profile-badges">${achievements().map(([name, description, earned]) => `<li class="${earned ? 'is-earned' : ''}"><span class="profile-badge-icon" aria-hidden="true">${icon(earned ? 'star' : 'lock')}</span><strong>${name}</strong><small>${description}</small><span class="sr-only">${earned ? 'Conseguido' : 'Pendiente'}</span></li>`).join('')}</ul></section>`
-      + `<section class="profile-card profile-data" aria-labelledby="profile-data-title"><div class="profile-card-heading"><h2 id="profile-data-title">Tus datos</h2><p>Zuka no necesita cuenta: tu progreso se guarda solo en este dispositivo. Descarga una copia para pasarla a otro celular o computador.</p></div><div class="profile-actions"><button type="button" class="button button-secondary" data-profile-export="1">${icon('download')}Descargar copia</button><label class="button button-secondary profile-import">${icon('book')}Restaurar copia<input class="sr-only" type="file" accept=".json,application/json" data-profile-import="1"></label><button type="button" class="text-button profile-reset" data-profile-reset="1">Borrar mi progreso</button></div></section>`
+      + `<section class="profile-card profile-data" aria-labelledby="profile-data-title"><div class="profile-card-heading"><h2 id="profile-data-title">Tus datos</h2><p>${cloud()?.state.user ? 'Tu progreso se guarda en este dispositivo y en tu cuenta. También puedes descargar una copia.' : 'Sin cuenta, tu progreso se guarda solo en este dispositivo. Descarga una copia para pasarla a otro celular o computador.'}</p></div><div class="profile-actions"><button type="button" class="button button-secondary" data-profile-export="1">${icon('download')}Descargar copia</button><label class="button button-secondary profile-import">${icon('book')}Restaurar copia<input class="sr-only" type="file" accept=".json,application/json" data-profile-import="1"></label><button type="button" class="text-button profile-reset" data-profile-reset="1">Borrar mi progreso</button></div></section>`
       + `</section>`;
     document.title = 'Tu perfil | Zuka';
   }
@@ -822,8 +914,13 @@
     }
   }
 
-  function resetProgress() {
-    if (!window.confirm('Se borrarán tus lecciones completadas, tu racha, tus XP y tus guardados en este dispositivo. ¿Continuar?')) return;
+  async function resetProgress() {
+    const signedIn = Boolean(cloud()?.state.user);
+    if (!window.confirm(`Se borrarán tus lecciones completadas, tu racha, tus XP y tus guardados ${signedIn ? 'en este dispositivo y en tu cuenta' : 'en este dispositivo'}. ¿Continuar?`)) return;
+    if (signedIn) {
+      try { await cloud().resetProgress(); }
+      catch (error) { toast(cloud().describe(error)); return; }
+    }
     try { for (const key of storageKeys.filter(key => key !== 'mathbrain-theme')) localStorage.removeItem(key); } catch { /* Sin almacenamiento no hay nada que borrar. */ }
     location.reload();
   }
@@ -1032,6 +1129,7 @@
     if (!resource) return;
     if (saved.has(id)) saved.delete(id); else saved.add(id);
     const persisted = storeList('mathbrain-saved', [...saved]);
+    cloudRecord('saved', { id, on: saved.has(id) });
     select('#saved-count').textContent = saved.size;
     selectAll(`[data-save="${id}"]`).forEach(button => {
       button.setAttribute('aria-pressed', String(saved.has(id)));
@@ -1102,6 +1200,17 @@
       return;
     }
     if (event.target.closest('[data-profile-export]')) { exportProgress(); return; }
+    const modeButton = event.target.closest('[data-auth-mode]');
+    if (modeButton) { authMode = modeButton.dataset.authMode; authNotice = ''; if (cloud()) cloud().state.message = ''; renderProfile(); select('#auth-email')?.focus(); return; }
+    if (event.target.closest('[data-auth-signout]')) {
+      cloud()?.signOut().then(() => location.reload()).catch(error => toast(cloud().describe(error)));
+      return;
+    }
+    if (event.target.closest('[data-auth-delete]')) {
+      if (!window.confirm('Se eliminará tu cuenta y todo el progreso guardado en ella. No se puede deshacer. ¿Continuar?')) return;
+      cloud()?.deleteAccount().then(() => location.reload()).catch(error => toast(cloud().describe(error)));
+      return;
+    }
     if (event.target.closest('[data-profile-reset]')) { resetProgress(); return; }
     const download = event.target.closest('[data-download]');
     if (download) downloadCourse(download.dataset.download);
@@ -1111,11 +1220,15 @@
     }
   });
   document.addEventListener('submit', event => {
+    const authForm = event.target.closest('[data-auth-form]');
+    if (authForm) { event.preventDefault(); submitAuth(authForm); return; }
     if (!event.target.closest('[data-profile-form]')) return;
     event.preventDefault();
     const name = select('#profile-name').value.trim().slice(0, 40);
     const goal = Number(select('#profile-goal')?.value) || 0;
-    storeList('mathbrain-profile', { name, goal: [2, 3, 5, 7].includes(goal) ? goal : 0 });
+    const weeklyTarget = [2, 3, 5, 7].includes(goal) ? goal : 0;
+    storeList('mathbrain-profile', { name, goal: weeklyTarget });
+    cloudRecord('profile', { name, goal: weeklyTarget });
     renderProfile();
     select('#detail-title').focus();
     toast(name ? `Listo, ${name}. Así te saludará Zuka.` : 'Nombre borrado.');
@@ -1129,6 +1242,22 @@
     if (player) return;
     lastRoutedHash = null;
     route(false);
+  });
+  // La cuenta avisa cuando cambia la sesión, el estado de la sincronización o el progreso unido.
+  window.addEventListener('zuka:cloud', event => {
+    const reason = event.detail?.reason;
+    if (reason === 'sync') { reloadLocalState(); updateStatsChip(); }
+    if (reason === 'status') {
+      const status = select('#profile-sync-status');
+      if (status && cloud()) { status.className = `profile-sync is-${cloud().state.status}`; select('span', status).textContent = syncLabel(cloud()); }
+      return;
+    }
+    if (player) return;
+    // No se redibuja mientras la persona escribe en el formulario de acceso.
+    if (page === 'perfil' && document.activeElement?.closest?.('.profile-auth')) return;
+    if (page === 'perfil') renderProfile();
+    else if (page === 'inicio') renderHome();
+    else if (reason === 'sync') { lastRoutedHash = null; route(false); }
   });
   window.addEventListener('hashchange', () => route());
   window.addEventListener('popstate', () => route());

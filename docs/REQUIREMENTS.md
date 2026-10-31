@@ -36,8 +36,9 @@ Estado: ✅ hecho · 🔜 planificado (ver `ROADMAP.md`).
 | RF-22 | Perfil: nombre, nivel, racha actual y mejor racha, semana, avance por curso | ✅ |
 | RF-23 | Copia de seguridad del progreso (descargar y restaurar) y borrado | ✅ |
 | RF-24 | Guardados («Mi biblioteca») y contenidos recientes | ✅ |
-| RF-25 | Meta diaria configurable e insignias | 🔜 |
-| RF-26 | Cuenta opcional y sincronización entre dispositivos | 🔜 |
+| RF-25 | Meta semanal opcional y logros | ✅ |
+| RF-26 | Cuenta opcional (correo y contraseña) y sincronización entre dispositivos con Supabase | ✅ |
+| RF-27 | Recuperar contraseña, cerrar sesión y eliminar la cuenta con todos sus datos | ✅ |
 
 ### App instalable
 
@@ -56,8 +57,8 @@ Estado: ✅ hecho · 🔜 planificado (ver `ROADMAP.md`).
 | RNF-01 | **Mobile first:** usable desde 320 px de ancho sin desplazamiento horizontal; barra de navegación inferior en el celular. |
 | RNF-02 | **Rendimiento:** la primera carga en 4G debe mostrar el inicio en menos de 3 s; las visitas siguientes cargan desde la caché. |
 | RNF-03 | **Accesibilidad:** WCAG 2.1 AA: contraste, foco visible, etiquetas, MathML para lectores de pantalla, `prefers-reduced-motion`. |
-| RNF-04 | **Privacidad:** sin cuentas, sin rastreadores y sin enviar datos a servidores; el progreso vive en el dispositivo. |
-| RNF-05 | **Sin dependencias en tiempo de ejecución:** HTML, CSS y JavaScript; Node.js solo para compilar y probar. |
+| RNF-04 | **Privacidad:** la cuenta es opcional; sin ella nada sale del dispositivo. Con cuenta solo se guardan el correo, el nombre visible y el progreso, protegidos por Row Level Security. Sin rastreadores. |
+| RNF-05 | **Sin frameworks:** HTML, CSS y JavaScript; las librerías del navegador (supabase-js) van copiadas en `src/vendor/`. Node.js solo para compilar y probar. |
 | RNF-06 | **Idioma:** toda la interfaz y el contenido en español. |
 | RNF-07 | **Calidad:** `npm test` en verde antes de cada commit; el contenido no compila si una fórmula o un ejercicio tiene errores. |
 | RNF-08 | **Compatibilidad:** Chrome y Edge recientes, Safari iOS 16+, Firefox reciente; Android 10 o superior. |

@@ -21,10 +21,12 @@ mathbrain/
 │   ├── app.js               Rutas, vistas, lecciones, progreso y perfil
 │   ├── space.js             Animación del fondo del tema oscuro
 │   ├── install.js           Instalación, modo sin conexión y actualizaciones
+│   ├── config.js            URL y clave publicable de Supabase
+│   ├── cloud.js             Cuenta y sincronización con Supabase
 │   ├── sw.js                Service worker
 │   ├── manifest.webmanifest Nombre, colores e iconos de la app instalada
 │   ├── assets/              Iconos, logo, fotos
-│   └── vendor/katex/        Hoja de estilos y fuentes de KaTeX
+│   └── vendor/              KaTeX (estilos y fuentes) y supabase-js 2.117.3
 ├── content/<curso>/NN-tema.md   Lecciones en Markdown + LaTeX
 ├── scripts/
 │   ├── build.cjs            Compila todo: src/ → dist/ + contenido + versión PWA
@@ -37,6 +39,7 @@ mathbrain/
 ├── docs/                    Documentación
 ├── server.cjs               Servidor local de desarrollo
 ├── vercel.json              Configuración de Vercel
+├── supabase/migrations/     Esquema de la base de datos (SQL)
 └── dist/                    Salida compilada (generada, ignorada por Git)
 ```
 
@@ -55,7 +58,7 @@ mathbrain/
 Orden de carga en `index.html`:
 
 1. `theme.js` (sin `defer`): aplica el tema guardado antes de pintar.
-2. Con `defer`, en orden: `courses.js` → `content.js` → `library.js` (une lecciones, simulaciones y ejercicios en `window.MATHBRAIN_LIBRARY`) → `mascot.js` → `app.js` → `space.js` → `install.js`.
+2. Con `defer`, en orden: `courses.js` → `content.js` → `library.js` (une lecciones, simulaciones y ejercicios en `window.MATHBRAIN_LIBRARY`) → `mascot.js` → `config.js` → `vendor/supabase/supabase.js` → `cloud.js` (cuenta y sincronización, `window.ZUKA_CLOUD`) → `app.js` → `space.js` → `install.js`.
 
 `app.js` es un módulo autoejecutable que lee el estado guardado, dibuja la vista según la dirección y escucha `hashchange`.
 
@@ -98,6 +101,7 @@ Si se añade un archivo que la app necesita sin conexión, hay que agregarlo a `
 | `install.test.cjs` | Flujo de instalación por plataforma |
 | `theme.test.cjs` | Tema claro por defecto y sincronización entre pestañas |
 | `space.test.cjs` | Fondo animado y movimiento reducido |
+| `cloud.test.cjs` | Cuenta y sincronización con un Supabase simulado: unión, envíos, sin conexión y errores |
 
 ## Despliegue
 

@@ -1,9 +1,11 @@
 # Datos y almacenamiento
 
-Zuka **no tiene servidor ni base de datos**. Hay dos tipos de datos:
+Hay dos tipos de datos:
 
-1. **Contenido** (cursos, lecciones, simulaciones): se escribe en el repositorio y se publica con la app.
-2. **Datos del estudiante** (progreso, XP, racha, perfil): se guardan en el `localStorage` del navegador, solo en ese dispositivo.
+1. **Contenido** (cursos, lecciones, simulaciones): se escribe en el repositorio y se publica con la app. No está en la base de datos.
+2. **Datos del estudiante** (progreso, XP, racha, perfil): se guardan en el `localStorage` del dispositivo y, si la persona tiene cuenta, también en **Supabase** (PostgreSQL), que los sincroniza entre dispositivos. La app lee siempre del dispositivo, así funciona sin conexión.
+
+La configuración de Supabase está en [SUPABASE.md](SUPABASE.md).
 
 ## Datos del estudiante (`localStorage`)
 
@@ -79,15 +81,29 @@ Identificador: `<curso>-<número de orden>` (por ejemplo `fundamentos-matematica
 
 Simulaciones (`sim-*`) y ejercicios resueltos (`ej-*`) con tema, nivel, etiquetas de búsqueda y, en los ejercicios, la respuesta (`check`) con su tolerancia.
 
-## Futuro: cuentas y sincronización
+## Base de datos en la nube (Supabase)
 
-Si se añaden cuentas (etapa 4 de `ROADMAP.md`), el modelo propuesto es:
+Esquema: [`supabase/migrations/20261031000000_zuka_inicial.sql`](../supabase/migrations/20261031000000_zuka_inicial.sql). Las cuentas las gestiona Supabase Auth (`auth.users`); al registrarse se crea su perfil. Borrar una cuenta borra en cascada todos sus datos.
 
-| Tabla | Campos principales |
+| Tabla | Columnas | Equivale en el dispositivo a |
+| --- | --- | --- |
+| `profiles` | `id` (= `auth.users.id`), `display_name`, `weekly_goal` (0, 2, 3, 5, 7), `xp`, `created_at`, `updated_at` | `mathbrain-profile` y `xp` de `mathbrain-stats` |
+| `lesson_progress` | `user_id`, `lesson_id`, `completed_at` | `mathbrain-progress` |
+| `study_days` | `user_id`, `day` | `days` de `mathbrain-stats` (racha y semana) |
+| `unit_reviews` | `user_id`, `review_key`, `passed_at` | `reviews` de `mathbrain-stats` |
+| `saved_resources` | `user_id`, `resource_id`, `saved_at` | `mathbrain-saved` |
+
+Las tablas de progreso usan la clave primaria `(user_id, …)`, así una lección o un día no se repiten.
+
+**Seguridad.** Todas las tablas tienen Row Level Security: cada persona solo lee y cambia sus filas (`auth.uid() = user_id`). Los visitantes sin sesión no tienen acceso. Los XP no se escriben directamente: cambian con funciones.
+
+| Función | Para qué |
 | --- | --- |
-| `usuarios` | id, nombre, correo, creado_en |
-| `progreso_lecciones` | usuario_id, leccion_id, completada_en |
-| `eventos_estudio` | usuario_id, fecha, xp, tipo (reto, lección, repaso) |
-| `guardados` | usuario_id, recurso_id, guardado_en |
+| `add_xp(amount)` | Suma los XP ganados (retos, lecciones, repasos) |
+| `merge_xp(total)` | Al unir un dispositivo con la cuenta, deja el mayor de los dos totales |
+| `reset_progress()` | «Borrar mi progreso»: vacía el progreso y deja el perfil |
+| `delete_account()` | «Eliminar mi cuenta»: borra la cuenta y todos sus datos |
 
-Mientras tanto, la app debe seguir funcionando sin cuenta y sin conexión, y al iniciar sesión por primera vez debe subir el progreso local.
+**Sincronización** (`src/cloud.js`). Al iniciar sesión, y cada vez que se abre la app con sesión, el progreso del dispositivo y el de la cuenta se unen en ambos sentidos. Con sesión, cada avance se envía al momento; sin conexión queda pendiente en `zuka-sync-pending` (`{ xp, full }`) y se envía al volver. La sesión de Supabase se guarda en `zuka-auth`.
+
+Cambiar el esquema: crea un archivo nuevo en `supabase/migrations/` (no edites el que ya se aplicó) y ejecútalo en el SQL Editor.

@@ -294,3 +294,32 @@ html[data-theme="light"] .profile-name select { background: #faf9f7; }
   html[data-theme] .lesson-player.is-immersive .player-bar-inner { min-height: 0; }
   html[data-theme] .lesson-player.is-immersive .player-continue { flex: 1; justify-content: center; }
 }
+
+/* ---------- Cuenta (Supabase) en el perfil ---------- */
+.profile-account .profile-card-heading p strong { color: var(--z-text); overflow-wrap: anywhere; }
+.profile-auth-tabs { display: inline-grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 16px; padding: 4px; border-radius: 12px; background: var(--z-locked); }
+.profile-auth-tabs button { padding: 8px 16px; border-radius: 9px; color: var(--z-muted); font-size: 14px; font-weight: 700; }
+.profile-auth-tabs button[aria-pressed="true"] { background: var(--z-surface); color: var(--z-text); box-shadow: 0 1px 2px rgb(32 37 45 / .1); }
+.profile-auth { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; align-items: end; gap: 12px; }
+.profile-auth[data-auth-form="reset"], .profile-auth[data-auth-form="recovery"] { grid-template-columns: minmax(0, 1fr) auto; }
+.profile-auth .profile-field { display: grid; gap: 6px; }
+.profile-auth label { font-size: 14px; font-weight: 600; }
+.profile-auth label span { color: var(--z-muted); font-weight: 500; }
+.profile-auth input { min-height: 46px; padding: 0 14px; border: 1px solid var(--z-line-strong); border-radius: 12px; background: transparent; color: inherit; font-size: 16px; }
+html[data-theme="light"] .profile-auth input { background: #faf9f7; }
+html[data-theme="light"] .profile-auth input:focus { outline: 2px solid var(--z-brand); outline-offset: 1px; border-color: transparent; }
+.profile-auth .button { min-height: 46px; }
+.profile-auth-links { margin-top: 10px; }
+.profile-auth-links:empty { display: none; }
+.profile-auth-notice { margin-top: 12px; color: var(--z-brand-dark); font-size: 14px; font-weight: 600; line-height: 1.5; }
+.profile-auth-notice:empty { display: none; }
+.profile-sync { display: flex; align-items: center; gap: 8px; margin: 2px 0 16px; color: var(--z-success); font-size: 14px; font-weight: 600; }
+.profile-sync .icon { width: 17px; height: 17px; flex-shrink: 0; }
+.profile-sync:is(.is-offline, .is-error) { color: #b7860f; }
+.profile-sync.is-syncing { color: var(--z-muted); }
+.home-account a { color: var(--z-brand-dark); }
+@media (max-width: 650px) {
+  .profile-auth, .profile-auth[data-auth-form="reset"], .profile-auth[data-auth-form="recovery"] { grid-template-columns: 1fr; }
+  .profile-auth .button { width: 100%; justify-content: center; }
+  .profile-auth-tabs { display: grid; }
+}

@@ -47,12 +47,17 @@ Zuka avanza por etapas pequeñas: cada una se termina, se prueba en el celular y
 - Más logros, siempre discretos y ligados al aprendizaje.
 - Recordatorios locales en la app instalada, si el navegador lo permite.
 
-## 🔜 Etapa 4 · Cuentas y sincronización (opcional)
+## ✅ Etapa 4 · Cuentas y sincronización (base)
 
-- Inicio de sesión opcional (por ejemplo, con Supabase o Firebase) para sincronizar el progreso entre celular y computador.
-- Subir el progreso local la primera vez que se inicia sesión.
-- Modelo de datos en `DATABASE.md`. La app debe seguir funcionando sin cuenta.
-- Más adelante: panel para docentes con el avance de un grupo.
+- Cuenta opcional con Supabase (correo y contraseña) en el Perfil: crear cuenta, iniciar sesión, recuperar contraseña, cerrar sesión y eliminar la cuenta.
+- Base de datos con Row Level Security: perfil, lecciones, días de estudio, repasos y guardados (`supabase/migrations/`).
+- Sincronización entre dispositivos que une el progreso local con el de la cuenta y funciona sin conexión.
+
+## 🔜 Etapa 4.1 · Cuentas: lo que sigue
+
+- SMTP propio y plantillas de correo en español (ver `SUPABASE.md`).
+- Acceso con Google.
+- Panel para docentes con el avance de un grupo.
 
 ## 🔜 Etapa 5 · Tiendas de aplicaciones
 

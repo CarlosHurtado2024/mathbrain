@@ -27,7 +27,8 @@ Abre `http://localhost:4173`. Para verla en tu celular Android, sigue [docs/PRUE
 - **51 lecciones** escritas en Markdown con LaTeX (KaTeX), video opcional de YouTube y **155 retos** interactivos.
 - **Lecciones paso a paso:** un concepto o un reto por pantalla, con retroalimentación de la mascota y la opción de leer la lección completa.
 - **Camino de niveles** por curso, repasos de cada nivel, 6 simulaciones y 6 ejercicios resueltos.
-- **Progreso:** XP, niveles, racha diaria y **perfil del estudiante** con su semana, sus cursos y una copia de seguridad para pasar el progreso a otro dispositivo.
+- **Progreso:** XP, niveles, racha diaria y **perfil del estudiante** con su semana, sus cursos y sus logros.
+- **Cuenta opcional** (Supabase) para guardar el progreso en la nube y continuar en otro dispositivo. Sin cuenta, todo funciona en el dispositivo.
 - **PWA:** instalable, sin conexión tras la primera visita y con aviso de actualización.
 - Tema claro (por defecto), oscuro o del sistema.
 
@@ -45,10 +46,11 @@ docs/      documentación           dist/     salida compilada (generada)
 - [Arquitectura](docs/ARCHITECTURE.md) · [Datos](docs/DATABASE.md) · [Sistema de diseño](docs/DESIGN_SYSTEM.md)
 - [Escribir lecciones y programas](docs/CONTENIDO.md)
 - [Probar en un celular Android](docs/PRUEBAS_ANDROID.md)
+- [Cuentas y base de datos (Supabase)](docs/SUPABASE.md)
 - [CLAUDE.md](CLAUDE.md): reglas para trabajar en el proyecto con Claude Code
 
 ## Publicación
 
 Cada push a `main` en [CarlosHurtado2024/mathbrain](https://github.com/CarlosHurtado2024/mathbrain) se publica en Vercel, que ejecuta `npm run build` y sirve `dist/` (configurado en `vercel.json`). Detalles en [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#despliegue).
 
-KaTeX 0.16.22 se distribuye con licencia MIT en `vendor/katex/` y `src/vendor/katex/`.
+KaTeX 0.16.22 (`vendor/katex/`, `src/vendor/katex/`) y supabase-js 2.117.3 (`src/vendor/supabase/`) se distribuyen con licencia MIT.
