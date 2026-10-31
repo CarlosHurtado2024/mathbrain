@@ -14,6 +14,24 @@ function filesIn(folder) {
   }).sort();
 }
 
+// Los navegadores identifican los cambios de icono por su URL. Emitir una URL
+// por contenido evita conservar el logo anterior al actualizar la aplicación.
+const installIcons = ['icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png'];
+const replacements = installIcons.map(filename => {
+  const original = path.join(directory, 'assets', 'icons', filename);
+  const revision = crypto.createHash('sha256').update(fs.readFileSync(original)).digest('hex').slice(0, 12);
+  const stem = path.basename(filename, '.png');
+  const versioned = `${stem}.${revision}.png`;
+  fs.copyFileSync(original, path.join(path.dirname(original), versioned));
+  return [new RegExp('assets/icons/' + stem + '(?:\\.[0-9a-f]{12})?\\.png', 'g'), `assets/icons/${versioned}`];
+});
+for (const filename of ['index.html', 'manifest.webmanifest', 'sw.js']) {
+  const target = path.join(directory, filename);
+  let contents = fs.readFileSync(target, 'utf8');
+  for (const [pattern, replacement] of replacements) contents = contents.replace(pattern, replacement);
+  fs.writeFileSync(target, contents);
+}
+
 const worker = fs.readFileSync(workerPath, 'utf8').replace(/\r\n/g, '\n');
 if (!workerPattern.test(worker)) throw new Error('No se encontró la versión de la caché en dist/sw.js.');
 const hash = crypto.createHash('sha256');

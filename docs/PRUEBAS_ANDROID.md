@@ -101,10 +101,12 @@ Por Wi-Fi la dirección no es HTTPS: la app se ve y se navega, pero no se instal
 ## 3. Instalar Zuka en el celular
 
 1. Abre Zuka en Chrome (por la forma A o C).
-2. Pulsa el botón **Instalar app** de la cabecera, o en el menú **⋮** de Chrome elige **Instalar app** («Agregar a la pantalla principal → Instalar» en algunas versiones).
+2. Pulsa el botón **Instalar Zuka** de la cabecera, o en el menú **⋮** de Chrome elige **Instalar app** («Agregar a la pantalla principal → Instalar» en algunas versiones).
 3. Zuka aparece en el cajón de aplicaciones con el icono morado y verde de Zuka y se abre a pantalla completa, sin la barra del navegador.
 
 Cuando publiques una versión nueva, la app muestra **«Hay una nueva versión de Zuka»** con el botón *Actualizar*.
+
+Comprueba que la confirmación de instalación y el acceso del dispositivo muestren **Zuka** y su logo morado y verde. El build versiona las imágenes para que el navegador detecte los cambios de icono. Si ya estaba instalada con otra identidad, acepta la revisión del nombre o icono cuando el navegador la ofrezca; actualizar el contenido y actualizar el icono son procesos distintos. No borres los datos del sitio para cambiar el icono: allí se conserva el progreso local.
 
 La app instalada desde `localhost` y la instalada desde Vercel son **dos apps distintas**, cada una con su propio progreso. Al terminar de desarrollar, desinstala la de `localhost` para no confundirlas. Para pasar el progreso de una a otra, usa **Perfil → Descargar copia** y **Restaurar copia**.
 

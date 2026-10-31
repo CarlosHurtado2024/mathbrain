@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#ffffff">
   <meta name="color-scheme" content="dark light">
   <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="Zuka">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Zuka">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -14,7 +15,9 @@
   <meta property="og:description" content="Te acompañamos para ingresar, aprender, avanzar y graduarte. Conoce nuestros programas, cursos por escuelas, tutorías y asesorías.">
   <title>Zuka — Tus sueños merecen un camino</title>
   <script src="theme.js"></script>
-  <link rel="icon" type="image/svg+xml" href="assets/mark.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="assets/icons/icon-512.png">
+  <link rel="icon" type="image/svg+xml" sizes="any" href="assets/mark.svg">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
   <link rel="preload" href="assets/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -60,7 +63,7 @@
       <a href="#" class="mobile-brand" aria-label="Zuka, inicio"><img src="assets/mark.svg" alt="" width="32" height="32"></a>
       <form id="search-form" class="global-search" role="search"><span data-icon="search"></span><label class="sr-only" for="content-search">Buscar un tema, una explicación o un ejercicio</label><input id="content-search" type="search" placeholder="¿Qué quieres entender hoy?" autocomplete="off" maxlength="160"><kbd aria-hidden="true">/</kbd></form>
       <a class="stats-chip" id="stats-chip" href="#perfil" title="Tu racha y tus puntos: abre tu perfil"><span class="stats-streak"><span data-icon="flame"></span><strong id="streak-count">0</strong></span><span class="stats-xp" id="xp-count">0 XP</span></a><label class="theme-control" title="Cambiar el tema de Zuka"><span class="sr-only">Tema de la aplicación</span><svg data-theme-icon="dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14A8.7 8.7 0 0 1 10 3.5 8.8 8.8 0 1 0 20.5 14Z"/></svg><svg data-theme-icon="light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" hidden><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><svg data-theme-icon="system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><select id="theme-select" data-theme-select><option value="dark">Oscuro</option><option value="light">Claro</option><option value="system">Sistema</option></select></label>
-      <button class="install-app-button" type="button" data-install aria-label="Instalar Zuka" aria-haspopup="dialog" aria-controls="install-dialog" title="Instalar Zuka"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></svg><span>Instalar app</span></button>
+      <button class="install-app-button" type="button" data-install aria-label="Instalar Zuka" aria-haspopup="dialog" aria-controls="install-dialog" title="Instalar Zuka"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></svg><span>Instalar Zuka</span></button>
     </header>
     <main id="main" tabindex="-1">
       <aside id="explore-notice" class="explore-notice" aria-label="Modo de exploración" hidden><span aria-hidden="true" data-icon="lock"></span><p><strong>Estás explorando.</strong> Prueba la primera lección de cada curso. <a href="#registro">Crea tu cuenta gratis</a> para acceder a todo.</p><a class="text-button" href="#ingresar">Iniciar sesión</a></aside>
@@ -88,10 +91,10 @@
   <dialog class="install-dialog" id="install-dialog" aria-labelledby="install-title" aria-describedby="install-description">
     <button id="close-install" class="close-install" type="button" aria-label="Cerrar instrucciones de instalación">×</button>
     <img src="assets/icons/icon-192.png" alt="" width="76" height="76">
-    <p class="eyebrow">TU UNIVERSO, SIEMPRE A MANO</p>
-    <h2 id="install-title">Zuka, contigo.</h2>
-    <p id="install-description">Añade Zuka a tus aplicaciones para abrirla con su propio icono, en el celular o el computador.</p>
-    <button type="button" id="install-native" class="button button-primary" hidden>Instalar ahora</button>
+    <p class="eyebrow">ZUKA EN TU DISPOSITIVO</p>
+    <h2 id="install-title">Instalar Zuka</h2>
+    <p id="install-description">En tu dispositivo aparecerá con el nombre Zuka y este icono morado y verde. Ábrela desde tus aplicaciones para seguir aprendiendo.</p>
+    <button type="button" id="install-native" class="button button-primary" hidden>Instalar Zuka</button>
     <h3 id="install-guide-title"></h3>
     <ol id="install-steps"></ol>
     <p id="install-note" class="install-note"></p>

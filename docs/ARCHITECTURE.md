@@ -52,7 +52,8 @@ mathbrain/
 
 1. Borra `dist/` y copia `src/` dentro.
 2. Compila `content/**/*.md` a `dist/content.js` (`window.MATHBRAIN_CONTENT`). Cada lección se divide en pasos; las fórmulas salen ya convertidas a HTML + MathML. Se detiene con el archivo y la línea si hay un error de LaTeX, un ejercicio mal escrito o una lección que no corresponde a un módulo de `src/courses.js`.
-3. Calcula un hash de todos los archivos de `dist/` y lo escribe en `CACHE_NAME` de `dist/sw.js`. Si nada cambió, la versión no cambia.
+3. Publica los iconos de instalación con un hash de su contenido en el nombre (`icon-192.<hash>.png`, etc.) y actualiza sus referencias en el HTML, el manifiesto, los accesos directos y el shell del service worker. Los PNG originales se conservan para las direcciones antiguas. Así, cambiar el logo también cambia su URL y el navegador puede detectar la nueva identidad.
+4. Calcula un hash de todos los archivos de `dist/` y lo escribe en `CACHE_NAME` de `dist/sw.js`. Si nada cambió, la versión no cambia.
 
 `npm run build` además ejecuta `npm run check` antes.
 
@@ -97,6 +98,10 @@ Las pantallas de cuenta aceptan `continuar` con una ruta interna; `sessionStorag
 - **Manifiesto** (`src/manifest.webmanifest`): nombre Zuka, `display: standalone`, colores, iconos (incluido el adaptable de Android) y accesos directos.
 - **Service worker** (`src/sw.js`): al instalarse guarda en caché todos los `SHELL_FILES`; responde primero desde la caché y, si falta algo, va a la red y lo guarda. Las navegaciones sirven `index.html`. Al activarse borra las cachés anteriores con el prefijo `mathbrain-shell-`. Se actualiza solo cuando la persona acepta el aviso (`ACTIVATE_UPDATE`).
 - **Instalación** (`src/install.js`): usa `beforeinstallprompt` cuando el navegador lo ofrece y, si no, muestra los pasos del dispositivo.
+
+La identidad instalada es **Zuka** en `name`, `short_name`, `application-name` y `apple-mobile-web-app-title`. El manifiesto define los PNG de 192 y 512 px y el adaptable de Android; el HTML añade iconos PNG de compatibilidad y el de Apple de 180 px. La ayuda de instalación muestra el mismo icono y el nombre «Instalar Zuka». Se mantienen el `id`, `start_url`, `scope` y la URL del manifiesto para actualizar la misma app.
+
+Una instalación existente puede pedir confirmar el cambio de nombre o icono desde el navegador. Cambiar solo los píxeles sin cambiar la URL no basta para actualizar el icono en Chrome actual; por eso el empaquetado versiona los archivos. Referencia: [actualizaciones de apps web en Chrome](https://developer.chrome.com/blog/improvements-to-web-app-updates).
 
 Si se añade un archivo que la app necesita sin conexión, hay que agregarlo a `SHELL_FILES`.
 

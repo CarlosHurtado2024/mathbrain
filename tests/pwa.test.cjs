@@ -112,11 +112,31 @@ test('El manifiesto instala Zuka como aplicación con iconos PNG válidos y acce
     const address = new URL(icon.src, appRoot);
     assert.equal(address.origin, new URL(appRoot).origin);
     assert.equal(icon.type, 'image/png');
+    assert.match(icon.src, /\.[0-9a-f]{12}\.png$/, 'El icono publicado tiene una URL por versión');
     const dimensions = pngDetails(path.join(directory, address.pathname));
     assert.equal(icon.sizes, `${dimensions.width}x${dimensions.height}`);
   }
   assert.deepEqual(pngDetails(path.join(directory, 'assets/icons/apple-touch-icon.png')), { width: 180, height: 180 });
   for (const shortcut of manifest.shortcuts) assert.equal(new URL(shortcut.url, appRoot).origin, new URL(appRoot).origin);
+});
+
+test('El nombre y los iconos de instalación coinciden en el manifiesto y los accesos de cada plataforma', () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(directory, 'manifest.webmanifest'), 'utf8'));
+  const html = fs.readFileSync(path.join(directory, 'index.html'), 'utf8');
+  assert.match(html, /<meta name="application-name" content="Zuka">/);
+  assert.match(html, /<meta name="apple-mobile-web-app-title" content="Zuka">/);
+  const fallbackIcons = [...html.matchAll(/<link rel="icon"[^>]*href="([^"]+)"/g)].map(match => match[1]);
+  for (const icon of manifest.icons.filter(icon => icon.purpose === 'any')) assert.ok(fallbackIcons.includes(icon.src));
+  const appleIcon = html.match(/<link rel="apple-touch-icon"[^>]*href="([^"]+)"/)[1];
+  assert.match(appleIcon, /apple-touch-icon\.[0-9a-f]{12}\.png$/);
+  assert.deepEqual(pngDetails(path.join(directory, appleIcon)), { width: 180, height: 180 });
+  const installation = html.split('<dialog class="install-dialog"')[1].split('</dialog>')[0];
+  assert.match(installation, /<h2 id="install-title">Instalar Zuka<\/h2>/);
+  assert.equal(installation.match(/<img src="([^"]+)"/)[1], manifest.icons.find(icon => icon.sizes === '192x192').src);
+  for (const shortcut of manifest.shortcuts) {
+    for (const icon of shortcut.icons) assert.ok(manifest.icons.some(appIcon => appIcon.src === icon.src));
+  }
+  assert.ok(environment().shellUrls.includes(new URL(appleIcon, appRoot).href));
 });
 
 test('La instalación prepara únicamente archivos locales existentes, incluyendo el catálogo y sus iconos', async () => {
@@ -129,7 +149,8 @@ test('La instalación prepara únicamente archivos locales existentes, incluyend
     assert.equal(parsed.origin, new URL(appRoot).origin);
     assert.ok(fs.statSync(path.join(directory, parsed.pathname === '/' ? 'index.html' : parsed.pathname)).isFile(), address);
   }
-  for (const filename of ['index.html', 'app.js', 'library.js', 'courses.js', 'space.js', 'install.js', 'manifest.webmanifest', 'assets/icons/icon-192.png', 'assets/icons/icon-512.png']) {
+  const manifest = JSON.parse(fs.readFileSync(path.join(directory, 'manifest.webmanifest'), 'utf8'));
+  for (const filename of ['index.html', 'app.js', 'library.js', 'courses.js', 'space.js', 'install.js', 'manifest.webmanifest', ...manifest.icons.map(icon => icon.src)]) {
     assert.ok(addresses.includes(new URL(filename, appRoot).href), filename);
   }
   assert.equal(env.stores.get(env.cacheName).size, addresses.length);
@@ -257,11 +278,15 @@ test('El builder conserva la versión al repetirse y la cambia al modificar un a
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'mathbrain-pwa-test-'));
   context.after(() => fs.rmSync(temporary, { recursive: true, force: true }));
   fs.mkdirSync(path.join(temporary, 'scripts'));
-  fs.mkdirSync(path.join(temporary, 'dist/assets'), { recursive: true });
+  fs.mkdirSync(path.join(temporary, 'dist/assets/icons'), { recursive: true });
   const builder = path.join(temporary, 'scripts/build-pwa.cjs');
   const worker = path.join(temporary, 'dist/sw.js');
   const html = path.join(temporary, 'dist/index.html');
   fs.copyFileSync(path.join(__dirname, '../scripts/build-pwa.cjs'), builder);
+  fs.copyFileSync(path.join(__dirname, '../src/manifest.webmanifest'), path.join(temporary, 'dist/manifest.webmanifest'));
+  for (const filename of ['icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png']) {
+    fs.copyFileSync(path.join(__dirname, '../src/assets/icons', filename), path.join(temporary, 'dist/assets/icons', filename));
+  }
   fs.writeFileSync(worker, workerSource);
   fs.writeFileSync(html, '<html>MathBrain</html>\n');
   fs.writeFileSync(path.join(temporary, 'dist/assets/icon.png'), Buffer.from([137, 80, 78, 71]));
@@ -278,4 +303,13 @@ test('El builder conserva la versión al repetirse y la cambia al modificar un a
   const changed = build();
   assert.notEqual(changed, first);
   assert.equal(build(), changed);
+  const manifestPath = path.join(temporary, 'dist/manifest.webmanifest');
+  const previousIcon = JSON.parse(fs.readFileSync(manifestPath, 'utf8')).icons.find(icon => icon.sizes === '512x512' && icon.purpose === 'any').src;
+  fs.appendFileSync(path.join(temporary, 'dist/assets/icons/icon-512.png'), Buffer.from([1]));
+  const newVersion = build();
+  const updatedIcon = JSON.parse(fs.readFileSync(manifestPath, 'utf8')).icons.find(icon => icon.sizes === '512x512' && icon.purpose === 'any').src;
+  assert.notEqual(updatedIcon, previousIcon, 'Cambiar la imagen también cambia su URL para el navegador');
+  assert.ok(newVersion.includes(updatedIcon), 'El icono actualizado también se prepara sin conexión');
+  assert.ok(!newVersion.includes(previousIcon));
+  assert.equal(build(), newVersion);
 });
