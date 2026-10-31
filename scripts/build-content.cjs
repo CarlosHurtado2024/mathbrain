@@ -10,7 +10,7 @@ const root = path.resolve(__dirname, '..');
 const contentDirectory = path.join(root, 'content');
 const outputPath = path.join(root, 'dist', 'content.js');
 const blockTitles = { idea: 'La idea clave', ejemplo: 'Veámoslo con un ejemplo', nota: 'Ten en cuenta' };
-const frontMatterFields = new Set(['titulo', 'descripcion', 'video', 'etiquetas', 'unidad', 'modulo']);
+const frontMatterFields = new Set(['titulo', 'descripcion', 'video', 'etiquetas', 'unidad', 'modulo', 'formato']);
 // Notación en español disponible en todas las fórmulas: \sen x, \cis \theta, \arcsen x, \gr P, \Dom f, \Ran f.
 const macros = { '\\sen': '\\operatorname{sen}', '\\arcsen': '\\operatorname{arcsen}', '\\cis': '\\operatorname{cis}', '\\gr': '\\operatorname{gr}', '\\Dom': '\\operatorname{Dom}', '\\Ran': '\\operatorname{Ran}' };
 
@@ -197,6 +197,7 @@ function compileLesson(source, file, id) {
     data[field[1]] = field[2].trim();
   }
   for (const required of ['titulo', 'descripcion']) if (!data[required]) throw new ContentError(file, 1, `Falta el campo «${required}».`);
+  if (data.formato && !['vertical', 'horizontal'].includes(data.formato)) throw new ContentError(file, 1, '«formato» debe ser vertical (9:16) u horizontal (16:9).');
   if (data.video && !/^(https:\/\/|assets\/videos\/)/.test(data.video)) throw new ContentError(file, 1, 'El video debe ser un enlace https:// (YouTube, Vimeo) o un archivo en assets/videos/.');
 
   const html = [];
@@ -236,7 +237,7 @@ function compileLesson(source, file, id) {
   const words = lines.slice(end + 1).join('\n').replace(/\$\$[\s\S]*?\$\$/g, ' f f f f ').replace(/\$[^$\n]*\$/g, ' f ').split(/\s+/).filter(word => /[\p{L}\p{N}]/u.test(word)).length;
   const minutes = Math.max(2, Math.round(words / 120));
   const fullHtml = html.join('');
-  return { id, title: data.titulo, description: data.descripcion, video: data.video || null, tags: data.etiquetas || '', unit: data.unidad || null, module: data.modulo || null, key, exercises, minutes, html: fullHtml, steps: splitSteps(fullHtml) };
+  return { id, title: data.titulo, description: data.descripcion, video: data.video || null, ...(data.formato === 'vertical' ? { videoFormat: 'vertical' } : {}), tags: data.etiquetas || '', unit: data.unidad || null, module: data.modulo || null, key, exercises, minutes, html: fullHtml, steps: splitSteps(fullHtml) };
 }
 
 // Divide la lección en pasos cortos para recorrerla una idea a la vez: cada subtítulo ##, cada bloque

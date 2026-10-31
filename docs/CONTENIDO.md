@@ -11,6 +11,7 @@ La lección de ejemplo más completa es `content/calculo-diferencial/03-que-es-u
 titulo: ¿Qué es una derivada?
 descripcion: Construye la pendiente instantánea a partir de rectas secantes.
 video: https://youtu.be/XXXXXXXXXXX
+formato: vertical
 etiquetas: derivada tangente pendiente limite
 unidad: Módulo 2 · La derivada y sus aplicaciones
 modulo: 2.1
@@ -53,11 +54,11 @@ solucion: Una pendiente negativa indica que la gráfica baja.
 - **LaTeX:** `$…$` en línea y `$$…$$` en bloque. Las fórmulas se convierten con KaTeX al compilar: el navegador recibe HTML ya preparado, con MathML para lectores de pantalla. Si una fórmula tiene un error, la compilación se detiene e indica el archivo y la línea. Además están `\sen`, `\arcsen`, `\cis`, `\gr`, `\Dom` y `\Ran` para la notación en español. En una fórmula en bloque, `\qquad` de primer nivel separa fórmulas que en el celular se apilan.
 - **Unidad y módulo:** `unidad:` debe coincidir exactamente con el `title` de un módulo del curso en `src/courses.js`. `modulo:` (por ejemplo `2.1`) es opcional; sin él, las lecciones se numeran por módulo.
 - **Ejercicios:** `respuesta:` comprueba un número, una fracción (`8/3`) o un porcentaje, y `tolerancia: 0,01` acepta aproximaciones. Si la respuesta se escribe con `%` (por ejemplo `40%`), se acepta tanto `40 %` como `0,4`. Para cantidades grandes, pide la respuesta en miles o millones: `600.000` se leería como decimal. Con opciones `- [ ]` y una sola `- [x]`, el ejercicio es de opción múltiple. `pista:` y `solucion:` son opcionales y admiten LaTeX.
-- **Video:** pega el enlace en `video:`. Se admiten YouTube (también «No listado» y Shorts), Vimeo público y archivos `.mp4` o `.webm` en `src/assets/videos/`. Se recomienda YouTube «No listado»: es gratis y la calidad se adapta a la conexión. El video debe permitir la inserción. Si el campo está vacío, la lección muestra su ilustración. El video aparece como primer paso de la lección.
+- **Video:** pega el enlace en `video:`. Se admiten YouTube (también «No listado» y Shorts), Vimeo público y archivos `.mp4` o `.webm` en `src/assets/videos/`. Se recomienda YouTube «No listado»: es gratis y la calidad se adapta a la conexión. El video debe permitir la inserción. Si el campo está vacío, la lección muestra su ilustración. El video aparece como primer paso de la lección, con subtítulos en español activados (si el video los tiene en YouTube). Con `formato: vertical` se muestra en 9:16, ideal para clases cortas grabadas con el celular; sin ese campo (o con `formato: horizontal`) se muestra en 16:9. Los enlaces de YouTube Shorts se muestran en vertical automáticamente. Para que el video sea parte de la lección y no un video suelto, pon justo después un `:::ejercicio` sobre lo que explica.
 
 ### Cómo se divide en pasos
 
-Cada subtítulo `##`, cada bloque `:::idea`, `:::ejemplo` y `:::nota`, y cada `:::ejercicio` forman un paso. Un subtítulo que queda solo, como `## Practica`, se une al paso siguiente. Para lecciones más interactivas, intercala ejercicios entre las explicaciones en lugar de dejarlos todos al final. Cada lección debe tener al menos dos ejercicios.
+Cada subtítulo `##`, cada bloque `:::idea`, `:::ejemplo` y `:::nota`, y cada `:::ejercicio` forman un paso. Un subtítulo que queda solo, como `## Practica`, se une al paso siguiente. Para lecciones más interactivas, intercala ejercicios entre las explicaciones en lugar de dejarlos todos al final. Un ejercicio de opción múltiple con exactamente dos opciones (por ejemplo `Verdadero` y `Falso`) se muestra como dos botones lado a lado. Al acertar se abre la `solucion` (la explicación de por qué) y tras un error, la `pista`: escríbelas para enseñar, no solo para dar el resultado. Cada lección debe tener al menos dos ejercicios.
 
 ### Ver los cambios
 

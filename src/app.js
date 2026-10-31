@@ -49,6 +49,7 @@
     flame: '<path d="M12 3c1 3.6 5.2 5.6 5.2 10.2a5.2 5.2 0 0 1-10.4 0c0-2.3 1-3.8 2.3-5 .2 1.8 1 2.9 2.4 3.4C10.9 9.1 10.6 5.9 12 3Z"/>',
     close: '<path d="M6 6l12 12M18 6 6 18"/>',
     star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/>',
+    lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-4 4.3-6 8-6s6.8 2 8 6"/>',
     list: '<path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>'
   };
@@ -112,6 +113,8 @@
     const xp = select('#xp-count');
     if (streak) streak.textContent = String(currentStreak());
     if (xp) xp.textContent = `${stats.xp} XP`;
+    const chip = select('#stats-chip');
+    if (chip) chip.hidden = !stats.xp && !currentStreak();
     select('#stats-chip')?.setAttribute('aria-label', `Racha de ${plural(currentStreak(), 'día', 'días')} y ${stats.xp} puntos de experiencia`);
   }
 
@@ -182,29 +185,17 @@
     return { derivative: 'f′', integral: '∫', probability: 'P(A)', inference: 'x̄', algebra: 'x²', trigonometry: 'θ' }[course.art] || 'π';
   }
 
-  // Portada: la mascota en las ilustraciones y la franja de cursos bajo el héroe.
-  function renderLanding() {
-    selectAll('[data-mascot]').forEach(element => { element.innerHTML = mascot.svg(element.dataset.mascot); });
-    const strip = select('#course-strip');
-    if (strip) strip.innerHTML = `<div class="course-strip-track">${courses.map(course => `<a class="strip-course ${course.color}" href="#curso/${course.id}"><span class="strip-icon" aria-hidden="true">${courseSymbol(course)}</span><span>${escape(course.title)}</span></a>`).join('')}</div>`;
-  }
-
+  // Tarjeta del catálogo: lo justo para decidir (título, descripción, nivel, duración y progreso).
   function courseCard(course) {
-    const resources = library.resources.filter(resource => resource.courseId === course.id);
-    const count = type => resources.filter(resource => resource.type === type).length;
-    const simulations = count('simulation');
-    const exercises = count('exercise');
-    const symbol = courseSymbol(course);
     const progress = courseProgress(course);
     const modules = courseModules(course);
-    const challenges = courseLessons(course).reduce((total, lesson) => total + (lesson.practice || 0), 0);
-    // Fila de catálogo: icono del curso, nivel, título, descripción y sus niveles, como un temario de un vistazo.
-    return `<article class="course-album course-row ${course.color}"><a class="course-album-link" href="#curso/${course.id}" aria-labelledby="course-name-${course.id}"><span class="course-row-icon" aria-hidden="true">${artwork(course, true)}<span class="course-cover-symbol">${symbol}</span></span><div class="course-album-copy"><p class="course-album-topic">NIVEL ${course.level.toUpperCase()} · ${escape(course.label)}</p><div class="course-row-title"><h3 id="course-name-${course.id}">${escape(course.title)}</h3>${progress.done === progress.total ? `<span class="course-row-badge is-done">${icon('check')}Completado</span>` : progress.done ? `<span class="course-row-badge">${progress.percent} %</span>` : ''}</div><p class="course-album-description">${escape(course.description)}</p><div class="course-album-meta"><span>${plural(modules.length, 'nivel', 'niveles')}</span><span>${count('explanation')} explicaciones</span><span>${plural(challenges, 'reto', 'retos')}</span></div><div class="course-album-extras">${simulations ? `<span>${simulations} ${simulations === 1 ? 'simulación' : 'simulaciones'}</span>` : ''}${exercises ? `<span>${exercises} ${exercises === 1 ? 'ejercicio' : 'ejercicios'}</span>` : ''}</div><div class="course-row-levels">${modules.map(module => `<span>${escape(module.name)}</span>`).join('')}</div>${progress.done ? `<div class="course-album-progress">${progressBar(progress, false)}<span>${progress.percent} % completado</span></div>` : ''}</div><span class="course-row-go" aria-hidden="true">${icon('right')}</span></a></article>`;
+    const unitWord = /^Unidad/.test(course.modules?.[0]?.title || '') ? ['unidad', 'unidades'] : ['módulo', 'módulos'];
+    const status = progress.done === progress.total ? `<span class="zcard-status is-done">${icon('check')}Completado</span>` : progress.done ? `<span class="zcard-status">${progress.percent} %</span>` : '';
+    return `<article class="course-album zcard ${course.color}"><a class="zcard-link" href="#curso/${course.id}" aria-labelledby="course-name-${course.id}"><span class="zcard-icon" aria-hidden="true">${courseSymbol(course)}</span><div class="zcard-copy"><div class="zcard-title"><h3 id="course-name-${course.id}">${escape(course.title)}</h3>${status}</div><p class="zcard-description">${escape(course.description)}</p><p class="zcard-meta"><span>Nivel ${course.level.toLowerCase()}</span><span>≈ ${studyHours(course)} h</span><span>${plural(modules.length, ...unitWord)}</span><span>${plural(progress.total, 'lección', 'lecciones')}</span></p>${progress.done ? progressBar(progress, false) : ''}</div><span class="zcard-go" aria-hidden="true">${icon('right')}</span></a></article>`;
   }
 
   function renderCourses() {
     const visibleCourses = courses.filter(course => (courseFilters.topic === 'all' || (course.id === 'probabilidad' ? 'probabilidad' : course.category) === courseFilters.topic) && (courseFilters.level === 'all' || course.level === courseFilters.level));
-    select('.course-browser-total strong').textContent = String(courses.length).padStart(2, '0');
     select('#course-level-filter').value = courseFilters.level;
     selectAll('[data-course-topic]').forEach(button => {
       const active = button.dataset.courseTopic === courseFilters.topic;
@@ -230,44 +221,47 @@
     route(false);
   }
 
-  // Panel del día en el inicio: la mascota saluda (por su nombre, si la persona lo dio en su perfil) según la racha, y se muestran XP, lecciones y los cursos en marcha.
-  function continueLearning() {
-    const active = courses.map(course => ({ course, progress: courseProgress(course) })).filter(({ progress }) => progress.done > 0 && progress.done < progress.total);
-    const streak = currentStreak();
-    const studiedToday = stats.lastDay === dayKey();
-    const suggestions = active.length ? active : [{ course: courses[0], progress: courseProgress(courses[0]) }];
+  function greeting() {
+    const hour = new Date().getHours();
+    return hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
+  }
+
+  // El curso en el que está la persona: el último que abrió sin terminarlo; si no, el de más avance; si no, el primero.
+  function activeCourse() {
+    const pending = course => { const progress = courseProgress(course); return progress.done > 0 && progress.done < progress.total; };
+    const fromRecent = recent.map(id => courses.find(course => course.id === resourceById.get(id)?.courseId)).find(course => course && pending(course));
+    if (fromRecent) return fromRecent;
+    const started = courses.filter(pending).sort((first, second) => courseProgress(second).done - courseProgress(first).done);
+    return started[0] || courses.find(course => courseProgress(course).done < courseProgress(course).total) || courses[0];
+  }
+
+  // Inicio: un panel de aprendizaje. Saludo, la siguiente lección con un único botón principal y la unidad en curso.
+  function renderHome() {
+    const course = activeCourse();
+    const progress = courseProgress(course);
+    const state = pathState(course);
+    const next = progress.next;
+    const unit = state.modules.find(module => module.lessons.some(({ lesson }) => lesson.id === next.id)) || state.modules[0];
+    const label = unit.lessons.find(({ lesson }) => lesson.id === next.id)?.label;
+    const started = completed.size > 0;
     const name = loadProfile().name;
-    const hello = name ? `, ${escape(name)}` : '';
-    const mood = studiedToday ? 'celebra' : streak ? 'animo' : active.length ? 'feliz' : 'saluda';
-    const message = studiedToday ? `<strong>¡Meta de hoy cumplida${hello}!</strong> Llevas ${plural(streak, 'día', 'días')} de racha.` : streak ? `Llevas <strong>${plural(streak, 'día', 'días')} de racha</strong>. Una lección hoy y la mantienes.` : active.length ? `<strong>¡Qué bueno verte${hello}!</strong> Sigamos donde lo dejaste.` : `<strong>¡Hola! Soy ${mascot.name || 'Zuka'}.</strong> Cada lección toma unos minutos: aprende resolviendo, una idea a la vez.`;
-    return `<section class="shelf today-panel" aria-labelledby="continue-title"><div class="today-greeting">${mascot.say(mood, message, 'today-nebi')}<ul class="today-stats" aria-label="Tu progreso"><li>${icon('flame')}<strong>${streak}</strong><span>${streak === 1 ? 'día de racha' : 'días de racha'}</span></li><li>${icon('star')}<strong>${stats.xp}</strong><span>XP</span></li><li>${icon('check')}<strong>${completed.size}</strong><span>${completed.size === 1 ? 'lección' : 'lecciones'}</span></li></ul></div><div class="section-heading"><div><h2 id="continue-title">${active.length ? 'Continúa aprendiendo' : 'Empieza tu camino'}</h2><p>${active.length ? 'Retoma tus cursos donde los dejaste.' : 'Te recomendamos empezar por aquí.'}</p></div></div><div class="continue-grid">${suggestions.map(({ course, progress }) => `<a class="continue-card ${course.color}" href="#contenido/${progress.next.id}"><small>${escape(course.label)}</small><strong>${escape(course.title)}</strong><span class="continue-next">${progress.done ? 'Siguiente' : 'Primera lección'}: ${escape(progress.next.title)}</span>${progress.done ? progressBar(progress) : `<span class="continue-start">${icon('play')}Empezar</span>`}</a>`).join('')}</div></section>`;
-  }
-
-  function shelf(id, title, description, resources, destination) {
-    if (!resources.length) return '';
-    return `<section class="shelf" aria-labelledby="title-${id}"><div class="section-heading"><div><h2 id="title-${id}">${title}</h2><p>${description}</p></div><div class="shelf-actions">${destination ? `<a class="see-all" href="${destination}">Ver todo <span aria-hidden="true">↗</span></a>` : ''}<button type="button" class="rail-arrow" data-rail="rail-${id}" data-direction="-1" aria-label="Anterior en ${title}" disabled>${icon('left')}</button><button type="button" class="rail-arrow" data-rail="rail-${id}" data-direction="1" aria-label="Siguiente en ${title}">${icon('right')}</button></div></div><div class="content-rail" id="rail-${id}" tabindex="0" aria-label="${title}">${resources.map(card).join('')}</div></section>`;
-  }
-
-  function updateRails() {
-    selectAll('.content-rail').forEach(rail => {
-      const maximum = rail.scrollWidth - rail.clientWidth;
-      selectAll(`[data-rail="${rail.id}"]`).forEach(button => { button.disabled = Number(button.dataset.direction) < 0 ? rail.scrollLeft <= 2 : rail.scrollLeft >= maximum - 2; });
-    });
-  }
-
-  function bindRails() {
-    selectAll('.content-rail').forEach(rail => {
-      if (!rail.dataset.bound) { rail.addEventListener('scroll', updateRails, { passive: true }); rail.dataset.bound = 'true'; }
-    });
-    requestAnimationFrame(updateRails);
+    const goal = weeklyGoal();
+    const others = courses.filter(candidate => candidate !== course && courseProgress(candidate).done > 0);
+    const title = started ? `${greeting()}${name ? `, ${escape(name)}` : ''}` : `¡Hola${name ? `, ${escape(name)}` : ''}! Soy ${mascot.name || 'Zuka'}`;
+    const lead = started ? `Sigues en <strong>${escape(course.title)}</strong>. Tu siguiente paso ya está listo.` : 'Aprende matemáticas resolviendo, una idea a la vez. Te sugerimos empezar por aquí.';
+    select('#today-panel').innerHTML = `<div class="home-dash">`
+      + `<header class="home-greeting"><span class="home-mascot" aria-hidden="true">${mascot.svg(started ? 'feliz' : 'saluda')}</span><div><h1 id="home-title" tabindex="-1">${title}</h1><p>${lead}</p>${goal.target ? `<p class="home-goal">${icon('check')}Meta semanal: ${goal.done} de ${goal.target} días${goal.done >= goal.target ? ' · ¡cumplida!' : ''}</p>` : ''}</div></header>`
+      + `<article class="home-next ${course.color}" aria-labelledby="home-next-title"><p class="home-next-course"><span class="home-next-symbol" aria-hidden="true">${courseSymbol(course)}</span>${escape(course.title)} · ${escape(unit.kicker)}</p><h2 id="home-next-title"><small>${progress.done ? 'Siguiente lección' : 'Primera lección'}${label ? ` · ${escape(label)}` : ''}</small>${escape(next.title)}</h2><p class="home-next-description">${escape(next.description)}</p><p class="home-next-meta">${lessonMeta(next)}</p>${progress.done ? progressBar(progress) : ''}<a class="button button-primary button-big home-next-button" href="#contenido/${next.id}">${icon('play')}${started ? 'Continuar aprendiendo' : 'Empezar a aprender'}</a></article>`
+      + `<section class="home-path" aria-labelledby="home-path-title"><div class="home-section-head"><h2 id="home-path-title">Tu camino</h2><a class="text-button" href="#curso/${course.id}">Ver el curso completo${icon('right')}</a></div>${pathUnit(course, unit, state, { popup: false })}</section>`
+      + (others.length ? `<section class="home-others" aria-labelledby="home-others-title"><h2 id="home-others-title">También estudias</h2><ul>${others.map(other => { const otherProgress = courseProgress(other); return `<li class="${other.color}"><a href="#curso/${other.id}"><span class="home-next-symbol" aria-hidden="true">${courseSymbol(other)}</span><span><strong>${escape(other.title)}</strong>${progressBar(otherProgress, false)}</span><small>${otherProgress.percent} %</small></a></li>`; }).join('')}</ul></section>` : '')
+      + `<p class="home-explore">¿Buscas otro tema? <a href="#explorar">Explora los cursos</a></p></div>`;
+    document.title = 'Zuka — Aprende matemáticas paso a paso';
   }
 
   function renderCatalog() {
-    select('#home-view').hidden = page !== 'inicio';
-    select('#catalog-heading').hidden = page === 'inicio';
+    select('#catalog-heading').hidden = false;
     select('#results-count').textContent = '';
     select('#empty-state').hidden = true;
-    select('#learning-paths').hidden = page !== 'inicio';
     select('#saved-count').textContent = saved.size;
     select('#content-search').value = filters.query;
     select('#topic-filter').value = filters.topic;
@@ -277,34 +271,19 @@
       button.classList.toggle('active', active);
       button.setAttribute('aria-pressed', String(active));
     });
-    if (page === 'inicio') {
-      const featured = ['calculo-diferencial-3', 'fundamentos-matematicas-11', 'probabilidad-1', 'fundamentos-matematicas-20', 'calculo-integral-2', 'inferencia-estadistica-3', 'fundamentos-matematicas-13', 'probabilidad-4'].map(id => resourceById.get(id));
-      // Quien ya empezó ve su panel del día arriba; quien llega por primera vez lo ve después de la portada.
-      const today = continueLearning();
-      select('#today-panel').innerHTML = completed.size ? today : '';
-      // Quien ya empezó ve su panel y sus cursos; la presentación de la portada es para quien llega por primera vez.
-      select('#home-view').dataset.returning = String(completed.size > 0);
-      select('#recent-shelf').innerHTML = (completed.size ? '' : today) + shelf('recent', 'Vuelve a tus ideas', 'Los contenidos que exploraste recientemente en este navegador.', recent.slice(0, 6).map(id => resourceById.get(id)), '');
-      select('#catalog-content').innerHTML = shelf('start', 'Empieza por una idea', 'Explicaciones que van directo al «¿por qué?».', featured, '#explorar?tipo=explanation')
-        + shelf('simulations', 'Menos imaginar. Más experimentar.', 'Mueve, cambia, prueba. Aquí tú tienes el control.', library.search({ type: 'simulation' }), '#simulaciones')
-        + shelf('exercises', 'Del «no entiendo» al «ahora sí»', 'Ejercicios resueltos, una decisión a la vez.', library.search({ type: 'exercise' }), '#ejercicios')
-        + `<section class="shelf" aria-labelledby="topics-title"><div class="section-heading"><div><h2 id="topics-title">¿Qué te da curiosidad hoy?</h2><p>Encuentra todas las formas de explorar un tema.</p></div></div><div class="topic-grid">${library.topics.map(topic => `<a class="topic-tile ${topic.color}" href="#explorar?tema=${topic.id}"><span class="topic-symbol" aria-hidden="true">${topic.symbol}</span><strong>${topic.title}</strong><small>${library.search({ topic: topic.id }).length} contenidos para explorar</small></a>`).join('')}</div></section>`;
-    } else {
-      const resources = library.search({ ...filters, ids: page === 'biblioteca' ? saved : null });
-      const title = page === 'biblioteca' ? 'Tu biblioteca de ideas.' : filters.query ? `Resultados para «${filters.query}»` : filters.type === 'simulation' ? 'Aprende haciendo.' : filters.type === 'exercise' ? 'Una solución, paso a paso.' : filters.topic !== 'all' ? `Explora ${topicName(filters.topic).toLowerCase()}.` : 'Encuentra esa idea.';
-      select('#catalog-title').textContent = title;
-      select('#catalog-eyebrow').textContent = page === 'biblioteca' ? 'LO QUE QUIERES TENER CERCA' : filters.type === 'simulation' ? 'EL LABORATORIO ZUKA' : 'EXPLORA A TU MANERA';
-      select('#catalog-description').textContent = page === 'biblioteca' ? 'Tus contenidos guardados en este navegador. Vuelve a ellos cuando quieras.' : 'Elige un tema, encuentra la explicación y pasa de entender a experimentar.';
-      select('#results-count').textContent = `${resources.length} ${resources.length === 1 ? 'contenido encontrado' : 'contenidos encontrados'}`;
-      select('#catalog-content').innerHTML = `<div class="resource-grid">${resources.map(card).join('')}</div>`;
-      if (!resources.length) {
-        select('#empty-state').hidden = false;
-        select('#empty-title').textContent = page === 'biblioteca' && !saved.size ? 'Tu próxima gran idea puede empezar aquí.' : 'Todavía no encontramos esa idea.';
-        select('#empty-description').textContent = page === 'biblioteca' && !saved.size ? 'Pulsa el marcador de cualquier contenido para guardarlo en tu biblioteca.' : 'Prueba con «derivadas», «ecuaciones» o «probabilidad», o cambia los filtros.';
-      }
-      document.title = `${title} | Zuka`;
+    const resources = library.search({ ...filters, ids: page === 'biblioteca' ? saved : null });
+    const title = page === 'biblioteca' ? 'Tu biblioteca de ideas.' : filters.query ? `Resultados para «${filters.query}»` : filters.type === 'simulation' ? 'Aprende haciendo.' : filters.type === 'exercise' ? 'Una solución, paso a paso.' : filters.topic !== 'all' ? `Explora ${topicName(filters.topic).toLowerCase()}.` : 'Encuentra esa idea.';
+    select('#catalog-title').textContent = title;
+    select('#catalog-eyebrow').textContent = page === 'biblioteca' ? 'LO QUE QUIERES TENER CERCA' : filters.type === 'simulation' ? 'EL LABORATORIO ZUKA' : 'EXPLORA A TU MANERA';
+    select('#catalog-description').textContent = page === 'biblioteca' ? 'Tus contenidos guardados en este navegador. Vuelve a ellos cuando quieras.' : 'Elige un tema, encuentra la explicación y pasa de entender a experimentar.';
+    select('#results-count').textContent = `${resources.length} ${resources.length === 1 ? 'contenido encontrado' : 'contenidos encontrados'}`;
+    select('#catalog-content').innerHTML = `<div class="resource-grid">${resources.map(card).join('')}</div>`;
+    if (!resources.length) {
+      select('#empty-state').hidden = false;
+      select('#empty-title').textContent = page === 'biblioteca' && !saved.size ? 'Tu próxima gran idea puede empezar aquí.' : 'Todavía no encontramos esa idea.';
+      select('#empty-description').textContent = page === 'biblioteca' && !saved.size ? 'Pulsa el marcador de cualquier contenido para guardarlo en tu biblioteca.' : 'Prueba con «derivadas», «ecuaciones» o «probabilidad», o cambia los filtros.';
     }
-    bindRails();
+    document.title = `${title} | Zuka`;
   }
 
   function updateCatalog(changes = {}, replace = false) {
@@ -339,7 +318,7 @@
     let videoId;
     if (['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtube-nocookie.com', 'www.youtube-nocookie.com'].includes(url.hostname)) videoId = url.searchParams.get('v') || url.pathname.match(/^\/(?:embed|shorts)\/([\w-]+)/)?.[1];
     if (url.hostname === 'youtu.be') videoId = url.pathname.slice(1);
-    if (videoId && /^[\w-]{11}$/.test(videoId)) return { type: 'iframe', src: `https://www.youtube-nocookie.com/embed/${videoId}?rel=0` };
+    if (videoId && /^[\w-]{11}$/.test(videoId)) return { type: 'iframe', src: `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&cc_load_policy=1&cc_lang_pref=es&hl=es` };
     if (['vimeo.com', 'www.vimeo.com', 'player.vimeo.com'].includes(url.hostname)) {
       const match = url.pathname.match(/(?:\/video)?\/(\d+)/);
       if (match) return { type: 'iframe', src: `https://player.vimeo.com/video/${match[1]}` };
@@ -352,7 +331,8 @@
     storeList('mathbrain-recent', recent);
     const format = library.formats[resource.type];
     const source = videoSource(resource.video);
-    const video = !source ? '' : `<div class="video-stage">${source.type === 'iframe' ? `<iframe title="${escape(resource.title)}" src="${escape(source.src)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>` : `<video controls playsinline preload="metadata" aria-label="${escape(resource.title)}"><source src="${escape(source.src)}"></video>`}</div>`;
+    const vertical = resource.videoFormat === 'vertical' || /\/shorts\//.test(resource.video || '');
+    const video = !source ? '' : `<div class="video-stage${vertical ? ' is-vertical' : ''}">${source.type === 'iframe' ? `<iframe title="${escape(resource.title)}" src="${escape(source.src)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>` : `<video controls playsinline preload="metadata" aria-label="${escape(resource.title)}"><source src="${escape(source.src)}"></video>`}</div>`;
     const course = courses.find(candidate => candidate.id === resource.courseId);
     // Las lecciones se recorren paso a paso; «?vista=lectura» las muestra completas en una sola página.
     if (resource.type === 'explanation' && course) return parameters.get('vista') === 'lectura' ? renderLesson(resource, course, video) : renderPlayer(resource, course, video);
@@ -388,7 +368,11 @@
       if (result === null) { form.dataset.state = 'invalid'; feedback.textContent = 'Escribe un número, una fracción como 8/3 o un porcentaje como 25 %.'; return null; }
     }
     form.dataset.state = result ? 'correct' : 'incorrect';
-    feedback.textContent = result ? '¡Correcto! Abre la solución si quieres comparar tu razonamiento.' : select('.lesson-hint', form) ? 'Todavía no. Abre la pista e inténtalo de nuevo.' : 'Todavía no. Revisa la explicación e inténtalo de nuevo.';
+    const solution = select('.lesson-solution', form);
+    const hint = select('.lesson-hint', form);
+    if (result && solution) solution.open = true;
+    if (!result && hint) hint.open = true;
+    feedback.textContent = result ? (solution ? '¡Correcto! Abajo tienes la explicación.' : '¡Correcto!') : hint ? 'Todavía no. Lee la pista e inténtalo de nuevo.' : 'Todavía no. Revisa la explicación e inténtalo de nuevo.';
     return result;
   }
 
@@ -456,37 +440,56 @@
     return `${library.formats[resource.type].title} · ${resource.type === 'simulation' ? 'Interactiva' : plural(resource.steps.length, 'paso', 'pasos')}`;
   }
 
+  // Estado del camino de un curso: la lección actual y qué unidades están abiertas.
+  // Una unidad se abre al terminar la anterior; las unidades en las que ya se avanzó siguen abiertas.
+  function pathState(course) {
+    const modules = courseModules(course);
+    const progress = courseProgress(course);
+    const current = progress.done === progress.total ? null : progress.next.id;
+    const unitDone = module => module.lessons.every(({ lesson }) => completed.has(lesson.id));
+    const touched = module => module.lessons.some(({ lesson }) => completed.has(lesson.id) || lesson.id === current);
+    const furthest = modules.reduce((last, module, index) => touched(module) ? index : last, 0);
+    const open = modules.map((module, index) => index <= furthest || unitDone(modules[index - 1]));
+    return { modules, progress, current, open };
+  }
+
+  // Una unidad del camino: encabezado con su objetivo y avance, y sus lecciones como nodos conectados.
+  function pathUnit(course, module, state, { popup = true } = {}) {
+    const open = state.open[module.index];
+    const done = module.lessons.filter(({ lesson }) => completed.has(lesson.id)).length;
+    const total = module.lessons.length;
+    const node = (status, href, disc, label, title, extra = '') => {
+      const inner = `<span class="znode-disc" aria-hidden="true">${disc}</span><span class="znode-text"><small>${label}</small><strong>${title}</strong></span>`;
+      const statusText = { done: 'Completada', locked: 'Bloqueada: termina la unidad anterior', current: 'Lección actual' }[status];
+      const body = status === 'locked' ? `<span class="znode-link" aria-disabled="true">${inner}<span class="sr-only">${statusText}</span></span>` : `<a class="znode-link" href="${href}">${inner}${statusText ? `<span class="sr-only">${statusText}</span>` : ''}</a>`;
+      return `<li class="znode is-${status}">${body}${extra}</li>`;
+    };
+    const lessonNodes = module.lessons.map(({ lesson, label }) => {
+      const status = completed.has(lesson.id) ? 'done' : lesson.id === state.current && open ? 'current' : open ? 'available' : 'locked';
+      const disc = icon({ done: 'check', current: 'play', available: lesson.video ? 'play' : 'book', locked: 'lock' }[status]);
+      const pop = status === 'current' && popup ? `<div class="znode-pop" role="group" aria-label="Lección actual"><p>${escape(lesson.description)}</p><a class="button button-primary" href="#contenido/${lesson.id}">${icon('play')}${state.progress.done ? 'Continuar' : 'Empezar'}</a></div>` : '';
+      return node(status, `#contenido/${lesson.id}`, disc, `<span class="module-item-number">${escape(label)}</span> · ${lessonMeta(lesson)}`, escape(lesson.title), pop);
+    }).join('');
+    const challenges = reviewSteps(module).length;
+    const reviewed = stats.reviews.includes(`${course.id}:${module.index}`);
+    const review = challenges ? node(!open ? 'locked' : reviewed ? 'done' : 'review', `#repaso/${course.id}/${module.index + 1}`, icon(!open ? 'lock' : reviewed ? 'check' : 'star'), plural(challenges, 'reto', 'retos'), 'Repaso de la unidad') : '';
+    const extras = module.extras.length ? `<div class="zunit-extras"><p>Practica más</p>${module.extras.map(resource => `<a class="zunit-extra" href="#contenido/${resource.id}">${icon(library.formats[resource.type].icon)}<span><small>${library.formats[resource.type].title}</small>${escape(resource.title)}</span></a>`).join('')}</div>` : '';
+    const percent = total ? Math.round(done / total * 100) : 0;
+    return `<section class="zunit${open ? '' : ' is-locked'}${done === total ? ' is-done' : ''}" aria-labelledby="unit-${course.id}-${module.index}"><header class="zunit-head"><div class="zunit-copy"><p class="zunit-kicker">${escape(module.kicker)}</p><h2 id="unit-${course.id}-${module.index}">${escape(module.name)}</h2>${module.summary ? `<p class="zunit-goal">${escape(module.summary)}</p>` : ''}</div><div class="zunit-progress"><span class="zunit-count">${done}/${total}</span><span class="zunit-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}" aria-label="${done} de ${total} lecciones completadas"><span style="width:${percent}%"></span></span></div></header><ol class="zpath">${lessonNodes}${review}</ol>${extras}</section>`;
+  }
+
   function renderCourse(course) {
     currentLessonId = null;
-    const modules = courseModules(course);
-    const lessons = courseLessons(course);
-    const progress = courseProgress(course);
-    const exercises = lessons.reduce((total, lesson) => total + (lesson.practice || 0), 0);
-    const extras = modules.reduce((total, module) => total + module.extras.length, 0);
+    const state = pathState(course);
+    const { modules, progress } = state;
+    const exercises = courseLessons(course).reduce((total, lesson) => total + (lesson.practice || 0), 0);
     const started = progress.done > 0;
     const finished = progress.done === progress.total;
-    const current = finished ? null : progress.next.id;
-    // Las lecciones se dibujan como un camino en zigzag de nodos: completadas, la actual (con su tarjeta para empezar) y las siguientes.
-    const offsets = [0, 1, 1.6, 1, 0, -1, -1.6, -1];
-    let position = 0;
-    const node = (className, href, disc, label, title, popup = '') => `<li class="path-node ${className}" style="--offset:${offsets[position++ % offsets.length]}"><a class="path-node-link" href="${href}"><span class="path-node-disc">${disc}</span><span class="path-node-label"><small>${label}</small>${title}</span></a>${popup}</li>`;
-    const level = module => {
-      const done = module.lessons.filter(({ lesson }) => completed.has(lesson.id)).length;
-      const challenges = reviewSteps(module).length;
-      const reviewed = stats.reviews.includes(`${course.id}:${module.index}`);
-      const lessonNodes = module.lessons.map(({ lesson, label }) => {
-        const isDone = completed.has(lesson.id);
-        const isCurrent = lesson.id === current;
-        return node(`${isDone ? 'is-done' : ''}${isCurrent ? ' is-current' : ''}`, `#contenido/${lesson.id}`, `${icon(isDone ? 'check' : isCurrent ? 'play' : lesson.video ? 'play' : 'book')}${isDone ? '<span class="sr-only">Completada:</span>' : ''}`, `<span class="module-item-number">${escape(label)}</span> · ${lessonMeta(lesson)}`, escape(lesson.title), isCurrent ? `<div class="path-node-pop" role="group" aria-label="Lección actual"><strong>${escape(lesson.title)}</strong><small>${escape(lesson.description)}</small><a class="button button-primary" href="#contenido/${lesson.id}">${icon('play')}${started ? 'Continuar' : 'Empezar'}</a></div>` : '');
-      }).join('');
-      const review = challenges ? node(`path-review${reviewed ? ' is-done' : ''}`, `#repaso/${course.id}/${module.index + 1}`, icon(reviewed ? 'check' : 'star'), plural(challenges, 'reto', 'retos'), 'Repaso del nivel') : '';
-      const extraNodes = module.extras.map(resource => node('path-extra', `#contenido/${resource.id}`, icon(library.formats[resource.type].icon), extraMeta(resource), escape(resource.title))).join('');
-      return `<section class="path-level" aria-labelledby="level-${module.index}"><header class="path-level-head"><span class="course-module-kicker">${escape(module.kicker)}</span><h2 class="course-module-title" id="level-${module.index}">${escape(module.name)}</h2><span class="path-level-count${done === module.lessons.length ? ' is-done' : ''}">${done}/${module.lessons.length}</span>${module.summary ? `<p>${escape(module.summary)}</p>` : ''}</header><ol class="path-nodes">${lessonNodes}${review}${extraNodes}</ol></section>`;
-    };
+    const unitWord = /^Unidad/.test(course.modules?.[0]?.title || '') ? ['unidad', 'unidades'] : ['módulo', 'módulos'];
     select('#detail-view').innerHTML = `<nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="#">Inicio</a><span aria-hidden="true">/</span><a href="#explorar">Explorar</a><span aria-hidden="true">/</span><span>Curso</span></nav>`
-      + `<div class="course-layout"><aside class="course-card ${course.color}"><div class="course-card-art" aria-hidden="true">${artwork(course, true)}<span class="course-card-symbol">${courseSymbol(course)}</span></div><p class="eyebrow">${escape(course.label)} · NIVEL ${course.level.toUpperCase()}</p><h1 id="detail-title" tabindex="-1">${escape(course.title)}</h1><p class="course-card-description">${escape(course.description)}</p><ul class="course-card-facts"><li>${icon('book')}${plural(lessons.length, 'lección', 'lecciones')}</li><li>${icon('exercise')}${plural(exercises, 'reto', 'retos')}</li><li>${icon('star')}${plural(modules.length, 'nivel', 'niveles')} · ≈ ${studyHours(course)} h</li></ul>${started ? progressBar(progress) : ''}<a class="button button-primary course-card-start" href="#contenido/${progress.next.id}">${icon('play')}${started ? (finished ? 'Repasar el curso' : 'Continuar el curso') : 'Empezar el curso'}</a><div class="course-instructor"><img src="${instructor.photo}" alt="" width="40" height="40" loading="lazy" decoding="async"><span><small>Impartido por</small><strong>${instructor.name}</strong></span></div><button class="text-button" type="button" data-download="${course.id}">${icon('download')}Descargar programa</button></aside>`
-      + `<div class="course-path-column"><h2 class="sr-only">Hay ${plural(modules.length, 'módulo', 'módulos')} en este curso</h2>${modules.map(level).join('')}`
-      + `<section class="course-about" aria-labelledby="about-course-title"><h2 id="about-course-title">Sobre este curso</h2><p>${escape(course.intro)}</p>${course.outcomes?.length ? `<h3>Lo que aprenderás</h3><ul class="course-outcomes">${course.outcomes.map(outcome => `<li>${icon('check')}<span>${escape(outcome)}</span></li>`).join('')}</ul>` : ''}${course.skills?.length ? `<h3>Habilidades que desarrollarás</h3><ul class="course-skills">${course.skills.map(skill => `<li>${escape(skill)}</li>`).join('')}</ul>` : ''}<p class="prerequisite"><strong>Antes de empezar</strong>${escape(course.prerequisite)}</p></section></div></div>`;
+      + `<div class="zcourse ${course.color}"><header class="zcourse-head"><span class="zcourse-icon" aria-hidden="true">${courseSymbol(course)}</span><div class="zcourse-copy"><p class="eyebrow">${escape(course.label)} · NIVEL ${course.level.toUpperCase()}</p><h1 id="detail-title" tabindex="-1">${escape(course.title)}</h1><p class="zcourse-description">${escape(course.description)}</p><p class="zcourse-meta"><span>${plural(modules.length, ...unitWord)}</span><span>${plural(progress.total, 'lección', 'lecciones')}</span><span>${plural(exercises, 'reto', 'retos')}</span><span>≈ ${studyHours(course)} h</span></p>${started ? progressBar(progress) : ''}</div><a class="button button-primary zcourse-start" href="#contenido/${progress.next.id}">${icon('play')}${started ? (finished ? 'Repasar el curso' : 'Continuar el curso') : 'Empezar el curso'}</a></header>`
+      + `<div class="zcourse-path"><h2 class="sr-only">Hay ${plural(modules.length, 'módulo', 'módulos')} en este curso</h2>${modules.map(module => pathUnit(course, module, state)).join('')}</div>`
+      + `<section class="course-about" aria-labelledby="about-course-title"><h2 id="about-course-title">Sobre este curso</h2><p>${escape(course.intro)}</p>${course.outcomes?.length ? `<h3>Lo que aprenderás</h3><ul class="course-outcomes">${course.outcomes.map(outcome => `<li>${icon('check')}<span>${escape(outcome)}</span></li>`).join('')}</ul>` : ''}${course.skills?.length ? `<h3>Habilidades que desarrollarás</h3><ul class="course-skills">${course.skills.map(skill => `<li>${escape(skill)}</li>`).join('')}</ul>` : ''}<p class="prerequisite"><strong>Antes de empezar</strong>${escape(course.prerequisite)}</p><div class="course-about-foot"><div class="course-instructor"><img src="${instructor.photo}" alt="" width="40" height="40" loading="lazy" decoding="async"><span><small>Impartido por</small><strong>${instructor.name}</strong></span></div><button class="text-button" type="button" data-download="${course.id}">${icon('download')}Descargar programa</button></div></section></div>`;
     document.title = `${course.title} | Zuka`;
   }
 
@@ -636,14 +639,16 @@
     const last = player.index === player.steps.length - 1;
     const open = step.type !== 'exercise' || result === 'correct' || result === 'revealed';
     const hint = step.type === 'exercise' && /lesson-hint/.test(step.html);
+    const solution = step.type === 'exercise' && /lesson-solution/.test(step.html);
     const back = player.index > 0 ? `<button class="player-back" type="button" data-player-back="1" aria-label="Paso anterior">${icon('left')}</button>` : '';
     let message = '';
     let state = '';
+    // La retroalimentación explica: al acertar se abre la solución y tras un error, la pista.
     if (step.type === 'exercise') {
-      if (result === 'correct') { state = 'is-correct'; message = mascot.say('feliz', `<strong>¡Correcto!</strong> +${player.gains[player.index]} XP`); }
-      else if (result === 'revealed') { state = 'is-revealed'; message = mascot.say('animo', 'Revisa la solución con calma. El próximo reto sale.'); }
-      else if (result === 'retry') { state = 'is-retry'; message = mascot.say('animo', hint ? '<strong>Casi.</strong> Abre la pista y vuelve a intentarlo.' : '<strong>Casi.</strong> Revisa el planteamiento y vuelve a intentarlo.'); }
-      else message = mascot.say('piensa', 'Tu turno: resuelve el reto para continuar.');
+      if (result === 'correct') { state = 'is-correct'; message = mascot.say('feliz', `<strong>¡Correcto!</strong> ${solution ? 'Lee la explicación para ver por qué funciona.' : 'Bien razonado.'} <span class="player-gain">+${player.gains[player.index]} XP</span>`); }
+      else if (result === 'revealed') { state = 'is-revealed'; message = mascot.say('animo', '<strong>Así se resuelve.</strong> Repasa la solución con calma y sigue adelante.'); }
+      else if (result === 'retry') { state = 'is-retry'; message = mascot.say('animo', hint ? '<strong>Todavía no.</strong> Te abrimos una pista: léela y vuelve a intentarlo.' : '<strong>Todavía no.</strong> Revisa el planteamiento y vuelve a intentarlo.'); }
+      else message = mascot.say('piensa', 'Tu turno: responde para continuar.');
     }
     const actions = open
       ? `<button class="button button-primary player-continue" type="button" data-player-next="1">${last ? 'Terminar' : 'Continuar'}${icon('right')}</button>`
@@ -661,11 +666,14 @@
     (select('#player-card') || select('#detail-title'))?.focus({ preventScroll: true });
   }
 
+  // Pantalla final: sencilla. Qué se practicó, el avance del curso y un solo botón para seguir.
   function finishPlayer() {
     const challenges = player.steps.filter(step => step.type === 'exercise').length;
     let title;
     let detail;
-    let actions;
+    let destination;
+    let secondary = '';
+    let mood = 'celebra';
     if (player.kind === 'lesson') {
       const { resource, course } = player;
       const firstTime = !completed.has(resource.id);
@@ -676,9 +684,10 @@
       const lessons = courseLessons(course);
       const next = lessons[lessons.findIndex(lesson => lesson.id === resource.id) + 1];
       const progress = courseProgress(course);
-      title = '¡Lección completada!';
-      detail = progress.done === progress.total ? `Completaste todas las lecciones de ${escape(course.title)}.` : `Llevas el ${progress.percent} % de ${escape(course.title)}.`;
-      actions = `${next ? `<a class="button button-primary" href="#contenido/${next.id}">Siguiente lección${icon('right')}</a>` : ''}<a class="button ${next ? 'button-secondary' : 'button-primary'}" href="#curso/${course.id}">Volver al curso</a><a class="text-button" href="#contenido/${resource.id}?vista=lectura">${icon('book')}Repasar la lección completa</a>`;
+      title = progress.done === progress.total ? '¡Curso completado!' : '¡Lección completada!';
+      detail = `<p class="player-end-skill">Practicaste <strong>${escape(resource.title)}</strong></p>${progressBar(progress)}`;
+      destination = next ? `#contenido/${next.id}` : `#curso/${course.id}`;
+      secondary = next ? `<a class="text-button" href="#curso/${course.id}">Volver al camino</a>` : '';
     } else {
       const { course, module } = player;
       const key = `${course.id}:${module.index}`;
@@ -687,15 +696,17 @@
       if (passed && !stats.reviews.includes(key)) { stats.reviews = [...stats.reviews, key]; player.xp += 30; addXp(30); }
       recordStudyDay();
       saveStats();
-      title = passed ? '¡Nivel superado!' : 'Repaso terminado';
-      detail = passed ? `Resolviste ${correct} de ${challenges} retos de «${escape(module.name)}».` : `Resolviste ${correct} de ${challenges} retos. Repasa las lecciones del nivel y vuelve a intentarlo.`;
-      actions = `<a class="button button-primary" href="#curso/${course.id}">Volver al curso</a>`;
+      mood = passed ? 'celebra' : 'animo';
+      title = passed ? '¡Unidad superada!' : 'Repaso terminado';
+      detail = `<p class="player-end-skill">${passed ? `Dominas <strong>${escape(module.name)}</strong>.` : `Repasa las lecciones de <strong>${escape(module.name)}</strong> y vuelve a intentarlo cuando quieras.`}</p>`;
+      destination = `#curso/${course.id}`;
     }
     updateStatsChip();
     select('#player-xp').textContent = player.xp ? `+${player.xp} XP` : '';
     select('#player-meter').innerHTML = playerMeter();
-    select('#player-stage').innerHTML = `<div class="player-end" id="player-card" tabindex="-1"><span class="player-end-mascot">${mascot.svg('celebra')}</span><h2>${title}</h2><p>${detail}</p><ul class="player-stats"><li><strong>+${player.xp}</strong><span>XP ganados</span></li><li><strong>${icon('flame')}${currentStreak()}</strong><span>${currentStreak() === 1 ? 'día de racha' : 'días de racha'}</span></li><li><strong>${player.firstTry}/${challenges}</strong><span>retos a la primera</span></li></ul></div>`;
-    select('#player-bar').innerHTML = `<div class="player-bar-inner is-finished"><div class="player-actions player-end-actions">${actions}</div></div>`;
+    const summary = [player.xp ? `+${player.xp} XP` : '', player.firstTry ? `${player.firstTry} de ${challenges} ${challenges === 1 ? 'reto' : 'retos'} a la primera` : ''].filter(Boolean).join(' · ');
+    select('#player-stage').innerHTML = `<div class="player-end" id="player-card" tabindex="-1"><span class="player-end-mascot">${mascot.svg(mood)}</span><h2>${title}</h2>${detail}${summary ? `<p class="player-end-xp">${summary}</p>` : ''}</div>`;
+    select('#player-bar').innerHTML = `<div class="player-bar-inner is-finished"><div class="player-actions player-end-actions"><a class="button button-primary button-big" href="${destination}">Continuar${icon('right')}</a>${secondary}</div></div>`;
     player.finished = true;
   }
 
@@ -705,9 +716,9 @@
   function loadProfile() {
     try {
       const value = JSON.parse(localStorage.getItem('mathbrain-profile') || '{}');
-      return { name: typeof value.name === 'string' ? value.name.trim().slice(0, 40) : '' };
+      return { name: typeof value.name === 'string' ? value.name.trim().slice(0, 40) : '', goal: [2, 3, 5, 7].includes(value.goal) ? value.goal : 0 };
     } catch {
-      return { name: '' };
+      return { name: '', goal: 0 };
     }
   }
 
@@ -742,6 +753,25 @@
     });
   }
 
+  // Meta semanal opcional: días con estudio en los últimos 7 frente a la meta elegida en el perfil.
+  function weeklyGoal() {
+    return { target: loadProfile().goal, done: weekActivity().filter(day => day.done).length };
+  }
+
+  // Logros ocasionales, calculados con el progreso: no hay que perseguirlos, llegan al estudiar.
+  function achievements() {
+    const unitDone = courses.some(course => courseModules(course).some(module => module.lessons.length && module.lessons.every(({ lesson }) => completed.has(lesson.id))));
+    const courseDone = courses.some(course => { const progress = courseProgress(course); return progress.done === progress.total; });
+    return [
+      ['Primer paso', 'Completa tu primera lección', completed.size >= 1],
+      ['Constancia', 'Estudia en 3 días distintos', new Set(stats.days).size >= 3],
+      ['Diez ideas', 'Completa 10 lecciones', completed.size >= 10],
+      ['Unidad completa', 'Termina todas las lecciones de una unidad', unitDone],
+      ['Repaso superado', 'Supera el repaso de una unidad', stats.reviews.length > 0],
+      ['Curso completo', 'Termina todas las lecciones de un curso', courseDone]
+    ];
+  }
+
   function renderProfile() {
     const profile = loadProfile();
     const level = xpLevel(stats.xp);
@@ -752,10 +782,11 @@
     const statItems = [['flame', streak, streak === 1 ? 'día de racha' : 'días de racha'], ['star', bestStreak(), 'mejor racha'], ['check', completed.size, completed.size === 1 ? 'lección completada' : 'lecciones completadas'], ['bookmark', saved.size, saved.size === 1 ? 'contenido guardado' : 'contenidos guardados']];
     select('#detail-view').innerHTML = `<section class="profile-view" aria-labelledby="detail-title">`
       + `<header class="profile-header"><span class="profile-avatar" aria-hidden="true">${mascot.svg(streak ? 'celebra' : 'feliz')}</span><div class="profile-identity"><p class="eyebrow">TU PERFIL</p><h1 id="detail-title" tabindex="-1">${profile.name ? `Hola, ${escape(profile.name)}` : 'Hola'}</h1><p class="profile-level"><strong>Nivel ${level.level}</strong> · ${stats.xp} XP</p><div class="profile-level-bar"><span class="course-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="${level.need}" aria-valuenow="${level.into}" aria-label="Progreso hacia el nivel ${level.level + 1}"><span style="width:${level.percent}%"></span></span><small>${level.need - level.into} XP para el nivel ${level.level + 1}</small></div></div></header>`
-      + `<form class="profile-name" data-profile-form="1"><label for="profile-name">¿Cómo quieres que te llamemos?</label><div><input id="profile-name" name="name" type="text" maxlength="40" autocomplete="nickname" placeholder="Tu nombre o apodo" value="${escape(profile.name)}"><button class="button button-secondary" type="submit">Guardar</button></div></form>`
+      + `<form class="profile-name" data-profile-form="1"><div class="profile-field"><label for="profile-name">¿Cómo quieres que te llamemos?</label><input id="profile-name" name="name" type="text" maxlength="40" autocomplete="nickname" placeholder="Tu nombre o apodo" value="${escape(profile.name)}"></div><div class="profile-field"><label for="profile-goal">Meta semanal <span>(opcional)</span></label><select id="profile-goal" name="goal">${[[0, 'Sin meta'], [2, '2 días por semana'], [3, '3 días por semana'], [5, '5 días por semana'], [7, 'Todos los días']].map(([value, label]) => `<option value="${value}"${profile.goal === value ? ' selected' : ''}>${label}</option>`).join('')}</select></div><button class="button button-secondary" type="submit">Guardar</button></form>`
       + `<ul class="profile-stats" aria-label="Tus números">${statItems.map(([name, value, label]) => `<li>${icon(name)}<strong>${value}</strong><span>${label}</span></li>`).join('')}</ul>`
-      + `<section class="profile-card" aria-labelledby="profile-week-title"><div class="profile-card-heading"><h2 id="profile-week-title">Esta semana</h2><p>${studiedWeek ? `Estudiaste ${plural(studiedWeek, 'día', 'días')} de 7.` : 'Completa una lección para empezar tu racha.'}</p></div><ol class="profile-week">${week.map(day => `<li class="${day.done ? 'is-done' : ''}${day.today ? ' is-today' : ''}"><span aria-hidden="true">${day.done ? icon('check') : ''}</span><small aria-hidden="true">${escape(day.short)}</small><span class="sr-only">${escape(day.long)}: ${day.done ? 'estudiaste' : 'sin estudio'}</span></li>`).join('')}</ol></section>`
+      + `<section class="profile-card" aria-labelledby="profile-week-title"><div class="profile-card-heading"><h2 id="profile-week-title">Últimos 7 días</h2><p>${studiedWeek ? `Estudiaste ${plural(studiedWeek, 'día', 'días')}${profile.goal ? ` de tu meta de ${profile.goal}` : ' de 7'}.` : 'Completa una lección y aparecerá aquí.'}</p></div><ol class="profile-week">${week.map(day => `<li class="${day.done ? 'is-done' : ''}${day.today ? ' is-today' : ''}"><span aria-hidden="true">${day.done ? icon('check') : ''}</span><small aria-hidden="true">${escape(day.short)}</small><span class="sr-only">${escape(day.long)}: ${day.done ? 'estudiaste' : 'sin estudio'}</span></li>`).join('')}</ol></section>`
       + `<section class="profile-card" aria-labelledby="profile-courses-title"><div class="profile-card-heading"><h2 id="profile-courses-title">Tus cursos</h2><p>${progress.some(item => item.progress.done) ? 'Tu avance en cada ruta.' : 'Todavía no empiezas ningún curso. Elige uno y da el primer paso.'}</p></div><ul class="profile-courses">${progress.map(({ course, progress: courseState }) => `<li class="${course.color}"><span class="profile-course-symbol" aria-hidden="true">${courseSymbol(course)}</span><div><a href="#curso/${course.id}"><strong>${escape(course.title)}</strong></a>${progressBar(courseState)}</div><a class="text-button" href="#contenido/${courseState.next.id}">${courseState.done === courseState.total ? 'Repasar' : courseState.done ? 'Continuar' : 'Empezar'}${icon('right')}</a></li>`).join('')}</ul></section>`
+      + `<section class="profile-card" aria-labelledby="profile-badges-title"><div class="profile-card-heading"><h2 id="profile-badges-title">Logros</h2><p>${achievements().filter(([, , earned]) => earned).length} de ${achievements().length} conseguidos.</p></div><ul class="profile-badges">${achievements().map(([name, description, earned]) => `<li class="${earned ? 'is-earned' : ''}"><span class="profile-badge-icon" aria-hidden="true">${icon(earned ? 'star' : 'lock')}</span><strong>${name}</strong><small>${description}</small><span class="sr-only">${earned ? 'Conseguido' : 'Pendiente'}</span></li>`).join('')}</ul></section>`
       + `<section class="profile-card profile-data" aria-labelledby="profile-data-title"><div class="profile-card-heading"><h2 id="profile-data-title">Tus datos</h2><p>Zuka no necesita cuenta: tu progreso se guarda solo en este dispositivo. Descarga una copia para pasarla a otro celular o computador.</p></div><div class="profile-actions"><button type="button" class="button button-secondary" data-profile-export="1">${icon('download')}Descargar copia</button><label class="button button-secondary profile-import">${icon('book')}Restaurar copia<input class="sr-only" type="file" accept=".json,application/json" data-profile-import="1"></label><button type="button" class="text-button profile-reset" data-profile-reset="1">Borrar mi progreso</button></div></section>`
       + `</section>`;
     document.title = 'Tu perfil | Zuka';
@@ -825,8 +856,7 @@
     if (destination === 'ejercicios') filters.type = 'exercise';
     select('#home-view').hidden = page !== 'inicio';
     select('#courses-view').hidden = page !== 'cursos';
-    select('.discovery').hidden = !['inicio', 'explorar', 'biblioteca'].includes(page);
-    select('#learning-paths').hidden = page !== 'inicio';
+    select('.discovery').hidden = !['explorar', 'biblioteca'].includes(page);
     select('#detail-view').hidden = !['detalle', 'perfil'].includes(page);
     select('#about-view').hidden = page !== 'nosotros';
     select('#content-search').value = filters.query;
@@ -852,8 +882,8 @@
       document.title = 'Sobre Zuka | Zuka';
     } else {
       select('#detail-view').replaceChildren();
-      renderCatalog();
-      if (page === 'inicio') document.title = 'Zuka — Aprende matemáticas paso a paso';
+      if (page === 'inicio') renderHome();
+      else renderCatalog();
     }
     // Durante una lección paso a paso, la interfaz se concentra en la lección, como en una app de aprendizaje.
     document.body?.classList.toggle('lesson-mode', Boolean(player));
@@ -867,7 +897,7 @@
     });
     if (shouldFocus) {
       window.scrollTo({ top: 0, behavior: 'instant' });
-      const heading = ['detalle', 'perfil'].includes(page) ? select('#detail-title') : page === 'nosotros' ? select('#about-title') : page === 'inicio' ? select('#main') : page === 'cursos' ? select('#courses-title') : select('#catalog-title');
+      const heading = ['detalle', 'perfil'].includes(page) ? select('#detail-title') : page === 'nosotros' ? select('#about-title') : page === 'inicio' ? select('#home-title') : page === 'cursos' ? select('#courses-title') : select('#catalog-title');
       heading?.focus({ preventScroll: true });
     }
   }
@@ -1029,9 +1059,6 @@
   }
 
   selectAll('[data-icon]').forEach(element => { element.innerHTML = icon(element.dataset.icon); });
-  renderLanding();
-  select('#library-stats').textContent = `${library.search({ type: 'explanation' }).length} explicaciones · ${library.search({ type: 'simulation' }).length} simulaciones · ${library.search({ type: 'exercise' }).length} ejercicios`;
-  select('#course-paths').innerHTML = courses.map(course => `<a class="path-card ${course.color}" href="#curso/${course.id}"><span class="path-symbol" aria-hidden="true">${course.art === 'derivative' ? 'f′' : course.art === 'integral' ? '∫' : course.art === 'probability' ? 'P' : course.art === 'inference' ? 'x̄' : course.art === 'algebra' ? 'x²' : 'θ'}</span><span><strong>${course.title}</strong><small>${course.lessons.length} explicaciones · ${course.level}</small></span><span aria-hidden="true">↗</span></a>`).join('');
   select('#saved-count').textContent = saved.size;
   select('#course-topics').innerHTML = [{ id: 'all', title: 'Todos' }, ...library.topics].map(topic => `<button class="course-topic" type="button" data-course-topic="${topic.id}" aria-pressed="${topic.id === 'all'}">${escape(topic.title)}</button>`).join('');
   selectAll('[data-course-topic]').forEach(button => button.addEventListener('click', () => updateCourseCatalog({ topic: button.dataset.courseTopic })));
@@ -1072,12 +1099,6 @@
       select('[data-outline-toggle]')?.setAttribute('aria-expanded', String(outlineOpen));
       return;
     }
-    const arrow = event.target.closest('[data-rail]');
-    if (arrow) {
-      const rail = document.getElementById(arrow.dataset.rail);
-      rail.scrollBy({ left: Number(arrow.dataset.direction) * rail.clientWidth * .9, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
-      return;
-    }
     if (event.target.closest('[data-profile-export]')) { exportProgress(); return; }
     if (event.target.closest('[data-profile-reset]')) { resetProgress(); return; }
     const download = event.target.closest('[data-download]');
@@ -1091,7 +1112,8 @@
     if (!event.target.closest('[data-profile-form]')) return;
     event.preventDefault();
     const name = select('#profile-name').value.trim().slice(0, 40);
-    storeList('mathbrain-profile', { name });
+    const goal = Number(select('#profile-goal')?.value) || 0;
+    storeList('mathbrain-profile', { name, goal: [2, 3, 5, 7].includes(goal) ? goal : 0 });
     renderProfile();
     select('#detail-title').focus();
     toast(name ? `Listo, ${name}. Así te saludará Zuka.` : 'Nombre borrado.');
@@ -1108,6 +1130,5 @@
   });
   window.addEventListener('hashchange', () => route());
   window.addEventListener('popstate', () => route());
-  window.addEventListener('resize', updateRails, { passive: true });
   route(false);
 })();

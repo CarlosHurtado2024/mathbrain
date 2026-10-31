@@ -68,10 +68,30 @@ Todo texto debe cumplir contraste AA (4,5:1; 3:1 en textos grandes).
 | Tarjeta de curso | `.course-card`, `.continue-card` | Fondo blanco, color del curso en el icono |
 | Barra de progreso | `.course-progress-track` | 6–8 px, con `role="progressbar"` |
 | Chip de racha y XP | `.stats-chip` | En la cabecera; abre el perfil |
-| Navegación | `.main-nav` | Lateral en escritorio, barra inferior de 5 accesos en el celular |
+| Navegación | `.main-nav` | Lateral en escritorio (6 secciones y Materias), barra inferior de 5 accesos en el celular |
 | Camino de niveles | `.path-node` | Nodos en zigzag: completado, actual, siguiente |
 | Lección paso a paso | `.lesson-player` | Sin menús; barra inferior verde al acertar y roja tras un error |
 | Perfil | `.profile-*` | Encabezado con la mascota, estadísticas en cuadrícula, semana y cursos |
+
+## Camino de aprendizaje
+
+Curso → unidades → lecciones → retos. Cada unidad tiene un encabezado con el color suave del curso, su objetivo y un contador `hechas/total`; debajo, sus lecciones como círculos unidos por una línea vertical (`.zunit`, `.znode` en `src/zuka.css`).
+
+| Estado | Aspecto |
+| --- | --- |
+| Completada | Círculo pequeño con check en el color del curso, texto atenuado |
+| Actual | Círculo naranja más grande con anillo suave y una tarjeta con «Empezar» o «Continuar» |
+| Disponible | Círculo blanco con borde gris |
+| Bloqueada | Círculo gris con candado, sin enlace |
+
+Una unidad se desbloquea al terminar la anterior; las unidades en las que ya se avanzó quedan abiertas. Los enlaces directos y el buscador siguen llegando a cualquier lección.
+
+## Principios del rediseño
+
+- Una sola acción principal por sección. En el inicio: «Continuar aprendiendo».
+- Una actividad a la vez en la lección; la retroalimentación explica (abre la solución o la pista).
+- Gamificación moderada: XP discretos, logros ocasionales y una meta semanal opcional. Sin vidas, rankings ni celebraciones ruidosas.
+- Nada de tarjetas o estadísticas para rellenar espacio.
 
 ## Iconos
 

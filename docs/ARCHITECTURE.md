@@ -13,6 +13,7 @@ mathbrain/
 │   ├── themes.css           Variables de cada tema
 │   ├── explore.css          Catálogo, cursos, lecciones, perfil
 │   ├── fresh.css            Tema claro (por defecto)
+│   ├── zuka.css             Rediseño: inicio, camino, lección, catálogo (se carga al final)
 │   ├── theme.js             Aplica el tema antes de pintar la página
 │   ├── courses.js           Programas de los cursos y sus módulos
 │   ├── library.js           Catálogo: simulaciones, ejercicios resueltos y búsqueda
@@ -62,7 +63,7 @@ Orden de carga en `index.html`:
 
 | Dirección | Vista |
 | --- | --- |
-| `#` o `#inicio` | Portada (primera visita) o panel del día |
+| `#` o `#inicio` | Panel de aprendizaje: saludo, siguiente lección y la unidad en curso |
 | `#explorar`, `#cursos` | Catálogo de cursos |
 | `#explorar?q=…&tipo=…&tema=…&nivel=…` | Búsqueda de contenidos |
 | `#simulaciones`, `#ejercicios` | Contenidos de ese formato |
