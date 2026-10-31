@@ -4,14 +4,39 @@ Zuka usa [Supabase](https://supabase.com) para las cuentas de los estudiantes y 
 
 Proyecto: `https://bzzzufyjhzjqawwrduom.supabase.co`
 
-## 1. Crear las tablas (una sola vez)
+## 1. Base de datos ✅
 
-1. Entra a tu proyecto en [supabase.com/dashboard](https://supabase.com/dashboard).
-2. Abre **SQL Editor → New query**.
-3. Copia todo el contenido de [`supabase/migrations/20261031000000_zuka_inicial.sql`](../supabase/migrations/20261031000000_zuka_inicial.sql), pégalo y pulsa **Run**.
-4. En **Table Editor** deben aparecer `profiles`, `lesson_progress`, `study_days`, `unit_reviews` y `saved_resources`, todas con el candado de **RLS enabled**.
+Ya está aplicada en el proyecto (31 de octubre de 2026) con las migraciones de [`supabase/migrations/`](../supabase/migrations/), en este orden:
 
-El archivo se puede ejecutar de nuevo sin duplicar nada.
+| Migración | Qué hace |
+| --- | --- |
+| `20261031000000_zuka_inicial.sql` | Tablas, Row Level Security, perfil al registrarse y funciones de XP, borrado de progreso y de cuenta |
+| `20261031010000_zuka_cuentas_google.sql` | Foto del perfil y nombre tomados de Google; permisos mínimos (leer, añadir y borrar) en las tablas de progreso |
+| `20261031020000_zuka_permisos_funciones.sql` | Los disparadores internos dejan de poder llamarse desde la API |
+
+Comprobado en el proyecto: cada persona solo ve sus filas, los visitantes sin sesión no tienen acceso, los XP solo cambian con las funciones y el perfil de Google se crea con el primer nombre y la foto. El asesor de seguridad de Supabase solo avisa de `add_xp`, `merge_xp`, `reset_progress` y `delete_account`, que son intencionales: la app las usa y cada una solo actúa sobre la cuenta que la llama.
+
+Para cambiar el esquema, añade una migración nueva (no edites las aplicadas). Con el conector de Supabase en Claude Code se aplica directamente; si no, pégala en **SQL Editor → Run**.
+
+## 1b. Entrar con Google
+
+La app muestra **«Continuar con Google»** en cuanto Google esté activado en Supabase: no hace falta volver a publicar. Se configura una vez:
+
+**En Google Cloud** ([console.cloud.google.com](https://console.cloud.google.com)):
+
+1. Crea un proyecto (por ejemplo «Zuka»).
+2. **Google Auth Platform → Branding:** nombre de la app «Zuka», correo de soporte y, si quieres, el logo. Añade tu dominio de Vercel en *Authorized domains* y también `supabase.co`.
+3. **Audience:** tipo *External*. Pulsa **Publish app** para que pueda entrar cualquier cuenta de Google (en modo *Testing* solo entran los usuarios de prueba que añadas).
+4. **Clients → Create client → Web application:**
+   - *Authorized JavaScript origins:* `https://tu-proyecto.vercel.app` y `http://localhost:4173`
+   - *Authorized redirect URIs:* `https://bzzzufyjhzjqawwrduom.supabase.co/auth/v1/callback`
+5. Copia el **Client ID** y el **Client secret**.
+
+**En Supabase:** **Authentication → Sign In / Providers → Google** → actívalo, pega el Client ID y el Client secret y guarda. El secreto queda solo en Supabase: no va en la app ni en el repositorio.
+
+Zuka pide únicamente el nombre, el correo y la foto (`openid`, `email`, `profile`), así que Google no exige una revisión especial. En la pantalla de Google aparecerá el dominio `bzzzufyjhzjqawwrduom.supabase.co`; para mostrar el tuyo hace falta un dominio personalizado en Supabase (plan de pago).
+
+Si alguien ya tenía cuenta con correo y contraseña y entra con Google usando el mismo correo, Supabase une ambas formas de acceso en la misma cuenta.
 
 ## 2. Direcciones permitidas
 
@@ -43,7 +68,7 @@ Para que los correos lleguen en español, edita las plantillas en **Authenticati
 ## 4. Probar
 
 1. `npm run dev` y abre `http://localhost:4173/#perfil`.
-2. **Crear cuenta** con un correo tuyo. Abre el enlace del correo **en el mismo navegador** donde te registraste.
+2. **Continuar con Google** (si ya lo activaste) o **Crear cuenta** con un correo tuyo. Abre el enlace del correo **en el mismo navegador** donde te registraste.
 3. Completa una lección y revisa en **Table Editor → lesson_progress** que aparezca la fila.
 4. Abre Zuka en otro dispositivo, inicia sesión y comprueba que llega el progreso.
 
@@ -62,4 +87,4 @@ Para que los correos lleguen en español, edita las plantillas en **Authenticati
 
 - Si quitas una lección o un guardado en un dispositivo sin conexión, puede volver a aparecer al sincronizar con otro dispositivo que aún lo tenga (la unión suma, no resta).
 - Los XP ganados con sesión se suman en la cuenta, incluso sin conexión. Pero la primera vez que un dispositivo que ya tenía progreso se une a una cuenta que también tiene XP, se conserva el mayor de los dos totales (no se suman).
-- Solo hay acceso con correo y contraseña. Google u otros proveedores se pueden añadir activándolos en **Authentication → Sign In / Providers**.
+- Hay acceso con correo y contraseña y con Google (cuando se activa, ver 1b). Otros proveedores se añaden en **Authentication → Sign In / Providers** y en `src/cloud.js`.

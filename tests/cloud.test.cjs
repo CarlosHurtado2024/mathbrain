@@ -62,13 +62,14 @@ function fakeSupabase(initial = {}) {
       signInWithPassword: async ({ password }) => password === 'correcta-123' ? (authListener('SIGNED_IN', { user: USER }), { error: null }) : { error: { code: 'invalid_credentials', message: 'Invalid login credentials' } },
       signOut: async () => { authListener('SIGNED_OUT', null); return { error: null }; },
       resetPasswordForEmail: async () => ({ error: null }),
-      updateUser: async () => ({ error: null })
+      updateUser: async () => ({ error: null }),
+      signInWithOAuth: async options => { calls.push({ oauth: options }); return { data: {}, error: null }; }
     }
   };
   return { db, calls, client, setOnline: value => { online = value; }, signIn: () => authListener('SIGNED_IN', { user: USER }) };
 }
 
-function environment({ supabase = fakeSupabase(), storage = {} } = {}) {
+function environment({ supabase = fakeSupabase(), storage = {}, settings = { external: { email: true, google: false } } } = {}) {
   const stored = new Map(Object.entries(storage).map(([key, value]) => [key, JSON.stringify(value)]));
   const events = [];
   const listeners = {};
@@ -81,6 +82,8 @@ function environment({ supabase = fakeSupabase(), storage = {} } = {}) {
   };
   const context = vm.createContext({
     window, navigator, URL, setTimeout, Promise,
+    // Ajustes de Auth del proyecto (qué proveedores de acceso están activos).
+    fetch: async (address, options) => ({ ok: address.endsWith('/auth/v1/settings') && options.headers.apikey === 'sb_publishable_prueba', json: async () => settings }),
     location: { href: 'https://zuka.app/#perfil', origin: 'https://zuka.app', pathname: '/' },
     history: { state: null, replaceState() {} },
     CustomEvent: class { constructor(type, init) { this.type = type; this.detail = init.detail; } },
@@ -202,6 +205,23 @@ test('Los errores de acceso se explican en español y cerrar sesión deja el dis
   assert.equal(env.read('mathbrain-stats'), null);
   assert.equal(env.read('mathbrain-theme'), 'dark', 'El tema se conserva');
   assert.equal(env.cloud.state.user, null);
+});
+
+test('Google solo se ofrece cuando el proyecto lo tiene activo y vuelve al perfil al terminar', async () => {
+  const off = environment();
+  await settle();
+  assert.equal(off.cloud.state.providers.google, false);
+  assert.equal(off.cloud.describe({ message: 'Unsupported provider: provider is not enabled' }), 'El acceso con Google aún no está activado.');
+  const supabase = fakeSupabase();
+  const on = environment({ supabase, settings: { external: { email: true, google: true } } });
+  await settle();
+  assert.equal(on.cloud.state.providers.google, true);
+  assert.ok(on.events.includes('auth'));
+  await on.cloud.signInWithGoogle();
+  const { oauth } = supabase.calls.find(call => call.oauth);
+  assert.equal(oauth.provider, 'google');
+  assert.equal(oauth.options.redirectTo, 'https://zuka.app/#perfil');
+  assert.equal(oauth.options.queryParams.prompt, 'select_account');
 });
 
 test('Sin Supabase la app sigue funcionando: la cuenta no está disponible y no se envía nada', async () => {

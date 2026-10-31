@@ -37,7 +37,7 @@ Estado: ✅ hecho · 🔜 planificado (ver `ROADMAP.md`).
 | RF-23 | Copia de seguridad del progreso (descargar y restaurar) y borrado | ✅ |
 | RF-24 | Guardados («Mi biblioteca») y contenidos recientes | ✅ |
 | RF-25 | Meta semanal opcional y logros | ✅ |
-| RF-26 | Cuenta opcional (correo y contraseña) y sincronización entre dispositivos con Supabase | ✅ |
+| RF-26 | Cuenta opcional (correo y contraseña, o Google) y sincronización entre dispositivos con Supabase | ✅ |
 | RF-27 | Recuperar contraseña, cerrar sesión y eliminar la cuenta con todos sus datos | ✅ |
 
 ### App instalable
