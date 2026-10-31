@@ -28,7 +28,7 @@ Abre `http://localhost:4173`. Para verla en tu celular Android, sigue [docs/PRUE
 - **Lecciones paso a paso:** un concepto o un reto por pantalla, con retroalimentación de la mascota y la opción de leer la lección completa.
 - **Camino de niveles** por curso, repasos de cada nivel, 6 simulaciones y 6 ejercicios resueltos.
 - **Progreso:** XP, niveles, racha diaria y **perfil del estudiante** con su semana, sus cursos y sus logros.
-- **Cuenta opcional** (Supabase) para guardar el progreso en la nube y continuar en otro dispositivo. Sin cuenta, todo funciona en el dispositivo.
+- **Bienvenida:** explorar la plataforma o crear una cuenta con correo y contraseña. Sin cuenta se puede probar la primera lección de cada curso; con una sesión activa se accede a todas las lecciones, repasos, simulaciones y ejercicios, y el progreso se sincroniza con Supabase.
 - **PWA:** instalable, sin conexión tras la primera visita y con aviso de actualización.
 - Tema claro (por defecto), oscuro o del sistema.
 

@@ -39,7 +39,7 @@ Requiere Node.js 20 o superior. No hay dependencias de npm.
 8. **Pruebas:** `npm test` debe pasar antes de cada commit. Si cambias el comportamiento, añade o ajusta la prueba en `tests/`.
 9. **Git:** commits pequeños con mensaje claro. No hacer `push` sin que Carlos lo pida: cada push a `main` publica en Vercel.
 10. Trabajar por etapas (`docs/ROADMAP.md`): una funcionalidad a la vez, probarla en el celular y luego seguir.
-11. **Supabase:** la app funciona sin cuenta. Toda tabla nueva lleva Row Level Security y va en un archivo nuevo de `supabase/migrations/`. En `src/config.js` solo va la clave publicable, nunca la secreta.
+11. **Supabase:** sin cuenta se exploran los cursos y se prueba la primera lección de cada uno; una sesión activa habilita todo el contenido. Toda tabla nueva lleva Row Level Security y va en un archivo nuevo de `supabase/migrations/`. En `src/config.js` solo va la clave publicable, nunca la secreta.
 
 ## Estructura
 

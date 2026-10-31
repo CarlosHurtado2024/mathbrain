@@ -8,7 +8,7 @@ const source = fs.readFileSync(path.join(__dirname, '../src/cloud.js'), 'utf8');
 const USER = { id: 'u-1', email: 'ana@ejemplo.com' };
 
 // Supabase falso en memoria: tablas por usuario, funciones RPC y un auth mínimo.
-function fakeSupabase(initial = {}, { confirmEmail = true } = {}) {
+function fakeSupabase(initial = {}, { confirmEmail = true, initialSession = null } = {}) {
   const db = { profiles: [], lesson_progress: [], saved_resources: [], study_days: [], unit_reviews: [], ...initial };
   const calls = [];
   let authListener = null;
@@ -57,7 +57,7 @@ function fakeSupabase(initial = {}, { confirmEmail = true } = {}) {
     },
     auth: {
       onAuthStateChange: callback => { authListener = callback; return { data: { subscription: { unsubscribe() {} } } }; },
-      getSession: async () => ({ data: { session: null } }),
+      getSession: async () => ({ data: { session: initialSession } }),
       signUp: async options => {
         calls.push({ signup: options });
         const session = confirmEmail ? null : { user: USER };
@@ -100,6 +100,16 @@ function environment({ supabase = fakeSupabase(), storage = {} } = {}) {
 }
 
 const settle = () => new Promise(resolve => setTimeout(resolve, 5));
+
+test('La sesión guardada se restaura antes de dar la cuenta por preparada', async () => {
+  const env = environment({ supabase: fakeSupabase({}, { initialSession: { user: USER } }) });
+  assert.equal(env.cloud.state.ready, false);
+  await settle();
+  assert.equal(env.cloud.state.ready, true);
+  assert.equal(env.cloud.state.user.id, USER.id);
+  await env.cloud.syncNow();
+  assert.equal(env.cloud.state.status, 'synced');
+});
 
 test('La unión conserva todo el progreso de ambos lados y recalcula la racha', () => {
   const { cloud } = environment();

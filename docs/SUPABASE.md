@@ -1,6 +1,6 @@
 # Configurar Supabase
 
-Zuka usa [Supabase](https://supabase.com) para las cuentas de los estudiantes y para guardar su progreso en la nube. El registro y el inicio de sesión se hacen únicamente con **correo electrónico y contraseña**. La cuenta es **opcional**: sin ella la app funciona igual y guarda el progreso en el dispositivo.
+Zuka usa [Supabase](https://supabase.com) para las cuentas de los estudiantes y para guardar su progreso en la nube. El registro y el inicio de sesión se hacen únicamente con **correo electrónico y contraseña**. Sin cuenta se puede explorar el catálogo y probar la primera lección de cada curso; una sesión activa habilita todas las lecciones, repasos, simulaciones y ejercicios.
 
 Proyecto: `https://bzzzufyjhzjqawwrduom.supabase.co`
 
@@ -25,6 +25,8 @@ En **Authentication → Sign In / Providers → Email**, mantén activo el prove
 Comprobado el 31 de octubre de 2026: Email está activo, el registro está permitido, la confirmación de correo está activa y Google está desactivado.
 
 En **Perfil** se puede **Crear cuenta**, **Iniciar sesión** y recuperar la contraseña con **¿Olvidaste tu contraseña?**. La app no incluye botones ni flujo de acceso con Google, aunque ese proveedor se active en Supabase. Su integración queda para una etapa posterior.
+
+La bienvenida enlaza también a las pantallas `#registro` y `#ingresar`. Registrarse no desbloquea contenido mientras falte confirmar el correo: hace falta una sesión activa. El destino solicitado se conserva en `sessionStorage` (`zuka-auth-return`) para retomarlo después de confirmar e iniciar sesión en el mismo navegador. Solo se admiten rutas internas de contenido, curso y repaso. No se guarda la contraseña en ese almacenamiento.
 
 Las migraciones ya aplicadas se conservan, incluida la que añadió el campo opcional de foto de perfil. No hace falta cambiar la base de datos para usar solo correo y contraseña.
 
@@ -75,6 +77,8 @@ Para que los correos lleguen en español, edita las plantillas en **Authenticati
 - El acceso usa el flujo PKCE: el enlace del correo vuelve a `/?code=…#perfil` y la app termina el inicio de sesión. Si se abre en otro navegador, la cuenta queda confirmada y la app pide iniciar sesión.
 
 ## Limitaciones conocidas
+
+- El acceso al contenido se limita en la navegación de la PWA (incluidos enlaces directos, buscador, temarios y cambios de sesión). El material sigue formando parte de archivos estáticos públicos y de la caché para uso sin conexión; esta limitación no equivale a servir contenido privado desde un servidor. Los datos personales del estudiante sí siguen protegidos por Row Level Security en Supabase.
 
 - Si quitas una lección o un guardado en un dispositivo sin conexión, puede volver a aparecer al sincronizar con otro dispositivo que aún lo tenga (la unión suma, no resta).
 - Los XP ganados con sesión se suman en la cuenta, incluso sin conexión. Pero la primera vez que un dispositivo que ya tenía progreso se une a una cuenta que también tiene XP, se conserva el mayor de los dos totales (no se suman).

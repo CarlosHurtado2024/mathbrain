@@ -8,6 +8,7 @@ Estado: ✅ hecho · 🔜 planificado (ver `ROADMAP.md`).
 
 | Id | Requisito | Estado |
 | --- | --- | --- |
+| RF-00 | Bienvenida con opciones de explorar, registrarse con correo y contraseña o iniciar sesión; sin cuenta solo se accede a la primera lección de cada curso | ✅ |
 | RF-01 | Catálogo de cursos agrupado por área, con nivel, descripción, módulos y progreso | ✅ |
 | RF-02 | Página de curso con camino de niveles: lecciones completadas, actual y siguientes | ✅ |
 | RF-03 | Programa del curso: objetivos, habilidades, requisitos y módulos; descargable en texto | ✅ |
@@ -37,7 +38,7 @@ Estado: ✅ hecho · 🔜 planificado (ver `ROADMAP.md`).
 | RF-23 | Copia de seguridad del progreso (descargar y restaurar) y borrado | ✅ |
 | RF-24 | Guardados («Mi biblioteca») y contenidos recientes | ✅ |
 | RF-25 | Meta semanal opcional y logros | ✅ |
-| RF-26 | Cuenta opcional con correo electrónico y contraseña, y sincronización entre dispositivos con Supabase | ✅ |
+| RF-26 | Cuenta con correo electrónico y contraseña para acceder a todo el contenido, y sincronización entre dispositivos con Supabase; el acceso completo requiere sesión activa | ✅ |
 | RF-27 | Recuperar contraseña, cerrar sesión y eliminar la cuenta con todos sus datos | ✅ |
 
 ### App instalable

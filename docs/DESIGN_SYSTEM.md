@@ -82,9 +82,11 @@ Curso → unidades → lecciones → retos. Cada unidad tiene un encabezado con 
 | Completada | Círculo pequeño con check en el color del curso, texto atenuado |
 | Actual | Círculo naranja más grande con anillo suave y una tarjeta con «Empezar» o «Continuar» |
 | Disponible | Círculo blanco con borde gris |
-| Bloqueada | Círculo gris con candado, sin enlace |
+| Requiere cuenta | Círculo gris con candado y enlace al registro; el texto mantiene contraste legible |
 
-Una unidad se desbloquea al terminar la anterior; las unidades en las que ya se avanzó quedan abiertas. Los enlaces directos y el buscador siguen llegando a cualquier lección.
+Con sesión activa todas las unidades, lecciones y repasos están disponibles desde el comienzo. Sin cuenta se puede ver el temario y estudiar únicamente la primera lección de cada curso; los demás nodos y los recursos del buscador indican que requieren cuenta. Los enlaces directos a contenido restringido muestran una invitación a registrarse o iniciar sesión.
+
+La bienvenida ofrece dos opciones: explorar la plataforma o crear una cuenta gratuita con correo y contraseña; debajo aparece el acceso para quienes ya tienen cuenta. En el catálogo se recuerda el alcance de la exploración. El registro y el acceso tienen una pantalla dedicada y, al entrar, devuelven a la lección que se quería abrir.
 
 ## Principios del rediseño
 

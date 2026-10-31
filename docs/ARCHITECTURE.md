@@ -66,12 +66,13 @@ Orden de carga en `index.html`:
 
 | Dirección | Vista |
 | --- | --- |
-| `#` o `#inicio` | Panel de aprendizaje: saludo, siguiente lección y la unidad en curso |
+| `#` o `#inicio` | Sin sesión: bienvenida para explorar o crear una cuenta. Con sesión: panel de aprendizaje |
 | `#explorar`, `#cursos` | Catálogo de cursos |
 | `#explorar?q=…&tipo=…&tema=…&nivel=…` | Búsqueda de contenidos |
 | `#simulaciones`, `#ejercicios` | Contenidos de ese formato |
 | `#biblioteca` | Guardados |
 | `#perfil` | Perfil del estudiante |
+| `#registro`, `#ingresar` | Registro con correo y contraseña, inicio de sesión y recuperación de contraseña |
 | `#nosotros` | Sobre Zuka y su autor |
 | `#curso/<id>` | Camino de niveles del curso |
 | `#contenido/<id>` | Lección paso a paso, simulación o ejercicio resuelto |
@@ -79,6 +80,10 @@ Orden de carga en `index.html`:
 | `#repaso/<curso>/<nivel>` | Repaso del nivel |
 
 Los enlaces antiguos de Álgebra y Trigonometría redirigen a Fundamentos de Matemáticas (`legacyHash` en `app.js`).
+
+`app.js` comprueba la sesión antes de abrir contenido: sin cuenta permite la primera lección de cada curso y sus retos; las demás lecciones, simulaciones, ejercicios independientes y repasos piden registro o acceso. La misma comprobación se aplica a enlaces directos, lectura y alias antiguos. Con sesión no hay bloqueos por progreso. Al cerrar sesión se vuelve a evaluar la vista activa, incluso dentro de una lección. Durante la restauración inicial se muestra un estado de espera.
+
+Las pantallas de cuenta aceptan `continuar` con una ruta interna; `sessionStorage` conserva el destino durante la confirmación de correo. El contenido sigue empaquetado en archivos estáticos y en la caché offline; el control descrito limita la navegación y no convierte esos archivos en privados (ver `SUPABASE.md`).
 
 ## PWA
 

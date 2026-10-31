@@ -8,7 +8,13 @@ const directory = path.resolve(__dirname, '../dist');
 const markup = fs.readFileSync(path.join(directory, 'index.html'), 'utf8');
 const source = fs.readFileSync(path.join(directory, 'app.js'), 'utf8');
 
-function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = undefined) {
+function registeredCloud() {
+  return { state: { available: true, ready: true, user: { id: 'estudiante', email: 'ana@ejemplo.com' }, message: '', status: 'synced' }, record: async () => {} };
+}
+
+const guestCloud = () => ({ ...registeredCloud(), state: { ...registeredCloud().state, user: null } });
+
+function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = registeredCloud()) {
   const target = extra => {
     const listeners = new Map();
     return Object.assign({
@@ -105,9 +111,11 @@ function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = unde
     getElementById(id) { return elements.get(id) || null; }
   });
   const stored = new Map();
+  const session = new Map();
   const context = vm.createContext({
     window, document, history, location, URL, URLSearchParams, Intl,
     localStorage: { getItem: key => stored.get(key) ?? null, setItem: (key, value) => stored.set(key, value) },
+    sessionStorage: { getItem: key => session.get(key) ?? null, setItem: (key, value) => session.set(key, value), removeItem: key => session.delete(key) },
     requestAnimationFrame: callback => callback(),
     setTimeout: () => 1,
     clearTimeout() {}
@@ -116,7 +124,8 @@ function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = unde
   prepareLibrary(window.MATHBRAIN_LIBRARY, window.MATHBRAIN_COURSES);
   vm.runInContext(source, context);
   return {
-    document, location, historyCalls, courseTotal,
+    document, location, historyCalls, courseTotal, stored, session,
+    emitCloud(reason = 'auth') { window.emit('zuka:cloud', { detail: { reason } }); },
     courses: window.MATHBRAIN_COURSES,
     library: window.MATHBRAIN_LIBRARY,
     node: selector => document.querySelector(selector),
@@ -329,13 +338,13 @@ test('La página del curso es un camino de niveles con lecciones, repasos y la d
   assert.deepEqual([numbers[0], numbers[5], numbers[11], numbers[18], numbers[30]], ['1.1', '2.1', '3.1', '4.1', '5.4']);
   assert.equal((html.match(/class="znode is-current"/g) || []).length, 1);
   assert.match(html, /class="znode is-current"><a class="znode-link" href="#contenido\/fundamentos-matematicas-1"/);
-  // Solo la primera unidad está abierta: las demás muestran sus lecciones bloqueadas, sin enlace.
+  // Con una cuenta todas las unidades, lecciones y repasos están disponibles desde el comienzo.
   assert.equal((html.match(/Repaso de la unidad/g) || []).length, 5);
   assert.match(html, /href="#repaso\/fundamentos-matematicas\/1"/);
-  assert.doesNotMatch(html, /href="#repaso\/fundamentos-matematicas\/2"/);
-  assert.doesNotMatch(html, /href="#contenido\/fundamentos-matematicas-6"/);
-  assert.equal((html.match(/class="znode is-locked"/g) || []).length, 26 + 4);
-  assert.equal((html.match(/class="zunit is-locked"/g) || []).length, 4);
+  assert.match(html, /href="#repaso\/fundamentos-matematicas\/2"/);
+  assert.match(html, /href="#contenido\/fundamentos-matematicas-6"/);
+  assert.doesNotMatch(html, /class="znode is-locked"/);
+  assert.doesNotMatch(html, /class="zunit is-locked"/);
   assert.match(html, /href="#contenido\/sim-circulo"/);
 });
 
@@ -542,4 +551,157 @@ test('El formulario valida el correo y la longitud de la contraseña antes de re
   app.document.emit('submit', { target: form });
   assert.equal(app.node('#profile-auth-notice').textContent, 'La contraseña debe tener al menos 8 caracteres.');
   assert.equal(requests, 0);
+});
+
+test('La bienvenida ofrece explorar, crear una cuenta por correo y entrar con una cuenta existente', () => {
+  const app = environment('#', undefined, guestCloud());
+  const html = app.node('#today-panel').innerHTML;
+  assert.match(html, /href="#explorar">Explorar la plataforma/);
+  assert.match(html, /href="#registro">Crear mi cuenta/);
+  assert.match(html, /href="#ingresar">Inicia sesión/);
+  assert.match(html, /primera lección de cada uno/);
+  assert.equal(app.node('#explore-notice').hidden, true);
+  app.navigate('#explorar');
+  assertCourses(app, app.courses.length);
+  assert.equal(app.node('#explore-notice').hidden, false);
+  app.navigate('#registro');
+  assert.equal(app.all('[data-auth-form="signup"]').length, 1);
+  assert.equal(app.node('#auth-email').getAttribute('type'), 'email');
+  assert.equal(app.node('#auth-password').getAttribute('minlength'), '8');
+  assert.doesNotMatch(app.node('#detail-view').innerHTML, /Google/);
+});
+
+test('Al explorar solo la primera lección de cada curso abre el reproductor y la lectura', () => {
+  const app = environment('#explorar', undefined, guestCloud());
+  for (const course of app.courses) {
+    const first = app.library.resources.find(resource => resource.courseId === course.id && resource.type === 'explanation');
+    app.navigate(`#contenido/${first.id}`);
+    assert.match(app.node('#detail-view').innerHTML, /id="lesson-player"/, first.id);
+    app.navigate(`#contenido/${first.id}?vista=lectura`);
+    assert.match(app.node('#detail-view').innerHTML, /class="reader-body lesson-content"/, first.id);
+    assert.match(app.node('#detail-view').innerHTML, /Crea tu cuenta para continuar/);
+    assert.doesNotMatch(app.node('#detail-view').innerHTML, new RegExp(`href="#contenido/${course.id}-2"`));
+  }
+});
+
+test('Los enlaces directos, la lectura, los alias y los repasos no evitan el registro', () => {
+  const app = environment('#explorar', undefined, guestCloud());
+  const firstIds = new Set(app.courses.map(course => app.library.resources.find(resource => resource.courseId === course.id && resource.type === 'explanation').id));
+  for (const resource of app.library.resources.filter(resource => !firstIds.has(resource.id))) {
+    for (const suffix of ['', '?vista=lectura']) {
+      app.navigate(`#contenido/${resource.id}${suffix}`);
+      const html = app.node('#detail-view').innerHTML;
+      assert.match(html, /Crea tu cuenta para continuar/, resource.id);
+      assert.doesNotMatch(html, /id="lesson-player"|class="reader-body lesson-content"|<iframe|<video|simulation-controls/, resource.id);
+    }
+  }
+  for (const address of ['#curso/fundamentos-matematicas/2', '#contenido/algebra-2', '#repaso/probabilidad/1']) {
+    app.navigate(address);
+    assert.match(app.node('#detail-view').innerHTML, /Crea tu cuenta para continuar/, address);
+  }
+});
+
+test('Los temarios y el buscador muestran qué contenido requiere cuenta', () => {
+  const app = environment('#curso/fundamentos-matematicas', undefined, guestCloud());
+  const html = app.node('#detail-view').innerHTML;
+  assert.match(html, /href="#contenido\/fundamentos-matematicas-1"/);
+  assert.doesNotMatch(html, /href="#contenido\/fundamentos-matematicas-2"/);
+  assert.match(html, /href="#registro\?continuar=contenido%2Ffundamentos-matematicas-2"/);
+  assert.equal((html.match(/class="znode is-locked"/g) || []).length, 30 + 5);
+  app.navigate('#explorar?vista=contenidos');
+  const catalog = app.node('#catalog-content').innerHTML;
+  assert.match(catalog, /Primera lección · acceso libre/);
+  assert.match(catalog, /Disponible al crear tu cuenta/);
+  assert.doesNotMatch(catalog, /href="#contenido\/sim-derivada"/);
+  app.navigate('#explorar?q=derivadas');
+  assert.match(app.node('#catalog-content').innerHTML, /#registro\?continuar=contenido%2Fsim-derivada/);
+});
+
+test('El progreso previo del visitante no desbloquea más lecciones', () => {
+  const app = environment('#contenido/probabilidad-1?vista=lectura', undefined, guestCloud());
+  app.click(app.all('[data-complete="probabilidad-1"]').at(-1));
+  assert.deepEqual(JSON.parse(app.stored.get('mathbrain-progress')), ['probabilidad-1']);
+  app.navigate('#contenido/probabilidad-2');
+  assert.match(app.node('#detail-view').innerHTML, /Crea tu cuenta para continuar/);
+  app.navigate('#curso/probabilidad');
+  assert.match(app.node('#detail-view').innerHTML, /class="znode is-locked"/);
+});
+
+test('Con sesión se puede entrar a cualquier lección, simulación, ejercicio y repaso', () => {
+  const app = environment('#explorar');
+  assert.equal(app.node('#explore-notice').hidden, true);
+  for (const resource of app.library.resources) {
+    app.navigate(`#contenido/${resource.id}?vista=lectura`);
+    assert.doesNotMatch(app.node('#detail-view').innerHTML, /Crea tu cuenta para continuar/, resource.id);
+    assert.match(app.node('#detail-view').innerHTML, /id="detail-title"/, resource.id);
+  }
+  app.navigate('#repaso/fundamentos-matematicas/5');
+  assert.match(app.node('#detail-view').innerHTML, /id="lesson-player"/);
+});
+
+test('La sesión se comprueba antes de mostrar bienvenida o bloquear una lección', () => {
+  const cloud = guestCloud();
+  cloud.state.ready = false;
+  const app = environment('#', undefined, cloud);
+  assert.match(app.node('#today-panel').innerHTML, /Preparando tu espacio/);
+  assert.doesNotMatch(app.node('#today-panel').innerHTML, /Explorar la plataforma/);
+  app.navigate('#contenido/probabilidad-2');
+  assert.match(app.node('#detail-view').innerHTML, /Comprobando tu sesión/);
+  cloud.state.user = { id: 'ana', email: 'ana@ejemplo.com' };
+  cloud.state.ready = true;
+  app.emitCloud();
+  assert.match(app.node('#detail-view').innerHTML, /id="lesson-player"/);
+});
+
+test('Cerrar sesión durante una lección restringida vuelve a pedir una cuenta inmediatamente', () => {
+  const cloud = registeredCloud();
+  const app = environment('#contenido/probabilidad-2', undefined, cloud);
+  assert.match(app.node('#detail-view').innerHTML, /id="lesson-player"/);
+  cloud.state.user = null;
+  app.emitCloud();
+  assert.match(app.node('#detail-view').innerHTML, /Crea tu cuenta para continuar/);
+  assert.doesNotMatch(app.node('#detail-view').innerHTML, /id="lesson-player"/);
+  app.navigate('#contenido/probabilidad-1');
+  assert.match(app.node('#detail-view').innerHTML, /id="lesson-player"/);
+});
+
+test('El registro conserva la lección elegida y solo la desbloquea al iniciar sesión', async () => {
+  const cloud = guestCloud();
+  cloud.signUp = async () => ({ needsConfirmation: true });
+  const app = environment('#registro?continuar=contenido%2Fprobabilidad-2%3Fvista%3Dlectura', undefined, cloud);
+  app.node('#auth-email').value = 'ana@ejemplo.com';
+  app.node('#auth-password').value = 'segura-123';
+  app.document.emit('submit', { target: app.all('[data-auth-form="signup"]').at(-1) });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(cloud.state.user, null);
+  assert.match(app.node('#detail-view').innerHTML, /Te enviamos un correo/);
+  assert.equal(app.all('[data-auth-form="signin"]').length, 1);
+  assert.equal(app.session.get('zuka-auth-return'), 'contenido/probabilidad-2?vista=lectura');
+  cloud.state.user = { id: 'ana', email: 'ana@ejemplo.com' };
+  app.emitCloud();
+  assert.equal(app.location.hash, '#contenido/probabilidad-2?vista=lectura');
+  assert.match(app.node('#detail-view').innerHTML, /class="reader-body lesson-content"/);
+  assert.equal(app.session.has('zuka-auth-return'), false);
+});
+
+test('La recuperación de contraseña no redirige hasta guardar la contraseña y los destinos externos se ignoran', () => {
+  const cloud = registeredCloud();
+  cloud.state.recovery = true;
+  const app = environment('#ingresar?continuar=contenido%2Fprobabilidad-2', undefined, cloud);
+  assert.equal(app.all('[data-auth-form="recovery"]').length, 1);
+  cloud.state.recovery = false;
+  app.emitCloud();
+  assert.equal(app.location.hash, '#contenido/probabilidad-2');
+  const other = environment('#registro?continuar=https%3A%2F%2Fejemplo.com', undefined, registeredCloud());
+  assert.equal(other.location.hash, '#');
+  assert.match(other.node('#today-panel').innerHTML, /Empezar a aprender/);
+});
+
+test('Sin Supabase se puede explorar la primera lección pero no se habilita todo el contenido', () => {
+  const app = environment('#', undefined, null);
+  assert.match(app.node('#today-panel').innerHTML, /Explorar la plataforma/);
+  app.navigate('#contenido/probabilidad-1');
+  assert.match(app.node('#detail-view').innerHTML, /id="lesson-player"/);
+  app.navigate('#contenido/probabilidad-2');
+  assert.match(app.node('#detail-view').innerHTML, /Crea tu cuenta para continuar/);
 });

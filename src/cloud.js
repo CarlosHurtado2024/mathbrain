@@ -297,6 +297,7 @@
     // Supabase recomienda no llamar a la API dentro de este aviso: se procesa en el siguiente ciclo.
     client.auth.onAuthStateChange((event, session) => { setTimeout(() => handleAuth(event, session), 0); });
     client.auth.getSession().then(({ data }) => {
+      handleAuth('INITIAL_SESSION', data.session);
       if (linkError) state.message = /expired/.test(linkError) ? 'El enlace del correo expiró. Pide uno nuevo.' : 'No se pudo usar el enlace del correo. Pide uno nuevo.';
       else if (fromEmail && !data.session) state.message = 'Tu correo quedó confirmado. Inicia sesión para continuar.';
       if (linkError || fromEmail) cleanUrl();

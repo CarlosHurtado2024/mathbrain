@@ -49,7 +49,7 @@ Zuka avanza por etapas pequeñas: cada una se termina, se prueba en el celular y
 
 ## ✅ Etapa 4 · Cuentas y sincronización (base)
 
-- Cuenta opcional con Supabase (correo y contraseña) en el Perfil: crear cuenta, iniciar sesión, recuperar contraseña, cerrar sesión y eliminar la cuenta.
+- Bienvenida para explorar o crear una cuenta con correo y contraseña: primera lección de cada curso sin cuenta; todo el contenido con sesión activa. Registro, acceso y recuperación tienen pantallas propias, además de la gestión de cuenta en el Perfil.
 - Base de datos con Row Level Security: perfil, lecciones, días de estudio, repasos y guardados (`supabase/migrations/`).
 - Sincronización entre dispositivos que une el progreso local con el de la cuenta y funciona sin conexión.
 

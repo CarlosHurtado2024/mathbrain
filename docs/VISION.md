@@ -14,7 +14,7 @@ Muchos estudiantes llegan a la universidad con vacíos en álgebra, funciones y 
 - **Aprender haciendo.** Una idea por pantalla y retos que hay que responder para avanzar, con pista, solución y ánimo de la mascota.
 - **Constancia.** XP, niveles, rachas y repasos para estudiar un poco cada día.
 - **Rigor académico.** Contenido escrito por un estadístico, con notación LaTeX y programas de curso con objetivos y unidades.
-- **En el bolsillo.** Una PWA que se instala en el celular, funciona sin conexión y no necesita cuenta.
+- **En el bolsillo.** Una PWA que se instala en el celular y funciona sin conexión tras la primera visita. Se exploran los cursos y se prueba su primera lección sin cuenta; una cuenta gratuita con correo y contraseña da acceso completo.
 
 ## Para quién
 
@@ -31,7 +31,7 @@ Zuka es cercana, clara y profesional. El zorro acompaña sin infantilizar: celeb
 - No es una app nativa: se construye con tecnologías web y se instala como PWA.
 - No es una calculadora ni un solucionador de tareas.
 - No es una red social ni una plataforma de cursos en video largos.
-- No recoge datos personales: por ahora el progreso vive solo en el dispositivo.
+- No incorpora rastreadores. Al explorar, el progreso vive solo en el dispositivo; con cuenta, el correo, el perfil y el progreso se gestionan en Supabase para continuar en otros dispositivos.
 
 ## Cómo se mide el éxito
 
