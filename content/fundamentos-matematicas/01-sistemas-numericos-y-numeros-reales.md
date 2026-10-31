@@ -3,7 +3,7 @@ titulo: Sistemas numéricos y números reales
 descripcion: De contar a medir: naturales, enteros, racionales, irracionales y la recta real.
 unidad: Unidad 1 · Números reales y aritmética
 modulo: 1.1
-video:
+video: https://youtu.be/UZHNTZ9PQd0
 etiquetas: numeros reales naturales enteros racionales irracionales intervalos valor absoluto fracciones propiedades campo aritmetica
 ---
 

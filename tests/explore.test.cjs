@@ -302,8 +302,11 @@ test('Inicio, detalle del curso y recursos siguen siendo accesibles', () => {
   assert.match(app.node('#detail-view').innerHTML, /href="#contenido\/fundamentos-matematicas-1"/);
   app.navigate('#contenido/fundamentos-matematicas-1');
   assert.equal(app.node('#detail-view').hidden, false);
-  assert.match(app.node('#player-stage').innerHTML, /Primero, la intuición/);
+  // La lección 1.1 tiene video: es el primer paso, incrustado desde youtube-nocookie.
+  assert.match(app.node('#player-stage').innerHTML, /Mira la clase[\s\S]*src="https:\/\/www\.youtube-nocookie\.com\/embed\/UZHNTZ9PQd0\?rel=0"/);
   assert.equal(app.document.activeElement, app.node('#detail-title'));
+  app.click(app.all('[data-player-next]').at(-1));
+  assert.match(app.node('#player-stage').innerHTML, /Primero, la intuición/);
   app.navigate('#contenido/fundamentos-matematicas-1?vista=lectura');
   assert.match(app.node('#detail-view').innerHTML, /Primero, la intuición[\s\S]*Practica/);
 });

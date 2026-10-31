@@ -5,7 +5,7 @@ window.MATHBRAIN_CONTENT = [
   "id": "fundamentos-matematicas-1",
   "title": "Sistemas numéricos y números reales",
   "description": "De contar a medir: naturales, enteros, racionales, irracionales y la recta real.",
-  "video": null,
+  "video": "https://youtu.be/UZHNTZ9PQd0",
   "tags": "numeros reales naturales enteros racionales irracionales intervalos valor absoluto fracciones propiedades campo aritmetica",
   "unit": "Unidad 1 · Números reales y aritmética",
   "module": "1.1",
