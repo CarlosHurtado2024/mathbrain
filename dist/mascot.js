@@ -1,4 +1,4 @@
-// Euly, el zorro de Euly: un zorro sentado de formas planas y geométricas, naranja con máscara y pecho crema,
+// Zuka, el zorro: un zorro sentado de formas planas y geométricas, naranja con máscara y pecho crema,
 // patas negras y una cola grande con la punta clara. window.MATHBRAIN_MASCOT.svg(estado) devuelve su dibujo SVG.
 // Estados: saluda, feliz, piensa, animo, celebra.
 (() => {
@@ -11,7 +11,7 @@
   const creamShade = '#efd3ae';
   const ink = '#24262c';
 
-  function svg(mood = 'feliz', { label = 'Euly, el zorro de Euly' } = {}) {
+  function svg(mood = 'feliz', { label = 'Zuka, el zorro' } = {}) {
     const state = moods.includes(mood) ? mood : 'feliz';
     // La cabeza se inclina un poco al pensar y al celebrar, como en el dibujo de referencia.
     const tilt = { piensa: -8, celebra: 6, saluda: -3, feliz: -4, animo: 0 }[state];
@@ -40,7 +40,7 @@
     const extras = state === 'celebra'
       ? '<g fill="#f2b33d"><path d="M16 22l1.8 4.2 4.2 1.8-4.2 1.8L16 34l-1.8-4.2-4.2-1.8 4.2-1.8z"/><path d="M102 14l1.5 3.5 3.5 1.5-3.5 1.5-1.5 3.5-1.5-3.5-3.5-1.5 3.5-1.5z"/></g>'
       : state === 'piensa' ? `<text x="94" y="24" fill="${orange}" font-size="20" font-weight="700" font-family="'Plus Jakarta Sans',Arial,sans-serif">?</text>` : '';
-    return `<svg class="euly-fox" data-mood="${state}" viewBox="0 0 120 124" role="img" aria-label="${label}">${extras}<ellipse cx="62" cy="119" rx="40" ry="4" fill="${ink}" opacity=".08"/>`
+    return `<svg class="zuka-fox" data-mood="${state}" viewBox="0 0 120 124" role="img" aria-label="${label}">${extras}<ellipse cx="62" cy="119" rx="40" ry="4" fill="${ink}" opacity=".08"/>`
       // Cola enroscada detrás del cuerpo, con la punta crema.
       + `<path d="M58 118c26 3 50-6 53-26 2-14-7-25-18-25 7 10 7 25-2 34-9 9-21 11-33 11z" fill="${orange}"/><path d="M93 67c11 0 20 11 18 25-1 7-4 13-8 17 2-15 0-30-10-42z" fill="${cream}"/><path d="M66 113c14-2 25-8 31-18" fill="none" stroke="${shade}" stroke-width="2.4" stroke-linecap="round" opacity=".6"/>`
       // Cuerpo sentado que sube hasta el cuello, con el pecho crema y la pata trasera.
@@ -49,10 +49,10 @@
       + `<g transform="rotate(${tilt} 58 44)"><path d="M33 34 29 6c11 3 20 12 24 20z" fill="${orange}"/><path d="M35 30 33 13c6 3 12 8 15 13z" fill="${cream}"/><path d="M83 34l4-28c-11 3-20 12-24 20z" fill="${orange}"/><path d="M81 30l2-17c-6 3-12 8-15 13z" fill="${cream}"/><path d="M24 40c4-12 16-18 34-18s30 6 34 18c-5 13-18 24-34 28-16-4-29-15-34-28z" fill="${orange}"/><path d="M24 40c8 3 16 8 22 15 5 6 9 9 12 10 3-1 7-4 12-10 6-7 14-12 22-15-5 13-18 24-34 28-16-4-29-15-34-28z" fill="${cream}"/>${eyes}<path d="M53 56.5h10l-5 5.5z" fill="${ink}"/>${mouth}</g></svg>`;
   }
 
-  // Euly con un globo de diálogo. El texto llega ya escapado desde quien lo usa.
+  // Zuka con un globo de diálogo. El texto llega ya escapado desde quien lo usa.
   function say(mood, html, className = '') {
-    return `<div class="nebi-say mascot-say ${className}"><span class="nebi-figure mascot-figure">${svg(mood, { label: 'Euly' })}</span><p class="nebi-bubble mascot-bubble">${html}</p></div>`;
+    return `<div class="nebi-say mascot-say ${className}"><span class="nebi-figure mascot-figure">${svg(mood, { label: 'Zuka' })}</span><p class="nebi-bubble mascot-bubble">${html}</p></div>`;
   }
 
-  window.MATHBRAIN_MASCOT = { name: 'Euly', moods, svg, say };
+  window.MATHBRAIN_MASCOT = { name: 'Zuka', moods, svg, say };
 })();

@@ -2,7 +2,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const sharp = require('sharp');
 
-const iconDirectory = path.join(__dirname, '..', 'dist', 'assets', 'icons');
+const iconDirectory = path.join(__dirname, '..', 'src', 'assets', 'icons');
 
 async function generateIcons() {
   const source = await fs.readFile(path.join(iconDirectory, 'app-icon.svg'), 'utf8');

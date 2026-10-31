@@ -9,7 +9,7 @@ const compile = body => compileLesson(lesson(body), 'content/prueba/01-prueba.md
 
 test('El contenido publicado coincide con los archivos Markdown de content/', () => {
   const published = fs.readFileSync(path.join(__dirname, '../dist/content.js'), 'utf8').replace(/\r\n/g, '\n');
-  assert.equal(published, render(compileAll()), 'Ejecuta «npm run content» para regenerar dist/content.js');
+  assert.equal(published, render(compileAll()), 'Ejecuta «npm run build» para regenerar dist/content.js');
 });
 
 test('Cada curso tiene lecciones con identificadores consecutivos e idea clave', () => {
@@ -67,7 +67,7 @@ test('Los errores de contenido indican el archivo, la línea y el motivo', () =>
 
 test('Cada lección declara un módulo existente de su curso y estima su tiempo de lectura', () => {
   const context = require('node:vm').createContext({ window: {} });
-  require('node:vm').runInContext(fs.readFileSync(path.join(__dirname, '../dist/courses.js'), 'utf8'), context);
+  require('node:vm').runInContext(fs.readFileSync(path.join(__dirname, '../src/courses.js'), 'utf8'), context);
   const courses = context.window.MATHBRAIN_COURSES;
   for (const lesson of compileAll()) {
     const course = courses.find(candidate => candidate.id === lesson.courseId);

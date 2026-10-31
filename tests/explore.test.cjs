@@ -439,3 +439,25 @@ test('Los enlaces de Álgebra y Trigonometría llevan a su módulo en Fundamento
   const app = environment('#contenido/algebra-2');
   assert.match(app.node('#detail-view').innerHTML, /<h1 id="detail-title" tabindex="-1">Ecuaciones y desigualdades<\/h1>/);
 });
+
+test('El perfil resume el progreso, guarda el nombre y saluda con él en el inicio', () => {
+  const app = environment('#contenido/probabilidad-1?vista=lectura');
+  app.click(app.all('[data-complete="probabilidad-1"]').at(-1));
+  app.navigate('#perfil');
+  assert.equal(app.node('#detail-view').hidden, false);
+  assert.equal(app.node('#home-view').hidden, true);
+  assert.equal(app.document.title, 'Tu perfil | Zuka');
+  assert.equal(app.document.activeElement, app.node('#detail-title'));
+  const profile = app.node('#detail-view').innerHTML;
+  assert.match(profile, /<strong>Nivel 1<\/strong>/);
+  assert.match(profile, /<strong>1<\/strong><span>lección completada<\/span>/);
+  assert.match(profile, /<strong>0<\/strong><span>días de racha<\/span>/);
+  assert.match(profile, /Completa una lección para empezar tu racha\./);
+  assert.match(profile, /Probabilidad<\/strong><\/a><div class="course-progress">[\s\S]*?20 % completado/);
+  assert.match(app.node('[data-nav="perfil"]').getAttribute('aria-current') || '', /page/);
+  app.node('#profile-name').value = '  Ana <b>  ';
+  app.document.emit('submit', { target: app.all('[data-profile-form]').at(-1) });
+  assert.match(app.node('#detail-view').innerHTML, /<h1 id="detail-title" tabindex="-1">Hola, Ana &lt;b&gt;<\/h1>/);
+  app.navigate('#');
+  assert.match(app.node('#today-panel').innerHTML, /¡Qué bueno verte, Ana &lt;b&gt;!/);
+});

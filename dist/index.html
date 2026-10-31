@@ -7,12 +7,12 @@
   <meta name="color-scheme" content="dark light">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Euly">
+  <meta name="apple-mobile-web-app-title" content="Zuka">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="description" content="Encuentra explicaciones de matemáticas, explora simulaciones y aprende con ejercicios resueltos. Tu universo de ideas, a tu ritmo.">
-  <meta property="og:title" content="Euly — Aprende matemáticas paso a paso">
+  <meta property="og:title" content="Zuka — Aprende matemáticas paso a paso">
   <meta property="og:description" content="Explicaciones, simulaciones y ejercicios resueltos. Encuentra la idea que necesitas entender.">
-  <title>Euly — Aprende matemáticas paso a paso</title>
+  <title>Zuka — Aprende matemáticas paso a paso</title>
   <script src="theme.js"></script>
   <link rel="icon" type="image/svg+xml" href="assets/mark.svg">
   <link rel="manifest" href="manifest.webmanifest">
@@ -37,25 +37,26 @@
 <body>
   <div id="space-background" class="space-background" data-state="static" aria-hidden="true"><div class="space-nebula"></div><canvas id="space-canvas"></canvas></div>
   <a class="skip" href="#main">Saltar al contenido</a>
-  <aside class="sidebar" aria-label="Menú de Euly">
-    <a class="brand" href="#" aria-label="Euly, inicio"><img src="assets/mark.svg" alt="" width="38" height="38"><span>Euly<small>APRENDE MATEMÁTICAS</small></span></a>
+  <aside class="sidebar" aria-label="Menú de Zuka">
+    <a class="brand" href="#" aria-label="Zuka, inicio"><img src="assets/mark.svg" alt="" width="38" height="38"><span>Zuka<small>APRENDE MATEMÁTICAS</small></span></a>
     <nav class="main-nav" aria-label="Navegación principal">
       <a href="#" data-nav="inicio"><span data-icon="home"></span><span>Inicio</span></a>
       <a href="#explorar" data-nav="explorar"><span data-icon="search"></span><span>Explorar</span></a>
       <a href="#simulaciones" data-nav="simulaciones"><span data-icon="simulation"></span><span>Simulaciones</span></a>
       <a href="#ejercicios" data-nav="ejercicios"><span data-icon="exercise"></span><span>Ejercicios resueltos</span></a>
       <a href="#biblioteca" data-nav="biblioteca"><span data-icon="bookmark"></span><span>Mi biblioteca <span id="saved-count" class="nav-count">0</span></span></a>
+      <a href="#perfil" data-nav="perfil"><span data-icon="user"></span><span>Perfil</span></a>
     </nav>
     <div class="sidebar-topics"><p class="sidebar-label">TU UNIVERSO</p><a href="#explorar?tema=fundamentos"><i class="topic-dot purple"></i>Fundamentos</a><a href="#explorar?tema=calculo"><i class="topic-dot blue"></i>Cálculo</a><a href="#explorar?tema=probabilidad"><i class="topic-dot sand"></i>Probabilidad</a><a href="#explorar?tema=estadistica"><i class="topic-dot green"></i>Estadística</a></div>
-    <div class="sidebar-bottom"><p>Un universo de ideas.<br><strong>Una a la vez.</strong></p><a href="#nosotros">Sobre Euly <span aria-hidden="true">↗</span></a></div>
+    <div class="sidebar-bottom"><p>Un universo de ideas.<br><strong>Una a la vez.</strong></p><a href="#nosotros">Sobre Zuka <span aria-hidden="true">↗</span></a></div>
   </aside>
   <div class="app-shell">
     <header class="topbar">
-      <a href="#" class="mobile-brand" aria-label="Euly, inicio"><img src="assets/mark.svg" alt="" width="32" height="32"></a>
+      <a href="#" class="mobile-brand" aria-label="Zuka, inicio"><img src="assets/mark.svg" alt="" width="32" height="32"></a>
       <form id="search-form" class="global-search" role="search"><span data-icon="search"></span><label class="sr-only" for="content-search">Buscar un tema, una explicación o un ejercicio</label><input id="content-search" type="search" placeholder="¿Qué quieres entender hoy?" autocomplete="off" maxlength="160"><kbd aria-hidden="true">/</kbd></form>
       <a class="topbar-note" href="#explorar">A tu ritmo. A tu manera. <span aria-hidden="true">✦</span></a>
-      <a class="stats-chip" id="stats-chip" href="#" title="Tu racha y tus puntos de experiencia"><span class="stats-streak"><span data-icon="flame"></span><strong id="streak-count">0</strong></span><span class="stats-xp" id="xp-count">0 XP</span></a><label class="theme-control" title="Cambiar el tema de Euly"><span class="sr-only">Tema de la aplicación</span><svg data-theme-icon="dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14A8.7 8.7 0 0 1 10 3.5 8.8 8.8 0 1 0 20.5 14Z"/></svg><svg data-theme-icon="light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" hidden><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><svg data-theme-icon="system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><select id="theme-select" data-theme-select><option value="dark">Oscuro</option><option value="light">Claro</option><option value="system">Sistema</option></select></label>
-      <button class="install-app-button" type="button" data-install aria-label="Instalar Euly" aria-haspopup="dialog" aria-controls="install-dialog" title="Instalar Euly"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></svg><span>Instalar app</span></button>
+      <a class="stats-chip" id="stats-chip" href="#perfil" title="Tu racha y tus puntos: abre tu perfil"><span class="stats-streak"><span data-icon="flame"></span><strong id="streak-count">0</strong></span><span class="stats-xp" id="xp-count">0 XP</span></a><label class="theme-control" title="Cambiar el tema de Zuka"><span class="sr-only">Tema de la aplicación</span><svg data-theme-icon="dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14A8.7 8.7 0 0 1 10 3.5 8.8 8.8 0 1 0 20.5 14Z"/></svg><svg data-theme-icon="light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" hidden><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><svg data-theme-icon="system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><select id="theme-select" data-theme-select><option value="dark">Oscuro</option><option value="light">Claro</option><option value="system">Sistema</option></select></label>
+      <button class="install-app-button" type="button" data-install aria-label="Instalar Zuka" aria-haspopup="dialog" aria-controls="install-dialog" title="Instalar Zuka"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></svg><span>Instalar app</span></button>
     </header>
     <main id="main" tabindex="-1">
       <div id="home-view"><div id="today-panel"></div>
@@ -63,12 +64,12 @@
           <div class="landing-art" aria-hidden="true"><div class="landing-stage"><span class="landing-mascot" data-mascot="saluda"></span></div></div>
           <div class="landing-copy"><h1 id="hero-title">Aprende matemáticas <span class="landing-highlight">entendiendo cada idea</span>.</h1><p class="landing-lead">Lecciones breves, retos con respuesta inmediata y un camino claro desde los fundamentos hasta el cálculo y la estadística. Gratis y a tu ritmo.</p><div class="landing-actions"><a class="button button-primary button-big" href="#curso/fundamentos-matematicas">Empieza ahora</a><a class="button button-outline button-big" href="#explorar">Explorar los cursos</a></div></div>
         </section>
-        <nav class="course-strip" id="course-strip" aria-label="Cursos de Euly"></nav>
+        <nav class="course-strip" id="course-strip" aria-label="Cursos de Zuka"></nav>
         <div class="landing-features landing-only">
           <section class="landing-feature tone-violet"><div class="landing-feature-copy"><h2>Práctica breve y constante</h2><p>Lecciones de pocos minutos con retos que se corrigen al instante. Cada respuesta te dice si vas bien y por qué, para que avances con seguridad.</p></div><div class="landing-feature-art" aria-hidden="true"><div class="mock-card mock-quiz"><p class="mock-label">Tu turno</p><p class="mock-question">Si f(x) = x², ¿cuánto vale f′(3)?</p><span class="mock-option">9</span><span class="mock-option is-right">6</span><span class="mock-option">3</span></div><span class="landing-feature-mascot" data-mascot="celebra"></span></div></section>
           <section class="landing-feature tone-blue"><div class="landing-feature-copy"><h2>Aprendes haciendo</h2><p>Primero la intuición, después la fórmula. Cada tema se explora con ejemplos, simulaciones que puedes mover y retos con retroalimentación inmediata, una idea a la vez.</p></div><div class="landing-feature-art" aria-hidden="true"><div class="mock-card mock-graph"><svg viewBox="0 0 220 140"><path d="M20 120H205M40 132V12" stroke="#c9cfe0" stroke-width="2" fill="none"/><path d="M45 20Q110 230 175 20" stroke="#1cb0f6" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M95 130 190 40" stroke="#ff9f1c" stroke-width="4" stroke-linecap="round"/><circle cx="143" cy="80" r="8" fill="#6c4df6"/></svg><span class="mock-slider"><i></i></span></div><span class="landing-feature-mascot" data-mascot="piensa"></span></div></section>
-          <section class="landing-feature tone-coral"><div class="landing-feature-copy"><h2>Un hábito que se mantiene</h2><p>Las rachas, los puntos de experiencia y los repasos de cada nivel te ayudan a crear el hábito de estudiar un poco cada día. Euly, nuestro zorro, te anima en cada reto.</p></div><div class="landing-feature-art" aria-hidden="true"><div class="mock-card mock-streak"><span class="mock-flame">🔥</span><strong>7</strong><span>días de racha</span><div class="mock-week"><i></i><i></i><i></i><i></i><i></i><i></i><i class="is-today"></i></div></div><span class="landing-feature-mascot" data-mascot="animo"></span></div></section>
-          <section class="landing-feature tone-green"><div class="landing-feature-copy"><h2>A tu ritmo, donde estés</h2><p>Cursos con niveles claros, desde los fundamentos hasta el cálculo y la estadística. Instala Euly en tu celular o computador y sigue estudiando incluso sin conexión.</p></div><div class="landing-feature-art" aria-hidden="true"><div class="mock-card mock-path"><span class="mock-node is-done">✓</span><span class="mock-node is-done">✓</span><span class="mock-node is-current">▶</span><span class="mock-node"></span><span class="mock-node is-star">★</span></div><span class="landing-feature-mascot" data-mascot="saluda"></span></div></section>
+          <section class="landing-feature tone-coral"><div class="landing-feature-copy"><h2>Un hábito que se mantiene</h2><p>Las rachas, los puntos de experiencia y los repasos de cada nivel te ayudan a crear el hábito de estudiar un poco cada día. Zuka, nuestro zorro, te anima en cada reto.</p></div><div class="landing-feature-art" aria-hidden="true"><div class="mock-card mock-streak"><span class="mock-flame">🔥</span><strong>7</strong><span>días de racha</span><div class="mock-week"><i></i><i></i><i></i><i></i><i></i><i></i><i class="is-today"></i></div></div><span class="landing-feature-mascot" data-mascot="animo"></span></div></section>
+          <section class="landing-feature tone-green"><div class="landing-feature-copy"><h2>A tu ritmo, donde estés</h2><p>Cursos con niveles claros, desde los fundamentos hasta el cálculo y la estadística. Instala Zuka en tu celular o computador y sigue estudiando incluso sin conexión.</p></div><div class="landing-feature-art" aria-hidden="true"><div class="mock-card mock-path"><span class="mock-node is-done">✓</span><span class="mock-node is-done">✓</span><span class="mock-node is-current">▶</span><span class="mock-node"></span><span class="mock-node is-star">★</span></div><span class="landing-feature-mascot" data-mascot="saluda"></span></div></section>
         </div>
         <section class="landing-cta landing-only" aria-labelledby="cta-title"><span class="landing-cta-mascot" data-mascot="celebra" aria-hidden="true"></span><h2 id="cta-title">Empieza hoy tu camino en matemáticas</h2><a class="button button-light button-big" href="#curso/fundamentos-matematicas">Empieza ahora</a></section>
         <div class="home-intro"><span><span class="tiny-spark" aria-hidden="true">✳</span> Un tema. Distintas formas de entenderlo.</span><span id="library-stats"></span></div>
@@ -89,10 +90,10 @@
       </section>
       <section id="learning-paths" class="learning-paths" aria-labelledby="paths-title"><div class="section-heading"><div><p class="eyebrow">CONECTA LAS IDEAS</p><h2 id="paths-title">Un camino para cada curiosidad</h2></div><span class="section-note">De las bases a lo que sigue.</span></div><div id="course-paths" class="paths-grid"></div></section>
       <section id="detail-view" class="detail-view" hidden></section>
-      <section id="about-view" class="about-view" aria-labelledby="about-title" hidden><p class="eyebrow">SOBRE EULY</p><h1 id="about-title" tabindex="-1">Las matemáticas,<br>con otros ojos.</h1><p class="about-intro">Primero la intuición. Después, la fórmula. Un espacio para explorar, visualizar y entender las ideas detrás de los números.</p><article class="creator-section"><img src="assets/autor-carlos.jpeg" alt="Carlos Hurtado, autor de Euly" width="734" height="1598" loading="lazy" decoding="async"><div><p class="eyebrow">HOLA, SOY</p><h2>Carlos Hurtado</h2><p class="creator-credential">Soy estadístico de la Universidad Nacional de Colombia.</p><p>Soy un apasionado por la enseñanza de las matemáticas. Con Euly, quiero acercarte a las matemáticas y la estadística para que comprendas las ideas detrás de los procedimientos y descubras el sentido de cada fórmula.</p><p>Mi propuesta parte de la curiosidad: explorar una pregunta, visualizar un concepto y conectar la teoría con ejemplos que tengan sentido. Quiero ayudarte a construir bases sólidas y a avanzar con confianza.</p><blockquote>Hacer que aprender sea un camino de descubrimiento, una idea a la vez.</blockquote><a class="button button-primary" href="#explorar">Empieza por una idea <span aria-hidden="true">↗</span></a></div></article></section>
-      <noscript><p class="empty-state">Activa JavaScript para buscar contenidos y utilizar las simulaciones de Euly.</p></noscript>
+      <section id="about-view" class="about-view" aria-labelledby="about-title" hidden><p class="eyebrow">SOBRE ZUKA</p><h1 id="about-title" tabindex="-1">Las matemáticas,<br>con otros ojos.</h1><p class="about-intro">Primero la intuición. Después, la fórmula. Un espacio para explorar, visualizar y entender las ideas detrás de los números.</p><article class="creator-section"><img src="assets/autor-carlos.jpeg" alt="Carlos Hurtado, autor de Zuka" width="734" height="1598" loading="lazy" decoding="async"><div><p class="eyebrow">HOLA, SOY</p><h2>Carlos Hurtado</h2><p class="creator-credential">Soy estadístico de la Universidad Nacional de Colombia.</p><p>Soy un apasionado por la enseñanza de las matemáticas. Con Zuka, quiero acercarte a las matemáticas y la estadística para que comprendas las ideas detrás de los procedimientos y descubras el sentido de cada fórmula.</p><p>Mi propuesta parte de la curiosidad: explorar una pregunta, visualizar un concepto y conectar la teoría con ejemplos que tengan sentido. Quiero ayudarte a construir bases sólidas y a avanzar con confianza.</p><blockquote>Hacer que aprender sea un camino de descubrimiento, una idea a la vez.</blockquote><a class="button button-primary" href="#explorar">Empieza por una idea <span aria-hidden="true">↗</span></a></div></article></section>
+      <noscript><p class="empty-state">Activa JavaScript para buscar contenidos y utilizar las simulaciones de Zuka.</p></noscript>
     </main>
-    <footer class="site-footer"><a href="#" class="footer-brand">Euly</a><p>Matemáticas con sentido, una idea a la vez.</p><button type="button" class="footer-install" data-install aria-haspopup="dialog" aria-controls="install-dialog">Instalar Euly <span aria-hidden="true">↓</span></button><a href="#nosotros">Hecho para entender. <span aria-hidden="true">↗</span></a></footer>
+    <footer class="site-footer"><a href="#" class="footer-brand">Zuka</a><p>Matemáticas con sentido, una idea a la vez.</p><button type="button" class="footer-install" data-install aria-haspopup="dialog" aria-controls="install-dialog">Instalar Zuka <span aria-hidden="true">↓</span></button><a href="#nosotros">Hecho para entender. <span aria-hidden="true">↗</span></a></footer>
   </div>
   <div id="toast" class="toast" role="status"></div>
   <div id="theme-status" class="sr-only" role="status" aria-live="polite"></div>
@@ -100,8 +101,8 @@
     <button id="close-install" class="close-install" type="button" aria-label="Cerrar instrucciones de instalación">×</button>
     <img src="assets/icons/icon-192.png" alt="" width="76" height="76">
     <p class="eyebrow">TU UNIVERSO, SIEMPRE A MANO</p>
-    <h2 id="install-title">Euly, contigo.</h2>
-    <p id="install-description">Añade Euly a tus aplicaciones para abrirla con su propio icono, en el celular o el computador.</p>
+    <h2 id="install-title">Zuka, contigo.</h2>
+    <p id="install-description">Añade Zuka a tus aplicaciones para abrirla con su propio icono, en el celular o el computador.</p>
     <button type="button" id="install-native" class="button button-primary" hidden>Instalar ahora</button>
     <h3 id="install-guide-title"></h3>
     <ol id="install-steps"></ol>
@@ -109,7 +110,7 @@
     <p class="install-offline" id="install-offline">Al completar la preparación, podrás usar las explicaciones, los ejercicios y las simulaciones sin conexión. Los vídeos externos necesitan internet.</p>
     <p id="install-feedback" class="install-feedback"></p>
   </dialog>
-  <div class="app-update" id="app-update" role="status" hidden><p>Hay una nueva versión de Euly.</p><button id="update-app" type="button">Actualizar</button><button id="dismiss-update" type="button" aria-label="Actualizar más tarde">Más tarde</button></div>
+  <div class="app-update" id="app-update" role="status" hidden><p>Hay una nueva versión de Zuka.</p><button id="update-app" type="button">Actualizar</button><button id="dismiss-update" type="button" aria-label="Actualizar más tarde">Más tarde</button></div>
   <button id="space-motion-toggle" class="space-motion-toggle" type="button" aria-label="Pausar animación del fondo espacial" aria-pressed="false" hidden><svg class="space-pause-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M7 5v10M13 5v10"/></svg><svg class="space-play-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m7 5 8 5-8 5Z"/></svg><span class="space-motion-label">Pausar fondo</span></button>
 </body>
 </html>

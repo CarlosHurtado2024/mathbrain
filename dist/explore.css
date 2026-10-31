@@ -539,3 +539,80 @@ body.lesson-mode .toast { bottom: 118px; }
   .player-stats strong { font-size: 19px; }
 }
 .player-card .lesson-exercise:is([data-state="correct"], [data-state="incorrect"]) .answer-feedback { display: none; }
+
+/* Perfil del estudiante (#perfil): común a ambos temas; el tema claro ajusta superficies al final. */
+.profile-view { max-width: 860px; margin: 0 auto; padding: 18px 0 40px; display: grid; gap: 18px; }
+.profile-header { display: flex; align-items: center; gap: 22px; }
+.profile-avatar { width: 104px; flex-shrink: 0; }
+.profile-avatar svg { width: 100%; height: auto; }
+.profile-identity { flex: 1; min-width: 0; }
+.profile-identity h1 { font-size: clamp(28px, 4vw, 38px); letter-spacing: -.03em; margin: 4px 0 6px; overflow-wrap: anywhere; }
+.profile-level { color: var(--muted); font-size: 14px; }
+.profile-level strong { color: var(--ink); font-weight: 700; }
+.profile-level-bar { display: grid; gap: 6px; margin-top: 10px; max-width: 360px; }
+.profile-level-bar .course-progress-track { height: 8px; }
+.profile-level-bar small { color: var(--muted); font-size: 12px; }
+.profile-name { display: grid; gap: 8px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 16px; }
+.profile-name label { font-weight: 600; font-size: 14px; }
+.profile-name div { display: flex; gap: 10px; }
+.profile-name input { flex: 1; min-width: 0; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; background: transparent; color: inherit; font-size: 16px; }
+.profile-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.profile-stats li { display: grid; gap: 4px; padding: 16px; border: 1px solid var(--line); border-radius: 16px; }
+.profile-stats .icon { width: 22px; height: 22px; color: var(--teal); }
+.profile-stats li:first-child .icon { color: #f2a65a; fill: #f2a65a33; }
+.profile-stats strong { font-size: 26px; font-weight: 750; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.profile-stats span { color: var(--muted); font-size: 12.5px; line-height: 1.3; }
+.profile-card { padding: 20px; border: 1px solid var(--line); border-radius: 18px; }
+.profile-card-heading { margin-bottom: 16px; }
+.profile-card-heading h2 { font-size: 18px; letter-spacing: -.01em; }
+.profile-card-heading p { color: var(--muted); font-size: 13.5px; margin-top: 4px; }
+.profile-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; max-width: 420px; }
+.profile-week li { display: grid; justify-items: center; gap: 6px; }
+.profile-week li > span:first-child { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 2px dashed var(--line); }
+.profile-week li.is-done > span:first-child { border: 0; background: var(--teal); color: #fff; }
+.profile-week li.is-today > span:first-child { outline: 2px solid var(--teal); outline-offset: 2px; }
+.profile-week .icon { width: 18px; height: 18px; stroke-width: 2.4; }
+.profile-week small { color: var(--muted); font-size: 12px; text-transform: uppercase; }
+.profile-courses { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.profile-courses li { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 12px 0; border-top: 1px solid var(--line); }
+.profile-courses li:first-child { border-top: 0; padding-top: 0; }
+.profile-course-symbol { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: var(--fun-soft, #ffffff10); color: var(--fun-dark, var(--teal)); font: italic 700 16px/1 var(--sans); }
+.profile-courses strong { display: block; font-size: 14.5px; margin-bottom: 6px; }
+.profile-courses .course-progress-label { font-size: 12px; }
+.profile-courses .text-button { white-space: nowrap; }
+.profile-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.profile-actions .button { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.profile-actions .icon { width: 16px; height: 16px; }
+.profile-import:focus-within { outline: 2px solid var(--teal); outline-offset: 3px; }
+.profile-reset { margin-left: auto; color: #e07a7a !important; }
+html[data-theme="light"] .profile-name, html[data-theme="light"] .profile-stats li, html[data-theme="light"] .profile-card { background: #fff; box-shadow: 0 1px 2px rgb(31 35 40 / .05); }
+html[data-theme="light"] .profile-name input { background: #faf9f7; border-color: #d9d6d1; }
+html[data-theme="light"] .profile-name input:focus { outline: 2px solid var(--fun-violet); outline-offset: 1px; border-color: transparent; }
+html[data-theme="light"] .profile-stats .icon { color: var(--fun-violet); }
+html[data-theme="light"] .profile-stats li:first-child .icon { color: var(--fun-orange); fill: #d9822b22; }
+html[data-theme="light"] .profile-stats li:nth-child(2) .icon { color: var(--fun-yellow); fill: #d9a43b22; }
+html[data-theme="light"] .profile-stats li:nth-child(3) .icon { color: var(--fun-green); }
+html[data-theme="light"] .profile-week li.is-done > span:first-child { background: var(--fun-violet); }
+html[data-theme="light"] .profile-week li.is-today > span:first-child { outline-color: var(--fun-violet); }
+html[data-theme="light"] .profile-reset { color: var(--fun-red) !important; }
+@media (max-width: 650px) {
+  .profile-view { padding-top: 4px; gap: 14px; }
+  .profile-header { gap: 14px; }
+  .profile-avatar { width: 76px; }
+  .profile-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .profile-stats li { padding: 14px; }
+  .profile-stats strong { font-size: 22px; }
+  .profile-card { padding: 16px; }
+  .profile-week li > span:first-child { width: 32px; height: 32px; }
+  .profile-courses li { grid-template-columns: 40px minmax(0, 1fr); }
+  .profile-courses li > .text-button { grid-column: 2; justify-self: start; }
+  .profile-course-symbol { width: 40px; height: 40px; }
+  .profile-reset { margin-left: 0; }
+  /* Seis accesos no caben en la barra inferior: Ejercicios resueltos sigue disponible desde Explorar. */
+  .main-nav a[data-nav="ejercicios"] { display: none; }
+}
+/* En celulares estrechos el botón de instalar queda solo con su icono para que el buscador sea legible. */
+@media (max-width: 420px) {
+  .install-app-button > span { display: none; }
+  .install-app-button { width: 33px; padding: 0; justify-content: center; }
+}

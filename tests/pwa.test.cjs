@@ -98,10 +98,10 @@ function pngDetails(filename) {
   return { width, height };
 }
 
-test('El manifiesto instala Euly como aplicación con iconos PNG válidos y accesos locales', () => {
+test('El manifiesto instala Zuka como aplicación con iconos PNG válidos y accesos locales', () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(directory, 'manifest.webmanifest'), 'utf8'));
-  assert.equal(manifest.name, 'Euly');
-  assert.equal(manifest.short_name, 'Euly');
+  assert.equal(manifest.name, 'Zuka');
+  assert.equal(manifest.short_name, 'Zuka');
   assert.equal(manifest.display, 'standalone');
   assert.equal(manifest.lang, 'es');
   assert.notEqual(manifest.prefer_related_applications, true);
@@ -141,7 +141,7 @@ test('La foto del autor está identificada y disponible sin conexión', async ()
   const html = fs.readFileSync(path.join(directory, 'index.html'), 'utf8');
   const photoTag = html.match(/<img\b[^>]*src="assets\/autor-carlos\.jpeg"[^>]*>/);
   assert.ok(photoTag);
-  assert.match(photoTag[0], /alt="Carlos Hurtado, autor de Euly"/);
+  assert.match(photoTag[0], /alt="Carlos Hurtado, autor de Zuka"/);
   const photo = fs.readFileSync(path.join(directory, 'assets/autor-carlos.jpeg'));
   assert.deepEqual(photo.subarray(0, 2), Buffer.from([255, 216]));
   assert.deepEqual(photo.subarray(-2), Buffer.from([255, 217]));

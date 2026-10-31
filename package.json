@@ -1,13 +1,17 @@
 {
-  "name": "mathbrain",
-  "version": "1.0.0",
+  "name": "zuka",
+  "version": "1.1.0",
   "private": true,
-  "description": "Euly: aprende matemáticas y estadística en español, paso a paso",
+  "description": "Zuka: aprende matemáticas y estadística en español, paso a paso",
   "scripts": {
-    "dev": "node server.cjs",
-    "build": "npm run check && node scripts/build-content.cjs && node scripts/build-pwa.cjs",
-    "check": "node --check dist/app.js && node --check dist/mascot.js && node --check dist/courses.js && node --check dist/content.js && node --check dist/library.js && node --check dist/space.js && node --check dist/install.js && node --check dist/theme.js && node --check dist/sw.js && node --check scripts/build-pwa.cjs && node --check scripts/build-content.cjs",
-    "test": "node --test tests/*.test.cjs",
-    "content": "node scripts/build-content.cjs"
+    "dev": "node scripts/build.cjs && node server.cjs",
+    "dev:movil": "node scripts/build.cjs && node server.cjs --red",
+    "build": "npm run check && node scripts/build.cjs",
+    "check": "node scripts/check.cjs",
+    "test": "node scripts/build.cjs && node --test tests/*.test.cjs",
+    "content": "node scripts/build.cjs"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

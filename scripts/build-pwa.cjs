@@ -15,7 +15,7 @@ function filesIn(folder) {
 }
 
 const worker = fs.readFileSync(workerPath, 'utf8').replace(/\r\n/g, '\n');
-if (!workerPattern.test(worker)) throw new Error('No se encontró la versión de la caché de MathBrain.');
+if (!workerPattern.test(worker)) throw new Error('No se encontró la versión de la caché en dist/sw.js.');
 const hash = crypto.createHash('sha256');
 for (const filename of filesIn(directory)) {
   const relative = path.relative(directory, filename).split(path.sep).join('/');
@@ -27,4 +27,4 @@ for (const filename of filesIn(directory)) {
 const revision = hash.digest('hex').slice(0, 16);
 const output = worker.replace(workerPattern, `const CACHE_NAME = 'mathbrain-shell-${revision}';`);
 fs.writeFileSync(workerPath, output);
-console.log(`Euly PWA preparada: ${revision}`);
+console.log(`Zuka PWA preparada: ${revision}`);

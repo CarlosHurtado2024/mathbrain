@@ -20,7 +20,7 @@
   const plural = (count, singular, pluralForm) => `${count} ${count === 1 ? singular : pluralForm}`;
   let currentLessonId = null;
   let outlineOpen = false;
-  // Octavio, la mascota (dist/mascot.js). Sin ese archivo, los mensajes se muestran sin el dibujo.
+  // Zuka, la mascota (src/mascot.js). Sin ese archivo, los mensajes se muestran sin el dibujo.
   const mascot = window.MATHBRAIN_MASCOT || { svg: () => '', say: (mood, html, className = '') => `<div class="nebi-say ${className}"><p class="nebi-bubble">${html}</p></div>` };
   // Puntos (XP) y racha: días seguidos en los que se completó al menos una lección.
   const stats = loadStats();
@@ -49,6 +49,7 @@
     flame: '<path d="M12 3c1 3.6 5.2 5.6 5.2 10.2a5.2 5.2 0 0 1-10.4 0c0-2.3 1-3.8 2.3-5 .2 1.8 1 2.9 2.4 3.4C10.9 9.1 10.6 5.9 12 3Z"/>',
     close: '<path d="M6 6l12 12M18 6 6 18"/>',
     star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-4 4.3-6 8-6s6.8 2 8 6"/>',
     list: '<path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>'
   };
 
@@ -174,14 +175,14 @@
 
   function card(resource) {
     const format = library.formats[resource.type];
-    return `<article class="content-card ${resource.color}"><a href="#contenido/${resource.id}" class="card-art" tabindex="-1" aria-hidden="true">${artwork(resource)}<span class="art-label">EULY / EXPLORA LAS IDEAS</span><span class="art-type">${icon(format.icon)}${format.title}</span><span class="card-open">↗</span></a>${saveButton(resource)}<div class="card-copy"><p class="card-topic">${topicName(resource.topic)}</p><h3><a href="#contenido/${resource.id}">${escape(resource.title)}</a></h3><p>${escape(resource.description)}</p><div class="card-meta"><span class="level-indicator ${resource.level === 'Inicial' ? 'initial' : ''}" aria-hidden="true"><i></i><i></i><i></i></span>${resource.level}<span>${resource.type === 'exercise' ? `${resource.steps.length} pasos` : resource.type === 'simulation' ? 'Interactiva' : resource.practice ? 'Lectura y práctica' : 'Lectura'}</span></div></div></article>`;
+    return `<article class="content-card ${resource.color}"><a href="#contenido/${resource.id}" class="card-art" tabindex="-1" aria-hidden="true">${artwork(resource)}<span class="art-label">ZUKA / EXPLORA LAS IDEAS</span><span class="art-type">${icon(format.icon)}${format.title}</span><span class="card-open">↗</span></a>${saveButton(resource)}<div class="card-copy"><p class="card-topic">${topicName(resource.topic)}</p><h3><a href="#contenido/${resource.id}">${escape(resource.title)}</a></h3><p>${escape(resource.description)}</p><div class="card-meta"><span class="level-indicator ${resource.level === 'Inicial' ? 'initial' : ''}" aria-hidden="true"><i></i><i></i><i></i></span>${resource.level}<span>${resource.type === 'exercise' ? `${resource.steps.length} pasos` : resource.type === 'simulation' ? 'Interactiva' : resource.practice ? 'Lectura y práctica' : 'Lectura'}</span></div></div></article>`;
   }
 
   function courseSymbol(course) {
     return { derivative: 'f′', integral: '∫', probability: 'P(A)', inference: 'x̄', algebra: 'x²', trigonometry: 'θ' }[course.art] || 'π';
   }
 
-  // Portada: Octavio en las ilustraciones y la franja de cursos bajo el héroe.
+  // Portada: la mascota en las ilustraciones y la franja de cursos bajo el héroe.
   function renderLanding() {
     selectAll('[data-mascot]').forEach(element => { element.innerHTML = mascot.svg(element.dataset.mascot); });
     const strip = select('#course-strip');
@@ -217,7 +218,7 @@
     select('#course-grid').classList.add('is-list');
     select('#course-grid').innerHTML = groups.map(({ category, items }) => `${groups.length > 1 ? `<h3 class="course-area">${escape(areas[category] || category)}</h3>` : ''}${items.map(courseCard).join('')}`).join('');
     select('#course-empty').hidden = visibleCourses.length > 0;
-    document.title = 'Explorar cursos | Euly';
+    document.title = 'Explorar cursos | Zuka';
   }
 
   function updateCourseCatalog(changes) {
@@ -229,14 +230,16 @@
     route(false);
   }
 
-  // Panel del día en el inicio: Octavio saluda según la racha, y se muestran XP, lecciones y los cursos en marcha.
+  // Panel del día en el inicio: la mascota saluda (por su nombre, si la persona lo dio en su perfil) según la racha, y se muestran XP, lecciones y los cursos en marcha.
   function continueLearning() {
     const active = courses.map(course => ({ course, progress: courseProgress(course) })).filter(({ progress }) => progress.done > 0 && progress.done < progress.total);
     const streak = currentStreak();
     const studiedToday = stats.lastDay === dayKey();
     const suggestions = active.length ? active : [{ course: courses[0], progress: courseProgress(courses[0]) }];
+    const name = loadProfile().name;
+    const hello = name ? `, ${escape(name)}` : '';
     const mood = studiedToday ? 'celebra' : streak ? 'animo' : active.length ? 'feliz' : 'saluda';
-    const message = studiedToday ? `<strong>¡Meta de hoy cumplida!</strong> Llevas ${plural(streak, 'día', 'días')} de racha.` : streak ? `Llevas <strong>${plural(streak, 'día', 'días')} de racha</strong>. Una lección hoy y la mantienes.` : active.length ? '<strong>¡Qué bueno verte!</strong> Sigamos donde lo dejaste.' : `<strong>¡Hola! Soy ${mascot.name || 'Octavio'}.</strong> Cada lección toma unos minutos: aprende resolviendo, una idea a la vez.`;
+    const message = studiedToday ? `<strong>¡Meta de hoy cumplida${hello}!</strong> Llevas ${plural(streak, 'día', 'días')} de racha.` : streak ? `Llevas <strong>${plural(streak, 'día', 'días')} de racha</strong>. Una lección hoy y la mantienes.` : active.length ? `<strong>¡Qué bueno verte${hello}!</strong> Sigamos donde lo dejaste.` : `<strong>¡Hola! Soy ${mascot.name || 'Zuka'}.</strong> Cada lección toma unos minutos: aprende resolviendo, una idea a la vez.`;
     return `<section class="shelf today-panel" aria-labelledby="continue-title"><div class="today-greeting">${mascot.say(mood, message, 'today-nebi')}<ul class="today-stats" aria-label="Tu progreso"><li>${icon('flame')}<strong>${streak}</strong><span>${streak === 1 ? 'día de racha' : 'días de racha'}</span></li><li>${icon('star')}<strong>${stats.xp}</strong><span>XP</span></li><li>${icon('check')}<strong>${completed.size}</strong><span>${completed.size === 1 ? 'lección' : 'lecciones'}</span></li></ul></div><div class="section-heading"><div><h2 id="continue-title">${active.length ? 'Continúa aprendiendo' : 'Empieza tu camino'}</h2><p>${active.length ? 'Retoma tus cursos donde los dejaste.' : 'Te recomendamos empezar por aquí.'}</p></div></div><div class="continue-grid">${suggestions.map(({ course, progress }) => `<a class="continue-card ${course.color}" href="#contenido/${progress.next.id}"><small>${escape(course.label)}</small><strong>${escape(course.title)}</strong><span class="continue-next">${progress.done ? 'Siguiente' : 'Primera lección'}: ${escape(progress.next.title)}</span>${progress.done ? progressBar(progress) : `<span class="continue-start">${icon('play')}Empezar</span>`}</a>`).join('')}</div></section>`;
   }
 
@@ -290,7 +293,7 @@
       const resources = library.search({ ...filters, ids: page === 'biblioteca' ? saved : null });
       const title = page === 'biblioteca' ? 'Tu biblioteca de ideas.' : filters.query ? `Resultados para «${filters.query}»` : filters.type === 'simulation' ? 'Aprende haciendo.' : filters.type === 'exercise' ? 'Una solución, paso a paso.' : filters.topic !== 'all' ? `Explora ${topicName(filters.topic).toLowerCase()}.` : 'Encuentra esa idea.';
       select('#catalog-title').textContent = title;
-      select('#catalog-eyebrow').textContent = page === 'biblioteca' ? 'LO QUE QUIERES TENER CERCA' : filters.type === 'simulation' ? 'EL LABORATORIO EULY' : 'EXPLORA A TU MANERA';
+      select('#catalog-eyebrow').textContent = page === 'biblioteca' ? 'LO QUE QUIERES TENER CERCA' : filters.type === 'simulation' ? 'EL LABORATORIO ZUKA' : 'EXPLORA A TU MANERA';
       select('#catalog-description').textContent = page === 'biblioteca' ? 'Tus contenidos guardados en este navegador. Vuelve a ellos cuando quieras.' : 'Elige un tema, encuentra la explicación y pasa de entender a experimentar.';
       select('#results-count').textContent = `${resources.length} ${resources.length === 1 ? 'contenido encontrado' : 'contenidos encontrados'}`;
       select('#catalog-content').innerHTML = `<div class="resource-grid">${resources.map(card).join('')}</div>`;
@@ -299,7 +302,7 @@
         select('#empty-title').textContent = page === 'biblioteca' && !saved.size ? 'Tu próxima gran idea puede empezar aquí.' : 'Todavía no encontramos esa idea.';
         select('#empty-description').textContent = page === 'biblioteca' && !saved.size ? 'Pulsa el marcador de cualquier contenido para guardarlo en tu biblioteca.' : 'Prueba con «derivadas», «ecuaciones» o «probabilidad», o cambia los filtros.';
       }
-      document.title = `${title} | Euly`;
+      document.title = `${title} | Zuka`;
     }
     bindRails();
   }
@@ -364,7 +367,7 @@
       body = `${video || `<div class="reader-art">${artwork(resource)}</div>`}<div class="reader-body lesson-content">${resource.html}<div class="reader-next">${next ? `<a class="button button-secondary" href="#contenido/${next.id}">Siguiente idea ${icon('right')}</a>` : `<a class="button button-secondary" href="#curso/${resource.courseId}">Volver a la ruta ${icon('right')}</a>`}</div></div>`;
     }
     select('#detail-view').innerHTML = `<nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="#">Inicio</a><span aria-hidden="true">/</span><a href="#explorar?tema=${resource.topic}">${topicName(resource.topic)}</a><span aria-hidden="true">/</span><span>${format.title}</span></nav><header class="detail-header"><p class="eyebrow">${topicName(resource.topic).toUpperCase()} · ${format.title.toUpperCase()} · ${resource.level.toUpperCase()}</p><h1 id="detail-title" tabindex="-1">${escape(resource.title)}</h1><p>${escape(resource.description)}</p><div class="detail-actions">${saveButton(resource, true)}<button type="button" class="text-button" data-copy>${icon('link')}Copiar enlace</button></div></header><div class="detail-layout"><article class="reader ${resource.color}">${body}</article>${relatedPanel(resource)}</div>`;
-    document.title = `${resource.title} | Euly`;
+    document.title = `${resource.title} | Zuka`;
     if (resource.type === 'simulation') bindSimulation(resource);
     if (resource.type === 'exercise') bindAnswerCheck(resource);
     if (resource.type === 'explanation') bindLessonExercises(resource);
@@ -484,7 +487,7 @@
       + `<div class="course-layout"><aside class="course-card ${course.color}"><div class="course-card-art" aria-hidden="true">${artwork(course, true)}<span class="course-card-symbol">${courseSymbol(course)}</span></div><p class="eyebrow">${escape(course.label)} · NIVEL ${course.level.toUpperCase()}</p><h1 id="detail-title" tabindex="-1">${escape(course.title)}</h1><p class="course-card-description">${escape(course.description)}</p><ul class="course-card-facts"><li>${icon('book')}${plural(lessons.length, 'lección', 'lecciones')}</li><li>${icon('exercise')}${plural(exercises, 'reto', 'retos')}</li><li>${icon('star')}${plural(modules.length, 'nivel', 'niveles')} · ≈ ${studyHours(course)} h</li></ul>${started ? progressBar(progress) : ''}<a class="button button-primary course-card-start" href="#contenido/${progress.next.id}">${icon('play')}${started ? (finished ? 'Repasar el curso' : 'Continuar el curso') : 'Empezar el curso'}</a><div class="course-instructor"><img src="${instructor.photo}" alt="" width="40" height="40" loading="lazy" decoding="async"><span><small>Impartido por</small><strong>${instructor.name}</strong></span></div><button class="text-button" type="button" data-download="${course.id}">${icon('download')}Descargar programa</button></aside>`
       + `<div class="course-path-column"><h2 class="sr-only">Hay ${plural(modules.length, 'módulo', 'módulos')} en este curso</h2>${modules.map(level).join('')}`
       + `<section class="course-about" aria-labelledby="about-course-title"><h2 id="about-course-title">Sobre este curso</h2><p>${escape(course.intro)}</p>${course.outcomes?.length ? `<h3>Lo que aprenderás</h3><ul class="course-outcomes">${course.outcomes.map(outcome => `<li>${icon('check')}<span>${escape(outcome)}</span></li>`).join('')}</ul>` : ''}${course.skills?.length ? `<h3>Habilidades que desarrollarás</h3><ul class="course-skills">${course.skills.map(skill => `<li>${escape(skill)}</li>`).join('')}</ul>` : ''}<p class="prerequisite"><strong>Antes de empezar</strong>${escape(course.prerequisite)}</p></section></div></div>`;
-    document.title = `${course.title} | Euly`;
+    document.title = `${course.title} | Zuka`;
   }
 
   function lessonOutline(course, current) {
@@ -530,7 +533,7 @@
       + `<div class="course-player"><aside class="player-aside" id="lesson-outline" aria-label="Contenido del curso">${lessonOutline(course, resource)}</aside><div class="player-main">`
       + `<header class="detail-header player-header"><p class="eyebrow">${escape(module.kicker.toUpperCase())} · LECCIÓN ${escape(label)}</p><h1 id="detail-title" tabindex="-1">${escape(resource.title)}</h1><p>${escape(resource.description)}</p><ul class="lesson-items" aria-label="Contenido de la lección">${video ? `<li>${icon('play')}Video</li>` : ''}<li>${icon('book')}Lectura · ${resource.minutes || 3} min</li>${resource.practice ? `<li>${icon('exercise')}Práctica · ${plural(resource.practice, 'ejercicio', 'ejercicios')}</li>` : ''}</ul><div class="detail-actions">${saveButton(resource, true)}<button type="button" class="text-button" data-copy>${icon('link')}Copiar enlace</button></div></header>`
       + `<article class="reader ${resource.color}">${video || `<div class="reader-art">${artwork(resource)}</div>`}<div class="reader-body lesson-content">${resource.html}</div></article><div id="lesson-pager">${lessonPager(course, resource)}</div></div></div>`;
-    document.title = `${resource.title} · ${course.title} | Euly`;
+    document.title = `${resource.title} · ${course.title} | Zuka`;
     bindLessonExercises(resource);
     // En cursos largos, el temario lateral se desplaza hasta la lección actual.
     const aside = select('#lesson-outline');
@@ -540,7 +543,7 @@
 
   // ── Lección paso a paso ─────────────────────────────────────────────────────────────
   // Cada lección se recorre una idea a la vez: un paso en pantalla, una barra de avance y,
-  // en los retos, retroalimentación inmediata de Octavio. Responder bien da XP; terminar la lección
+  // en los retos, retroalimentación inmediata de la mascota. Responder bien da XP; terminar la lección
   // la completa, suma un bono y mantiene la racha.
 
   function lessonPosition(course, resource) {
@@ -557,7 +560,7 @@
   function renderPlayer(resource, course, video) {
     currentLessonId = null;
     const { module, label } = lessonPosition(course, resource);
-    document.title = `${resource.title} · ${course.title} | Euly`;
+    document.title = `${resource.title} · ${course.title} | Zuka`;
     startPlayer({ kind: 'lesson', resource, course, color: resource.color, title: resource.title, eyebrow: `${module.kicker.toUpperCase()} · LECCIÓN ${label}`, exit: `#curso/${course.id}`, reading: `#contenido/${resource.id}?vista=lectura`, steps: [...(video ? [{ type: 'video', html: `<h2>Mira la clase</h2>${video}` }] : []), ...resource.steps] });
   }
 
@@ -571,7 +574,7 @@
     const module = courseModules(course)[index];
     const steps = module && reviewSteps(module);
     if (!steps?.length) return false;
-    document.title = `Repaso: ${module.name} · ${course.title} | Euly`;
+    document.title = `Repaso: ${module.name} · ${course.title} | Zuka`;
     startPlayer({ kind: 'review', course, module, color: course.color, title: `Repaso: ${module.name}`, eyebrow: `${module.kicker.toUpperCase()} · REPASO DEL NIVEL`, exit: `#curso/${course.id}`, reading: '', steps: [{ type: 'intro', html: `<h2>Pon a prueba este nivel</h2><p>${plural(steps.length, 'reto', 'retos')} de las lecciones de «${escape(module.name)}». Resuélvelos sin mirar la explicación; si te atascas, puedes ver la solución y seguir.</p>` }, ...steps] });
     return true;
   }
@@ -696,9 +699,105 @@
     player.finished = true;
   }
 
+  // Perfil del estudiante (#perfil). No hay cuentas: todo se calcula con los datos guardados en este navegador.
+  const storageKeys = ['mathbrain-progress', 'mathbrain-stats', 'mathbrain-saved', 'mathbrain-recent', 'mathbrain-profile', 'mathbrain-theme'];
+
+  function loadProfile() {
+    try {
+      const value = JSON.parse(localStorage.getItem('mathbrain-profile') || '{}');
+      return { name: typeof value.name === 'string' ? value.name.trim().slice(0, 40) : '' };
+    } catch {
+      return { name: '' };
+    }
+  }
+
+  // Cada nivel pide 50 XP más que el anterior: 100 para el nivel 2, 150 más para el 3…
+  function xpLevel(xp) {
+    let level = 1;
+    let floor = 0;
+    let need = 100;
+    while (xp >= floor + need) { floor += need; level++; need += 50; }
+    return { level, into: xp - floor, need, percent: Math.round((xp - floor) / need * 100) };
+  }
+
+  function bestStreak() {
+    let best = 0;
+    let run = 0;
+    let previous = null;
+    for (const day of [...new Set(stats.days)].sort()) {
+      const date = new Date(`${day}T12:00:00`);
+      run = previous && Math.round((date - previous) / 86400000) === 1 ? run + 1 : 1;
+      best = Math.max(best, run);
+      previous = date;
+    }
+    return Math.max(best, currentStreak());
+  }
+
+  function weekActivity() {
+    const studied = new Set(stats.days);
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = new Date();
+      date.setDate(date.getDate() - 6 + index);
+      return { short: new Intl.DateTimeFormat('es-CO', { weekday: 'narrow' }).format(date), long: new Intl.DateTimeFormat('es-CO', { weekday: 'long', day: 'numeric' }).format(date), done: studied.has(dayKey(date)), today: index === 6 };
+    });
+  }
+
+  function renderProfile() {
+    const profile = loadProfile();
+    const level = xpLevel(stats.xp);
+    const streak = currentStreak();
+    const week = weekActivity();
+    const studiedWeek = week.filter(day => day.done).length;
+    const progress = courses.map(course => ({ course, progress: courseProgress(course) })).sort((a, b) => Number(b.progress.done > 0) - Number(a.progress.done > 0));
+    const statItems = [['flame', streak, streak === 1 ? 'día de racha' : 'días de racha'], ['star', bestStreak(), 'mejor racha'], ['check', completed.size, completed.size === 1 ? 'lección completada' : 'lecciones completadas'], ['bookmark', saved.size, saved.size === 1 ? 'contenido guardado' : 'contenidos guardados']];
+    select('#detail-view').innerHTML = `<section class="profile-view" aria-labelledby="detail-title">`
+      + `<header class="profile-header"><span class="profile-avatar" aria-hidden="true">${mascot.svg(streak ? 'celebra' : 'feliz')}</span><div class="profile-identity"><p class="eyebrow">TU PERFIL</p><h1 id="detail-title" tabindex="-1">${profile.name ? `Hola, ${escape(profile.name)}` : 'Hola'}</h1><p class="profile-level"><strong>Nivel ${level.level}</strong> · ${stats.xp} XP</p><div class="profile-level-bar"><span class="course-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="${level.need}" aria-valuenow="${level.into}" aria-label="Progreso hacia el nivel ${level.level + 1}"><span style="width:${level.percent}%"></span></span><small>${level.need - level.into} XP para el nivel ${level.level + 1}</small></div></div></header>`
+      + `<form class="profile-name" data-profile-form="1"><label for="profile-name">¿Cómo quieres que te llamemos?</label><div><input id="profile-name" name="name" type="text" maxlength="40" autocomplete="nickname" placeholder="Tu nombre o apodo" value="${escape(profile.name)}"><button class="button button-secondary" type="submit">Guardar</button></div></form>`
+      + `<ul class="profile-stats" aria-label="Tus números">${statItems.map(([name, value, label]) => `<li>${icon(name)}<strong>${value}</strong><span>${label}</span></li>`).join('')}</ul>`
+      + `<section class="profile-card" aria-labelledby="profile-week-title"><div class="profile-card-heading"><h2 id="profile-week-title">Esta semana</h2><p>${studiedWeek ? `Estudiaste ${plural(studiedWeek, 'día', 'días')} de 7.` : 'Completa una lección para empezar tu racha.'}</p></div><ol class="profile-week">${week.map(day => `<li class="${day.done ? 'is-done' : ''}${day.today ? ' is-today' : ''}"><span aria-hidden="true">${day.done ? icon('check') : ''}</span><small aria-hidden="true">${escape(day.short)}</small><span class="sr-only">${escape(day.long)}: ${day.done ? 'estudiaste' : 'sin estudio'}</span></li>`).join('')}</ol></section>`
+      + `<section class="profile-card" aria-labelledby="profile-courses-title"><div class="profile-card-heading"><h2 id="profile-courses-title">Tus cursos</h2><p>${progress.some(item => item.progress.done) ? 'Tu avance en cada ruta.' : 'Todavía no empiezas ningún curso. Elige uno y da el primer paso.'}</p></div><ul class="profile-courses">${progress.map(({ course, progress: courseState }) => `<li class="${course.color}"><span class="profile-course-symbol" aria-hidden="true">${courseSymbol(course)}</span><div><a href="#curso/${course.id}"><strong>${escape(course.title)}</strong></a>${progressBar(courseState)}</div><a class="text-button" href="#contenido/${courseState.next.id}">${courseState.done === courseState.total ? 'Repasar' : courseState.done ? 'Continuar' : 'Empezar'}${icon('right')}</a></li>`).join('')}</ul></section>`
+      + `<section class="profile-card profile-data" aria-labelledby="profile-data-title"><div class="profile-card-heading"><h2 id="profile-data-title">Tus datos</h2><p>Zuka no necesita cuenta: tu progreso se guarda solo en este dispositivo. Descarga una copia para pasarla a otro celular o computador.</p></div><div class="profile-actions"><button type="button" class="button button-secondary" data-profile-export="1">${icon('download')}Descargar copia</button><label class="button button-secondary profile-import">${icon('book')}Restaurar copia<input class="sr-only" type="file" accept=".json,application/json" data-profile-import="1"></label><button type="button" class="text-button profile-reset" data-profile-reset="1">Borrar mi progreso</button></div></section>`
+      + `</section>`;
+    document.title = 'Tu perfil | Zuka';
+  }
+
+  function exportProgress() {
+    const data = Object.fromEntries(storageKeys.map(key => [key, localStorage.getItem(key)]).filter(([, value]) => value !== null));
+    const contents = JSON.stringify({ app: 'zuka', version: 1, exportedAt: new Date().toISOString(), data }, null, 2);
+    const address = URL.createObjectURL(new Blob([contents], { type: 'application/json' }));
+    const anchor = document.createElement('a');
+    anchor.href = address;
+    anchor.download = `zuka-progreso-${dayKey()}.json`;
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(address), 1000);
+    toast('Copia descargada. Ábrela desde Perfil en el otro dispositivo.');
+  }
+
+  async function importProgress(file) {
+    try {
+      const backup = JSON.parse(await file.text());
+      if (backup?.app !== 'zuka' || typeof backup.data !== 'object' || !backup.data) throw new Error('formato');
+      const entries = Object.entries(backup.data).filter(([key, value]) => storageKeys.includes(key) && typeof value === 'string');
+      if (!entries.length) throw new Error('vacía');
+      if (!window.confirm('¿Reemplazar el progreso de este dispositivo por el de la copia?')) return;
+      for (const [key, value] of entries) localStorage.setItem(key, value);
+      location.reload();
+    } catch {
+      toast('Ese archivo no es una copia de Zuka.');
+    }
+  }
+
+  function resetProgress() {
+    if (!window.confirm('Se borrarán tus lecciones completadas, tu racha, tus XP y tus guardados en este dispositivo. ¿Continuar?')) return;
+    try { for (const key of storageKeys.filter(key => key !== 'mathbrain-theme')) localStorage.removeItem(key); } catch { /* Sin almacenamiento no hay nada que borrar. */ }
+    location.reload();
+  }
+
   function missingResource() {
     select('#detail-view').innerHTML = '<div class="empty-state">' + mascot.svg('piensa') + '<h1 id="detail-title" tabindex="-1">Esta idea no está en ese enlace.</h1><p>El enlace puede estar incompleto. Encuentra el tema en el catálogo.</p><a class="button button-primary" href="#explorar">Explorar contenidos</a></div>';
-    document.title = 'Contenido no encontrado | Euly';
+    document.title = 'Contenido no encontrado | Zuka';
   }
 
   // Los cursos de Álgebra y Trigonometría forman ahora Fundamentos de Matemáticas: sus enlaces antiguos siguen funcionando.
@@ -720,7 +819,7 @@
     const parameters = new URLSearchParams(rawParameters);
     filters = { query: (parameters.get('q') || '').slice(0, 160), type: library.formats[parameters.get('tipo')] ? parameters.get('tipo') : 'all', topic: library.topics.some(topic => topic.id === parameters.get('tema')) ? parameters.get('tema') : 'all', level: ['Inicial', 'Intermedio'].includes(parameters.get('nivel')) ? parameters.get('nivel') : 'all' };
     courseFilters = { topic: library.topics.some(topic => topic.id === parameters.get('curso_tema')) ? parameters.get('curso_tema') : 'all', level: ['Inicial', 'Intermedio'].includes(parameters.get('curso_nivel')) ? parameters.get('curso_nivel') : 'all' };
-    page = !destination || destination === 'inicio' ? 'inicio' : destination === 'biblioteca' ? 'biblioteca' : destination === 'nosotros' ? 'nosotros' : ['explorar', 'cursos', 'enfoque', 'simulaciones', 'ejercicios'].includes(destination) ? 'explorar' : 'detalle';
+    page = !destination || destination === 'inicio' ? 'inicio' : destination === 'biblioteca' ? 'biblioteca' : destination === 'nosotros' ? 'nosotros' : destination === 'perfil' ? 'perfil' : ['explorar', 'cursos', 'enfoque', 'simulaciones', 'ejercicios'].includes(destination) ? 'explorar' : 'detalle';
     if (['explorar', 'cursos'].includes(destination) && !filters.query && filters.type === 'all' && filters.topic === 'all' && filters.level === 'all' && parameters.get('vista') !== 'contenidos') page = 'cursos';
     if (destination === 'simulaciones') filters.type = 'simulation';
     if (destination === 'ejercicios') filters.type = 'exercise';
@@ -728,7 +827,7 @@
     select('#courses-view').hidden = page !== 'cursos';
     select('.discovery').hidden = !['inicio', 'explorar', 'biblioteca'].includes(page);
     select('#learning-paths').hidden = page !== 'inicio';
-    select('#detail-view').hidden = page !== 'detalle';
+    select('#detail-view').hidden = !['detalle', 'perfil'].includes(page);
     select('#about-view').hidden = page !== 'nosotros';
     select('#content-search').value = filters.query;
     player = null;
@@ -746,13 +845,15 @@
     } else if (page === 'cursos') {
       select('#detail-view').replaceChildren();
       renderCourses();
+    } else if (page === 'perfil') {
+      renderProfile();
     } else if (page === 'nosotros') {
       select('#detail-view').replaceChildren();
-      document.title = 'Sobre Euly | Euly';
+      document.title = 'Sobre Zuka | Zuka';
     } else {
       select('#detail-view').replaceChildren();
       renderCatalog();
-      if (page === 'inicio') document.title = 'Euly — Aprende matemáticas paso a paso';
+      if (page === 'inicio') document.title = 'Zuka — Aprende matemáticas paso a paso';
     }
     // Durante una lección paso a paso, la interfaz se concentra en la lección, como en una app de aprendizaje.
     document.body?.classList.toggle('lesson-mode', Boolean(player));
@@ -766,7 +867,7 @@
     });
     if (shouldFocus) {
       window.scrollTo({ top: 0, behavior: 'instant' });
-      const heading = page === 'detalle' ? select('#detail-title') : page === 'nosotros' ? select('#about-title') : page === 'inicio' ? select('#main') : page === 'cursos' ? select('#courses-title') : select('#catalog-title');
+      const heading = ['detalle', 'perfil'].includes(page) ? select('#detail-title') : page === 'nosotros' ? select('#about-title') : page === 'inicio' ? select('#main') : page === 'cursos' ? select('#courses-title') : select('#catalog-title');
       heading?.focus({ preventScroll: true });
     }
   }
@@ -915,11 +1016,11 @@
     if (!course) return;
     const outcomes = course.outcomes?.length ? `\nLO QUE APRENDERÁS\n${course.outcomes.map(outcome => `- ${outcome}`).join('\n')}\n` : '';
     const modules = courseModules(course).map(module => `${module.kicker.toUpperCase()} · ${module.name}\n${module.summary ? `${module.summary}\n` : ''}${module.objectives.map(objective => `- ${objective}`).join('\n')}${module.objectives.length ? '\n' : ''}\n${module.lessons.map(({ lesson, label }) => `${label}. ${lesson.title}\n${lesson.description}\nIdea clave: ${lesson.key}\n`).join('\n')}${module.extras.length ? `\nPráctica interactiva: ${module.extras.map(resource => resource.title).join('; ')}\n` : ''}`).join('\n\n');
-    const contents = `EULY — ${course.title}\n\n${course.description}\n${course.intro}\nNivel: ${course.level}\nImpartido por: ${instructor.name}\nAntes de empezar: ${course.prerequisite}\n${outcomes}\n${modules}`;
+    const contents = `ZUKA — ${course.title}\n\n${course.description}\n${course.intro}\nNivel: ${course.level}\nImpartido por: ${instructor.name}\nAntes de empezar: ${course.prerequisite}\n${outcomes}\n${modules}`;
     const address = URL.createObjectURL(new Blob([contents], { type: 'text/plain;charset=utf-8' }));
     const anchor = document.createElement('a');
     anchor.href = address;
-    anchor.download = `Euly-${id}-programa.txt`;
+    anchor.download = `Zuka-${id}-programa.txt`;
     document.body.append(anchor);
     anchor.click();
     anchor.remove();
@@ -977,12 +1078,27 @@
       rail.scrollBy({ left: Number(arrow.dataset.direction) * rail.clientWidth * .9, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
       return;
     }
+    if (event.target.closest('[data-profile-export]')) { exportProgress(); return; }
+    if (event.target.closest('[data-profile-reset]')) { resetProgress(); return; }
     const download = event.target.closest('[data-download]');
     if (download) downloadCourse(download.dataset.download);
     if (event.target.closest('[data-copy]')) {
       try { await navigator.clipboard.writeText(location.href); toast('Enlace copiado. Comparte esta idea.'); }
       catch { toast('Puedes copiar el enlace desde la barra de direcciones.'); }
     }
+  });
+  document.addEventListener('submit', event => {
+    if (!event.target.closest('[data-profile-form]')) return;
+    event.preventDefault();
+    const name = select('#profile-name').value.trim().slice(0, 40);
+    storeList('mathbrain-profile', { name });
+    renderProfile();
+    select('#detail-title').focus();
+    toast(name ? `Listo, ${name}. Así te saludará Zuka.` : 'Nombre borrado.');
+  });
+  document.addEventListener('change', event => {
+    const input = event.target.closest('[data-profile-import]');
+    if (input?.files?.[0]) importProgress(input.files[0]);
   });
   // Al cambiar de tema se vuelve a dibujar la página para que las ilustraciones usen su paleta, salvo en mitad de una lección.
   document.addEventListener('mathbrain:themechange', () => {

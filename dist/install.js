@@ -50,16 +50,16 @@
       note = 'Si no encuentras la opción, abre esta página en Safari y utiliza su menú Compartir.';
     } else if (/Android/i.test(userAgent)) {
       title = 'En tu celular o tableta';
-      steps = ['Abre el menú de tu navegador, normalmente ⋮.', 'Busca Instalar app o Añadir a pantalla de inicio.', 'Confirma para añadir Euly con su icono a la pantalla de inicio.'];
+      steps = ['Abre el menú de tu navegador, normalmente ⋮.', 'Busca Instalar app o Añadir a pantalla de inicio.', 'Confirma para añadir Zuka con su icono a la pantalla de inicio.'];
       note = 'Si estás dentro de otra aplicación o no ves la opción, abre este sitio en Chrome. Según el navegador y el dispositivo, se añadirá como aplicación o como acceso directo.';
     } else if (macSafari) {
       title = 'En Safari para Mac';
-      steps = ['Abre el menú Archivo o Compartir de Safari.', 'Elige Añadir al Dock.', 'Confirma el nombre Euly y pulsa Añadir.'];
+      steps = ['Abre el menú Archivo o Compartir de Safari.', 'Elige Añadir al Dock.', 'Confirma el nombre Zuka y pulsa Añadir.'];
       note = 'Si no aparece esa opción, utiliza una versión de Safari compatible con apps web o abre este sitio en Chrome o Edge.';
     } else {
       title = 'En tu computador';
-      steps = ['Abre el menú de tu navegador o busca el icono de instalación junto a la dirección.', 'Elige Instalar Euly o la opción de instalar este sitio como aplicación.', 'Confirma la instalación para abrir Euly en su propia ventana y con su icono.'];
-      note = 'Si no aparece la instalación, prueba con un navegador compatible, como Chrome o Edge. Puedes seguir utilizando Euly desde la web.';
+      steps = ['Abre el menú de tu navegador o busca el icono de instalación junto a la dirección.', 'Elige Instalar Zuka o la opción de instalar este sitio como aplicación.', 'Confirma la instalación para abrir Zuka en su propia ventana y con su icono.'];
+      note = 'Si no aparece la instalación, prueba con un navegador compatible, como Chrome o Edge. Puedes seguir utilizando Zuka desde la web.';
     }
     document.getElementById('install-guide-title').textContent = title;
     const list = document.getElementById('install-steps');
@@ -85,9 +85,9 @@
       const choice = await promptEvent.userChoice;
       if (choice.outcome === 'accepted') {
         if (dialog.open) dialog.close();
-        if (!installed) announce('Instalación aceptada. El navegador terminará de añadir Euly con su icono.');
+        if (!installed) announce('Instalación aceptada. El navegador terminará de añadir Zuka con su icono.');
       } else {
-        announce('Puedes instalar Euly cuando quieras desde el menú de tu navegador.');
+        announce('Puedes instalar Zuka cuando quieras desde el menú de tu navegador.');
       }
     } catch {
       showInstructions();
@@ -108,7 +108,7 @@
     installPrompt = null;
     if (dialog.open) dialog.close();
     syncButtons();
-    announce('Euly ya está lista. Ábrela desde su nuevo icono.');
+    announce('Zuka ya está lista. Ábrela desde su nuevo icono.');
   });
   standalone.addEventListener('change', event => {
     installed = event.matches || navigator.standalone === true;
@@ -136,7 +136,7 @@
       if (worker.state === 'activated') offlineReady();
       if (worker.state === 'installed') offerUpdate();
       if (worker.state === 'redundant' && !navigator.serviceWorker.controller) {
-        offlineNote.textContent = 'El contenido sin conexión aún no está preparado. Vuelve a abrir Euly con conexión para intentarlo de nuevo.';
+        offlineNote.textContent = 'El contenido sin conexión aún no está preparado. Vuelve a abrir Zuka con conexión para intentarlo de nuevo.';
         feedback.textContent = 'No se pudo completar la descarga del contenido. Puedes seguir utilizando la web con conexión.';
       }
     };
@@ -146,11 +146,11 @@
 
   async function prepareOfflineApp() {
     if (!('serviceWorker' in navigator)) {
-      offlineNote.textContent = 'Puedes utilizar Euly en línea. Este navegador no permite preparar el contenido sin conexión.';
+      offlineNote.textContent = 'Puedes utilizar Zuka en línea. Este navegador no permite preparar el contenido sin conexión.';
       return;
     }
     if (!window.isSecureContext) {
-      offlineNote.textContent = 'Abre la versión HTTPS de Euly para preparar el contenido sin conexión y utilizar la instalación del navegador.';
+      offlineNote.textContent = 'Abre la versión HTTPS de Zuka para preparar el contenido sin conexión y utilizar la instalación del navegador.';
       return;
     }
     try {
@@ -160,8 +160,8 @@
       offerUpdate();
       registration.addEventListener('updatefound', () => observeWorker(registration.installing));
     } catch {
-      offlineNote.textContent = 'El contenido sin conexión aún no está preparado. Vuelve a abrir Euly con conexión para intentarlo de nuevo.';
-      feedback.textContent = 'No se pudo preparar el uso sin conexión. Puedes seguir navegando y volver a intentarlo al abrir Euly.';
+      offlineNote.textContent = 'El contenido sin conexión aún no está preparado. Vuelve a abrir Zuka con conexión para intentarlo de nuevo.';
+      feedback.textContent = 'No se pudo preparar el uso sin conexión. Puedes seguir navegando y volver a intentarlo al abrir Zuka.';
     }
   }
 

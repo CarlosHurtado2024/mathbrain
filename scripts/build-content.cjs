@@ -1,6 +1,6 @@
-// Compila las lecciones de content/<curso>/NN-tema.md en dist/content.js.
+// Compila las lecciones de content/<curso>/NN-tema.md en dist/content.js (lo usa scripts/build.cjs).
 // Las fórmulas LaTeX ($…$ y $$…$$) se convierten a HTML con KaTeX durante la compilación,
-// así que el navegador solo necesita dist/vendor/katex/katex.min.css y sus fuentes.
+// así que el navegador solo necesita src/vendor/katex/katex.min.css y sus fuentes.
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
@@ -259,10 +259,10 @@ function splitSteps(html) {
 
 function compileAll() {
   const context = vm.createContext({ window: {} });
-  vm.runInContext(fs.readFileSync(path.join(root, 'dist', 'courses.js'), 'utf8'), context);
+  vm.runInContext(fs.readFileSync(path.join(root, 'src', 'courses.js'), 'utf8'), context);
   const courses = context.window.MATHBRAIN_COURSES;
   const folders = fs.readdirSync(contentDirectory, { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => entry.name);
-  for (const folder of folders) if (!courses.some(course => course.id === folder)) throw new ContentError(`content/${folder}`, 0, 'La carpeta no corresponde a ningún curso de dist/courses.js.');
+  for (const folder of folders) if (!courses.some(course => course.id === folder)) throw new ContentError(`content/${folder}`, 0, 'La carpeta no corresponde a ningún curso de src/courses.js.');
   return courses.flatMap(course => {
     const folder = path.join(contentDirectory, course.id);
     const files = fs.existsSync(folder) ? fs.readdirSync(folder).filter(name => name.endsWith('.md')).sort() : [];
@@ -278,7 +278,7 @@ function compileAll() {
       let previous = 0;
       for (const lesson of lessons) {
         const position = titles.indexOf(lesson.unit);
-        if (position < 0) throw new ContentError(lesson.file, 1, `«unidad: ${lesson.unit || ''}» no coincide con ningún módulo de ${course.id} en dist/courses.js. Usa uno de: ${titles.join(' | ')}.`);
+        if (position < 0) throw new ContentError(lesson.file, 1, `«unidad: ${lesson.unit || ''}» no coincide con ningún módulo de ${course.id} en src/courses.js. Usa uno de: ${titles.join(' | ')}.`);
         if (position < previous) throw new ContentError(lesson.file, 1, `La lección está en «${lesson.unit}», pero un archivo anterior ya pertenece a un módulo posterior. Ordena los archivos por módulo.`);
         previous = position;
       }
@@ -299,7 +299,7 @@ if (require.main === module) {
   try {
     const lessons = compileAll();
     fs.writeFileSync(outputPath, render(lessons));
-    console.log(`Euly contenido: ${lessons.length} lecciones, ${lessons.reduce((total, lesson) => total + lesson.exercises, 0)} ejercicios interactivos.`);
+    console.log(`Zuka contenido: ${lessons.length} lecciones, ${lessons.reduce((total, lesson) => total + lesson.exercises, 0)} ejercicios interactivos.`);
   } catch (error) {
     console.error(error instanceof ContentError ? `Error en el contenido · ${error.message}` : error);
     process.exit(1);

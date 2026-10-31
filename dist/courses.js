@@ -5,7 +5,7 @@
 // - outcomes: «Lo que aprenderás» en todo el curso.
 // - skills: habilidades que se desarrollan.
 // - modules: módulos en orden. Cada lección declara en su archivo «unidad:» con el título exacto de su módulo.
-//   summary y objectives describen el módulo; extras añade simulaciones o ejercicios resueltos de dist/library.js.
+//   summary y objectives describen el módulo; extras añade simulaciones o ejercicios resueltos de src/library.js.
 window.MATHBRAIN_COURSES = [
   {
     id: 'fundamentos-matematicas', title: 'Fundamentos de Matemáticas', category: 'fundamentos', label: 'FUNDAMENTOS', level: 'Inicial', art: 'algebra', color: 'purple',
