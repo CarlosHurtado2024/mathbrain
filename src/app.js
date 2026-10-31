@@ -318,7 +318,7 @@
     let videoId;
     if (['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtube-nocookie.com', 'www.youtube-nocookie.com'].includes(url.hostname)) videoId = url.searchParams.get('v') || url.pathname.match(/^\/(?:embed|shorts)\/([\w-]+)/)?.[1];
     if (url.hostname === 'youtu.be') videoId = url.pathname.slice(1);
-    if (videoId && /^[\w-]{11}$/.test(videoId)) return { type: 'iframe', src: `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&cc_load_policy=1&cc_lang_pref=es&hl=es` };
+    if (videoId && /^[\w-]{11}$/.test(videoId)) return { type: 'iframe', src: `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&playsinline=1&cc_load_policy=1&cc_lang_pref=es&hl=es` };
     if (['vimeo.com', 'www.vimeo.com', 'player.vimeo.com'].includes(url.hostname)) {
       const match = url.pathname.match(/(?:\/video)?\/(\d+)/);
       if (match) return { type: 'iframe', src: `https://player.vimeo.com/video/${match[1]}` };
@@ -556,7 +556,7 @@
 
   function startPlayer(state) {
     player = { index: 0, results: {}, gains: {}, xp: 0, firstTry: 0, ...state };
-    select('#detail-view').innerHTML = `<section class="lesson-player ${player.color}" aria-labelledby="detail-title"><header class="player-top"><a class="player-close" href="${player.exit}" aria-label="Salir y volver al curso">${icon('close')}</a><div class="player-meter" id="player-meter"></div><span class="player-xp" id="player-xp" aria-live="polite"></span></header><div class="player-heading"><p class="eyebrow">${escape(player.eyebrow)}</p><h1 id="detail-title" tabindex="-1">${escape(player.title)}</h1>${player.reading ? `<a class="player-reading" href="${player.reading}">${icon('book')}Ver toda la lección en una página</a>` : ''}</div><div class="player-stage" id="player-stage"></div><div class="player-bar" id="player-bar"></div></section>`;
+    select('#detail-view').innerHTML = `<section class="lesson-player ${player.color}" id="lesson-player" aria-labelledby="detail-title"><header class="player-top"><a class="player-close" href="${player.exit}" aria-label="Salir y volver al curso">${icon('close')}</a><div class="player-meter" id="player-meter"></div><span class="player-xp" id="player-xp" aria-live="polite"></span></header><div class="player-heading"><p class="eyebrow">${escape(player.eyebrow)}</p><h1 id="detail-title" tabindex="-1">${escape(player.title)}</h1>${player.reading ? `<a class="player-reading" href="${player.reading}">${icon('book')}Ver toda la lección en una página</a>` : ''}</div><div class="player-stage" id="player-stage"></div><div class="player-bar" id="player-bar"></div></section>`;
     renderPlayerStep();
   }
 
@@ -591,6 +591,8 @@
     const step = player.steps[player.index];
     select('#player-meter').innerHTML = playerMeter();
     select('#player-xp').textContent = player.xp ? `+${player.xp} XP` : '';
+    // Un video vertical (9:16) se ve a pantalla completa en el celular: la lección pasa a modo inmersivo.
+    select('#lesson-player')?.classList.toggle('is-immersive', step?.type === 'video' && /video-stage is-vertical/.test(step.html));
     if (!step) return finishPlayer();
     const labels = { exercise: 'Tu turno', idea: 'Idea clave', example: 'Ejemplo', note: 'Atención', video: 'Video', intro: 'Repaso' };
     select('#player-stage').innerHTML = `<article class="player-card reader-body lesson-content step-${step.type}" id="player-card" tabindex="-1">${labels[step.type] ? `<p class="player-step-label">${labels[step.type]}</p>` : ''}${step.html}</article>`;

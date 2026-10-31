@@ -273,3 +273,24 @@ html[data-theme="light"] .profile-name select { background: #faf9f7; }
 @media (max-width: 650px) {
   .zcard-link { align-items: start; }
 }
+
+/* ---------- Video vertical a pantalla completa (celular y tableta en vertical) ----------
+   Al entrar a una lección cuyo primer paso es un short 9:16, el video ocupa toda la pantalla:
+   arriba cerrar y el avance, abajo «Continuar». En computador se mantiene el marco 9:16 en la tarjeta. */
+@media (max-width: 650px), (max-width: 900px) and (orientation: portrait) {
+  body:has(.lesson-player.is-immersive) { overflow: hidden; background: #000; }
+  html[data-theme] .lesson-player.is-immersive { position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column; max-width: none; height: 100vh; height: 100dvh; min-height: 0; margin: 0; padding: 0; background: #000; }
+  html[data-theme] .lesson-player.is-immersive .player-top { position: static; flex: 0 0 auto; padding: calc(10px + env(safe-area-inset-top)) 14px 10px; background: #000; }
+  html[data-theme] .lesson-player.is-immersive .player-close { border-color: #ffffff38; background: #ffffff14; color: #fff; }
+  html[data-theme] .lesson-player.is-immersive .player-segments li { background: #ffffff2e; }
+  html[data-theme] .lesson-player.is-immersive .player-segments li.is-current { background: var(--z-brand); }
+  /* El título sigue disponible para lectores de pantalla, pero no ocupa espacio. */
+  html[data-theme] .lesson-player.is-immersive .player-heading { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  html[data-theme] .lesson-player.is-immersive .player-stage { display: flex; flex: 1 1 auto; min-height: 0; padding: 0; }
+  html[data-theme] .lesson-player.is-immersive .player-card { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; padding: 0; border: 0; border-radius: 0; background: #000; box-shadow: none; animation: none; }
+  html[data-theme] .lesson-player.is-immersive .player-card > :not(.video-stage) { display: none; }
+  html[data-theme] .lesson-player.is-immersive .video-stage.is-vertical { flex: 1 1 auto; width: 100%; height: auto; min-height: 0; aspect-ratio: auto; margin: 0; border-radius: 0; background: #000; }
+  html[data-theme] .lesson-player.is-immersive .player-bar { position: static; flex: 0 0 auto; padding: 10px 14px calc(12px + env(safe-area-inset-bottom)); border-top: 0; background: #000; backdrop-filter: none; }
+  html[data-theme] .lesson-player.is-immersive .player-bar-inner { min-height: 0; }
+  html[data-theme] .lesson-player.is-immersive .player-continue { flex: 1; justify-content: center; }
+}
