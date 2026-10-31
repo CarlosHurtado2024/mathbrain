@@ -87,7 +87,7 @@ Esquema: [`supabase/migrations/`](../supabase/migrations/) (aplicado en el proye
 
 | Tabla | Columnas | Equivale en el dispositivo a |
 | --- | --- | --- |
-| `profiles` | `id` (= `auth.users.id`), `display_name`, `avatar_url` (foto de Google), `weekly_goal` (0, 2, 3, 5, 7), `xp`, `created_at`, `updated_at` | `mathbrain-profile` y `xp` de `mathbrain-stats` |
+| `profiles` | `id` (= `auth.users.id`), `display_name`, `avatar_url` (campo opcional conservado para compatibilidad), `weekly_goal` (0, 2, 3, 5, 7), `xp`, `created_at`, `updated_at` | `mathbrain-profile` y `xp` de `mathbrain-stats` |
 | `lesson_progress` | `user_id`, `lesson_id`, `completed_at` | `mathbrain-progress` |
 | `study_days` | `user_id`, `day` | `days` de `mathbrain-stats` (racha y semana) |
 | `unit_reviews` | `user_id`, `review_key`, `passed_at` | `reviews` de `mathbrain-stats` |

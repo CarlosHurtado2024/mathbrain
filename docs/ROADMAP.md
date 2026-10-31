@@ -56,7 +56,7 @@ Zuka avanza por etapas pequeñas: cada una se termina, se prueba en el celular y
 ## 🔜 Etapa 4.1 · Cuentas: lo que sigue
 
 - SMTP propio y plantillas de correo en español (ver `SUPABASE.md`).
-- Activar Google en Google Cloud y Supabase (la app ya lo admite; ver `SUPABASE.md`).
+- Evaluar el acceso con Google más adelante; la versión inicial solo usa correo electrónico y contraseña.
 - Panel para docentes con el avance de un grupo.
 
 ## 🔜 Etapa 5 · Tiendas de aplicaciones

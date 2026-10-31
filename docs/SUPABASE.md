@@ -1,6 +1,6 @@
 # Configurar Supabase
 
-Zuka usa [Supabase](https://supabase.com) para las cuentas de los estudiantes y para guardar su progreso en la nube. La cuenta es **opcional**: sin ella la app funciona igual y guarda el progreso en el dispositivo.
+Zuka usa [Supabase](https://supabase.com) para las cuentas de los estudiantes y para guardar su progreso en la nube. El registro y el inicio de sesión se hacen únicamente con **correo electrónico y contraseña**. La cuenta es **opcional**: sin ella la app funciona igual y guarda el progreso en el dispositivo.
 
 Proyecto: `https://bzzzufyjhzjqawwrduom.supabase.co`
 
@@ -18,25 +18,15 @@ Comprobado en el proyecto: cada persona solo ve sus filas, los visitantes sin se
 
 Para cambiar el esquema, añade una migración nueva (no edites las aplicadas). Con el conector de Supabase en Claude Code se aplica directamente; si no, pégala en **SQL Editor → Run**.
 
-## 1b. Entrar con Google
+## 1b. Acceso con correo y contraseña
 
-La app muestra **«Continuar con Google»** en cuanto Google esté activado en Supabase: no hace falta volver a publicar. Se configura una vez:
+En **Authentication → Sign In / Providers → Email**, mantén activo el proveedor Email y permite crear cuentas. La app pide una contraseña de al menos 8 caracteres al registrarse o cambiarla; usa ese mismo mínimo en la configuración de contraseñas de Supabase.
 
-**En Google Cloud** ([console.cloud.google.com](https://console.cloud.google.com)):
+Comprobado el 31 de octubre de 2026: Email está activo, el registro está permitido, la confirmación de correo está activa y Google está desactivado.
 
-1. Crea un proyecto (por ejemplo «Zuka»).
-2. **Google Auth Platform → Branding:** nombre de la app «Zuka», correo de soporte y, si quieres, el logo. Añade tu dominio de Vercel en *Authorized domains* y también `supabase.co`.
-3. **Audience:** tipo *External*. Pulsa **Publish app** para que pueda entrar cualquier cuenta de Google (en modo *Testing* solo entran los usuarios de prueba que añadas).
-4. **Clients → Create client → Web application:**
-   - *Authorized JavaScript origins:* `https://tu-proyecto.vercel.app` y `http://localhost:4173`
-   - *Authorized redirect URIs:* `https://bzzzufyjhzjqawwrduom.supabase.co/auth/v1/callback`
-5. Copia el **Client ID** y el **Client secret**.
+En **Perfil** se puede **Crear cuenta**, **Iniciar sesión** y recuperar la contraseña con **¿Olvidaste tu contraseña?**. La app no incluye botones ni flujo de acceso con Google, aunque ese proveedor se active en Supabase. Su integración queda para una etapa posterior.
 
-**En Supabase:** **Authentication → Sign In / Providers → Google** → actívalo, pega el Client ID y el Client secret y guarda. El secreto queda solo en Supabase: no va en la app ni en el repositorio.
-
-Zuka pide únicamente el nombre, el correo y la foto (`openid`, `email`, `profile`), así que Google no exige una revisión especial. En la pantalla de Google aparecerá el dominio `bzzzufyjhzjqawwrduom.supabase.co`; para mostrar el tuyo hace falta un dominio personalizado en Supabase (plan de pago).
-
-Si alguien ya tenía cuenta con correo y contraseña y entra con Google usando el mismo correo, Supabase une ambas formas de acceso en la misma cuenta.
+Las migraciones ya aplicadas se conservan, incluida la que añadió el campo opcional de foto de perfil. No hace falta cambiar la base de datos para usar solo correo y contraseña.
 
 ## 2. Direcciones permitidas
 
@@ -68,9 +58,10 @@ Para que los correos lleguen en español, edita las plantillas en **Authenticati
 ## 4. Probar
 
 1. `npm run dev` y abre `http://localhost:4173/#perfil`.
-2. **Continuar con Google** (si ya lo activaste) o **Crear cuenta** con un correo tuyo. Abre el enlace del correo **en el mismo navegador** donde te registraste.
+2. **Crear cuenta** con un correo tuyo y una contraseña de al menos 8 caracteres. Abre el enlace del correo **en el mismo navegador** donde te registraste.
 3. Completa una lección y revisa en **Table Editor → lesson_progress** que aparezca la fila.
 4. Abre Zuka en otro dispositivo, inicia sesión y comprueba que llega el progreso.
+5. Cierra sesión, entra en **Iniciar sesión → ¿Olvidaste tu contraseña?** y comprueba que el enlace permite guardar una contraseña nueva.
 
 ## Cómo funciona
 
@@ -87,4 +78,4 @@ Para que los correos lleguen en español, edita las plantillas en **Authenticati
 
 - Si quitas una lección o un guardado en un dispositivo sin conexión, puede volver a aparecer al sincronizar con otro dispositivo que aún lo tenga (la unión suma, no resta).
 - Los XP ganados con sesión se suman en la cuenta, incluso sin conexión. Pero la primera vez que un dispositivo que ya tenía progreso se une a una cuenta que también tiene XP, se conserva el mayor de los dos totales (no se suman).
-- Hay acceso con correo y contraseña y con Google (cuando se activa, ver 1b). Otros proveedores se añaden en **Authentication → Sign In / Providers** y en `src/cloud.js`.
+- El único acceso implementado es correo electrónico y contraseña. Google y otros proveedores quedan fuera de esta versión.

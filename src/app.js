@@ -719,8 +719,6 @@
   const cloud = () => window.ZUKA_CLOUD;
   const cloudRecord = (kind, data) => { cloud()?.record(kind, data); };
   let authMode = 'signup';
-  // Logotipo oficial de Google para el botón «Continuar con Google».
-  const GOOGLE_MARK = '<svg class="google-mark" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
   let authNotice = '';
 
   // Vuelve a leer el progreso del dispositivo después de unirlo con la cuenta.
@@ -753,15 +751,14 @@
       return `<section class="profile-card profile-account" aria-labelledby="profile-account-title">${heading}<p>Escribe tu nueva contraseña para <strong>${escape(user.email)}</strong>.</p></div><form class="profile-auth" data-auth-form="recovery"><div class="profile-field"><label for="auth-password">Nueva contraseña</label><input id="auth-password" name="password" type="password" autocomplete="new-password" minlength="8" required></div><button class="button button-primary" type="submit">Guardar contraseña</button></form>${noticeHtml}</section>`;
     }
     if (user) {
-      return `<section class="profile-card profile-account is-signed-in" aria-labelledby="profile-account-title">${heading}<p class="profile-account-user">${user.avatar ? `<img src="${escape(user.avatar)}" alt="" width="36" height="36" referrerpolicy="no-referrer" loading="lazy">` : ''}<span>Conectado como <strong>${escape(user.email)}</strong>${user.provider === 'google' ? '<small>con Google</small>' : ''}</span></p></div><p class="profile-sync is-${service.state.status}" id="profile-sync-status" role="status" aria-live="polite">${icon(service.state.status === 'error' || service.state.status === 'offline' ? 'close' : 'check')}<span>${escape(syncLabel(service))}</span></p><div class="profile-actions"><button type="button" class="button button-secondary" data-auth-signout="1">Cerrar sesión</button><button type="button" class="text-button profile-reset" data-auth-delete="1">Eliminar mi cuenta</button></div>${authNotice ? noticeHtml : ''}</section>`;
+      return `<section class="profile-card profile-account is-signed-in" aria-labelledby="profile-account-title">${heading}<p class="profile-account-user">${user.avatar ? `<img src="${escape(user.avatar)}" alt="" width="36" height="36" referrerpolicy="no-referrer" loading="lazy">` : ''}<span>Conectado como <strong>${escape(user.email)}</strong></span></p></div><p class="profile-sync is-${service.state.status}" id="profile-sync-status" role="status" aria-live="polite">${icon(service.state.status === 'error' || service.state.status === 'offline' ? 'close' : 'check')}<span>${escape(syncLabel(service))}</span></p><div class="profile-actions"><button type="button" class="button button-secondary" data-auth-signout="1">Cerrar sesión</button><button type="button" class="text-button profile-reset" data-auth-delete="1">Eliminar mi cuenta</button></div>${authNotice ? noticeHtml : ''}</section>`;
     }
     const modes = { signup: ['Crear cuenta', 'new-password'], signin: ['Iniciar sesión', 'current-password'], reset: ['Enviar enlace', ''] };
     const [submit, passwordAutocomplete] = modes[authMode];
-    const intro = authMode === 'reset' ? 'Escribe tu correo y te enviaremos un enlace para crear una nueva contraseña.' : 'Gratis. Guarda tu progreso en la nube y continúa en tu celular o en tu computador.';
-    const google = authMode !== 'reset' && service.state.providers?.google ? `<button type="button" class="button button-secondary profile-google" data-auth-google="1">${GOOGLE_MARK}Continuar con Google</button><p class="profile-auth-or"><span>o con tu correo</span></p>` : '';
-    return `<section class="profile-card profile-account" aria-labelledby="profile-account-title">${heading}<p>${intro}</p></div>${google}`
+    const intro = authMode === 'reset' ? 'Escribe tu correo y te enviaremos un enlace para crear una nueva contraseña.' : 'Crea tu cuenta o inicia sesión con tu correo electrónico y contraseña. Es gratis y tu progreso te acompaña en todos tus dispositivos.';
+    return `<section class="profile-card profile-account" aria-labelledby="profile-account-title">${heading}<p>${intro}</p></div>`
       + (authMode === 'reset' ? '' : `<div class="profile-auth-tabs" role="group" aria-label="Tipo de acceso"><button type="button" data-auth-mode="signup" aria-pressed="${authMode === 'signup'}">Crear cuenta</button><button type="button" data-auth-mode="signin" aria-pressed="${authMode === 'signin'}">Iniciar sesión</button></div>`)
-      + `<form class="profile-auth" data-auth-form="${authMode}"><div class="profile-field"><label for="auth-email">Correo</label><input id="auth-email" name="email" type="email" autocomplete="email" inputmode="email" required></div>${passwordAutocomplete ? `<div class="profile-field"><label for="auth-password">Contraseña${authMode === 'signup' ? ' <span>(mínimo 8 caracteres)</span>' : ''}</label><input id="auth-password" name="password" type="password" autocomplete="${passwordAutocomplete}"${authMode === 'signup' ? ' minlength="8"' : ''} required></div>` : ''}<button class="button button-primary" type="submit">${submit}</button></form>`
+      + `<form class="profile-auth" data-auth-form="${authMode}"><div class="profile-field"><label for="auth-email">Correo electrónico</label><input id="auth-email" name="email" type="email" autocomplete="email" inputmode="email" required></div>${passwordAutocomplete ? `<div class="profile-field"><label for="auth-password">Contraseña${authMode === 'signup' ? ' <span>(mínimo 8 caracteres)</span>' : ''}</label><input id="auth-password" name="password" type="password" autocomplete="${passwordAutocomplete}"${authMode === 'signup' ? ' minlength="8"' : ''} required></div>` : ''}<button class="button button-primary" type="submit">${submit}</button></form>`
       + `<div class="profile-auth-links">${authMode === 'signin' ? '<button type="button" class="text-button" data-auth-mode="reset">¿Olvidaste tu contraseña?</button>' : authMode === 'reset' ? '<button type="button" class="text-button" data-auth-mode="signin">Volver a iniciar sesión</button>' : ''}</div>${noticeHtml}</section>`;
   }
 
@@ -1205,12 +1202,6 @@
     if (event.target.closest('[data-profile-export]')) { exportProgress(); return; }
     const modeButton = event.target.closest('[data-auth-mode]');
     if (modeButton) { authMode = modeButton.dataset.authMode; authNotice = ''; if (cloud()) cloud().state.message = ''; renderProfile(); select('#auth-email')?.focus(); return; }
-    if (event.target.closest('[data-auth-google]')) {
-      authNotice = '';
-      showAuthNotice('Abriendo Google…');
-      cloud()?.signInWithGoogle().catch(error => { showAuthNotice(cloud().describe(error)); });
-      return;
-    }
     if (event.target.closest('[data-auth-signout]')) {
       cloud()?.signOut().then(() => location.reload()).catch(error => toast(cloud().describe(error)));
       return;

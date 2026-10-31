@@ -7,7 +7,7 @@
 
   const KEYS = { progress: 'mathbrain-progress', stats: 'mathbrain-stats', saved: 'mathbrain-saved', recent: 'mathbrain-recent', profile: 'mathbrain-profile', pending: 'zuka-sync-pending' };
   const GOALS = [0, 2, 3, 5, 7];
-  const state = { available: false, ready: false, user: null, status: 'idle', lastSync: null, message: '', recovery: false, providers: { google: false } };
+  const state = { available: false, ready: false, user: null, status: 'idle', lastSync: null, message: '', recovery: false };
   let client = null;
   let syncing = null;
   let pending = readJson(KEYS.pending, null) || { xp: 0, full: false };
@@ -213,7 +213,6 @@
     if (code === 'user_already_exists' || /already registered/i.test(message)) return 'Ya hay una cuenta con ese correo. Inicia sesión.';
     if (code === 'same_password') return 'La nueva contraseña debe ser distinta de la anterior.';
     if (code === 'weak_password' || /password should|weak password/i.test(message)) return 'Usa una contraseña más segura, de al menos 8 caracteres.';
-    if (/provider is not enabled|unsupported provider/i.test(message)) return 'El acceso con Google aún no está activado.';
     if (/rate_limit/.test(code) || /rate limit|too many/i.test(message)) return 'Demasiados intentos seguidos. Espera unos minutos.';
     if (code === 'validation_failed' || /invalid.*email|unable to validate email/i.test(message)) return 'Revisa que el correo esté bien escrito.';
     if (error?.name === 'AuthRetryableFetchError' || /failed to fetch|network|load failed/i.test(message) || navigator.onLine === false) return 'No hay conexión. Inténtalo cuando vuelvas a estar en línea.';
@@ -231,25 +230,6 @@
   async function signIn(email, password) {
     const { error } = await client.auth.signInWithPassword({ email, password });
     if (error) throw error;
-  }
-
-  // Entrar con Google: el navegador va a Google y vuelve a /?code=…#perfil, donde Supabase termina el acceso.
-  async function signInWithGoogle() {
-    const { error } = await client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: redirectTo(), queryParams: { prompt: 'select_account' } } });
-    if (error) throw error;
-  }
-
-  // Qué formas de acceso tiene activadas el proyecto: el botón de Google solo aparece si funciona.
-  function loadProviders(config) {
-    if (typeof fetch !== 'function') return;
-    fetch(`${config.supabaseUrl}/auth/v1/settings`, { headers: { apikey: config.supabaseKey } })
-      .then(response => response.ok ? response.json() : null)
-      .then(settings => {
-        if (!settings?.external) return;
-        state.providers = { google: settings.external.google === true };
-        emit('auth');
-      })
-      .catch(() => { /* Sin conexión: solo correo y contraseña. */ });
   }
 
   async function requestPasswordReset(email) {
@@ -292,7 +272,7 @@
   function handleAuth(event, session) {
     const meta = session?.user?.user_metadata || {};
     const photo = meta.avatar_url || meta.picture || '';
-    const user = session?.user ? { id: session.user.id, email: session.user.email || '', avatar: photo.startsWith('https://') ? photo : '', provider: session.user.app_metadata?.provider || 'email' } : null;
+    const user = session?.user ? { id: session.user.id, email: session.user.email || '', avatar: photo.startsWith('https://') ? photo : '' } : null;
     const changed = user?.id !== state.user?.id;
     state.user = user;
     if (event === 'PASSWORD_RECOVERY') state.recovery = true;
@@ -311,7 +291,6 @@
       auth: { flowType: 'pkce', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'zuka-auth' }
     });
     state.available = true;
-    loadProviders(config);
     const url = new URL(location.href);
     const linkError = url.searchParams.get('error_code') || url.searchParams.get('error');
     const fromEmail = url.searchParams.has('code');
@@ -328,6 +307,6 @@
     window.addEventListener('online', () => { if (state.user && (pending.full || pending.xp)) syncNow(); });
   }
 
-  window.ZUKA_CLOUD = { state, record, syncNow, signUp, signIn, signInWithGoogle, signOut, requestPasswordReset, updatePassword, resetProgress, deleteAccount, describe, mergeState, streakFrom };
+  window.ZUKA_CLOUD = { state, record, syncNow, signUp, signIn, signOut, requestPasswordReset, updatePassword, resetProgress, deleteAccount, describe, mergeState, streakFrom };
   init();
 })();

@@ -323,10 +323,5 @@ html[data-theme="light"] .profile-auth input:focus { outline: 2px solid var(--z-
   .profile-auth .button { width: 100%; justify-content: center; }
   .profile-auth-tabs { display: grid; }
 }
-.profile-google { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 48px; font-size: 15px; font-weight: 700; }
-.google-mark { width: 20px; height: 20px; flex-shrink: 0; }
-.profile-auth-or { display: flex; align-items: center; gap: 12px; margin: 16px 0; color: var(--z-muted); font-size: 13px; }
-.profile-auth-or::before, .profile-auth-or::after { content: ''; flex: 1; height: 1px; background: var(--z-line); }
 .profile-account-user { display: flex; align-items: center; gap: 12px; }
 .profile-account-user img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-.profile-account-user small { display: block; color: var(--z-muted); font-size: 12.5px; }

@@ -8,7 +8,7 @@ const source = fs.readFileSync(path.join(__dirname, '../src/cloud.js'), 'utf8');
 const USER = { id: 'u-1', email: 'ana@ejemplo.com' };
 
 // Supabase falso en memoria: tablas por usuario, funciones RPC y un auth mínimo.
-function fakeSupabase(initial = {}) {
+function fakeSupabase(initial = {}, { confirmEmail = true } = {}) {
   const db = { profiles: [], lesson_progress: [], saved_resources: [], study_days: [], unit_reviews: [], ...initial };
   const calls = [];
   let authListener = null;
@@ -58,18 +58,25 @@ function fakeSupabase(initial = {}) {
     auth: {
       onAuthStateChange: callback => { authListener = callback; return { data: { subscription: { unsubscribe() {} } } }; },
       getSession: async () => ({ data: { session: null } }),
-      signUp: async () => ({ data: { session: null, user: { id: 'nuevo' } }, error: null }),
-      signInWithPassword: async ({ password }) => password === 'correcta-123' ? (authListener('SIGNED_IN', { user: USER }), { error: null }) : { error: { code: 'invalid_credentials', message: 'Invalid login credentials' } },
+      signUp: async options => {
+        calls.push({ signup: options });
+        const session = confirmEmail ? null : { user: USER };
+        if (session) authListener('SIGNED_IN', session);
+        return { data: { session, user: session?.user || { id: 'nuevo' } }, error: null };
+      },
+      signInWithPassword: async ({ email, password }) => {
+        calls.push({ signin: { email, password } });
+        return email === USER.email && password === 'correcta-123' ? (authListener('SIGNED_IN', { user: USER }), { error: null }) : { error: { code: 'invalid_credentials', message: 'Invalid login credentials' } };
+      },
       signOut: async () => { authListener('SIGNED_OUT', null); return { error: null }; },
-      resetPasswordForEmail: async () => ({ error: null }),
-      updateUser: async () => ({ error: null }),
-      signInWithOAuth: async options => { calls.push({ oauth: options }); return { data: {}, error: null }; }
+      resetPasswordForEmail: async (email, options) => { calls.push({ reset: { email, ...options } }); return { error: null }; },
+      updateUser: async options => { calls.push({ updateUser: options }); return { error: null }; }
     }
   };
-  return { db, calls, client, setOnline: value => { online = value; }, signIn: () => authListener('SIGNED_IN', { user: USER }) };
+  return { db, calls, client, setOnline: value => { online = value; }, signIn: () => authListener('SIGNED_IN', { user: USER }), recoverPassword: () => authListener('PASSWORD_RECOVERY', { user: USER }) };
 }
 
-function environment({ supabase = fakeSupabase(), storage = {}, settings = { external: { email: true, google: false } } } = {}) {
+function environment({ supabase = fakeSupabase(), storage = {} } = {}) {
   const stored = new Map(Object.entries(storage).map(([key, value]) => [key, JSON.stringify(value)]));
   const events = [];
   const listeners = {};
@@ -82,8 +89,6 @@ function environment({ supabase = fakeSupabase(), storage = {}, settings = { ext
   };
   const context = vm.createContext({
     window, navigator, URL, setTimeout, Promise,
-    // Ajustes de Auth del proyecto (qué proveedores de acceso están activos).
-    fetch: async (address, options) => ({ ok: address.endsWith('/auth/v1/settings') && options.headers.apikey === 'sb_publishable_prueba', json: async () => settings }),
     location: { href: 'https://zuka.app/#perfil', origin: 'https://zuka.app', pathname: '/' },
     history: { state: null, replaceState() {} },
     CustomEvent: class { constructor(type, init) { this.type = type; this.detail = init.detail; } },
@@ -207,21 +212,39 @@ test('Los errores de acceso se explican en español y cerrar sesión deja el dis
   assert.equal(env.cloud.state.user, null);
 });
 
-test('Google solo se ofrece cuando el proyecto lo tiene activo y vuelve al perfil al terminar', async () => {
-  const off = environment();
+test('El registro envía correo y contraseña, conserva el nombre y devuelve la confirmación al perfil', async () => {
+  const env = environment({ storage: { 'mathbrain-profile': { name: 'Ana', goal: 3 } } });
+  const result = await env.cloud.signUp(USER.email, 'segura-123');
+  assert.equal(result.needsConfirmation, true);
+  assert.deepEqual(JSON.parse(JSON.stringify(env.supabase.calls.find(call => call.signup).signup)), {
+    email: USER.email,
+    password: 'segura-123',
+    options: { emailRedirectTo: 'https://zuka.app/#perfil', data: { display_name: 'Ana' } }
+  });
+  assert.equal(env.cloud.state.user, null, 'Sin confirmar el correo no se inicia sesión');
+  assert.equal(env.read('mathbrain-profile').name, 'Ana');
+});
+
+test('El registro inicia sesión si Supabase no exige confirmación de correo', async () => {
+  const env = environment({ supabase: fakeSupabase({}, { confirmEmail: false }) });
+  assert.equal((await env.cloud.signUp(USER.email, 'correcta-123')).needsConfirmation, false);
   await settle();
-  assert.equal(off.cloud.state.providers.google, false);
-  assert.equal(off.cloud.describe({ message: 'Unsupported provider: provider is not enabled' }), 'El acceso con Google aún no está activado.');
-  const supabase = fakeSupabase();
-  const on = environment({ supabase, settings: { external: { email: true, google: true } } });
+  await env.cloud.syncNow();
+  assert.equal(env.cloud.state.user.email, USER.email);
+  assert.equal(env.cloud.state.status, 'synced');
+});
+
+test('La recuperación envía un enlace al perfil y permite guardar una nueva contraseña', async () => {
+  const env = environment();
+  await env.cloud.requestPasswordReset(USER.email);
+  assert.deepEqual(env.supabase.calls.find(call => call.reset).reset, { email: USER.email, redirectTo: 'https://zuka.app/#perfil' });
+  env.supabase.recoverPassword();
   await settle();
-  assert.equal(on.cloud.state.providers.google, true);
-  assert.ok(on.events.includes('auth'));
-  await on.cloud.signInWithGoogle();
-  const { oauth } = supabase.calls.find(call => call.oauth);
-  assert.equal(oauth.provider, 'google');
-  assert.equal(oauth.options.redirectTo, 'https://zuka.app/#perfil');
-  assert.equal(oauth.options.queryParams.prompt, 'select_account');
+  assert.equal(env.cloud.state.recovery, true);
+  await env.cloud.updatePassword('nueva-segura-123');
+  assert.equal(env.supabase.calls.find(call => call.updateUser).updateUser.password, 'nueva-segura-123');
+  assert.equal(env.cloud.state.recovery, false);
+  assert.equal(env.cloud.state.user.email, USER.email);
 });
 
 test('Sin Supabase la app sigue funcionando: la cuenta no está disponible y no se envía nada', async () => {

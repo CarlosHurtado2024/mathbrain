@@ -8,7 +8,7 @@ const directory = path.resolve(__dirname, '../dist');
 const markup = fs.readFileSync(path.join(directory, 'index.html'), 'utf8');
 const source = fs.readFileSync(path.join(directory, 'app.js'), 'utf8');
 
-function environment(hash = '#explorar', prepareLibrary = () => {}) {
+function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = undefined) {
   const target = extra => {
     const listeners = new Map();
     return Object.assign({
@@ -87,7 +87,7 @@ function environment(hash = '#explorar', prepareLibrary = () => {}) {
     location.hash = address;
     location.href = `http://localhost/${address}`;
   }]));
-  const window = target({ location, scrollTo() {}, matchMedia: () => ({ matches: false }) });
+  const window = target({ location, ZUKA_CLOUD: cloud, scrollTo() {}, matchMedia: () => ({ matches: false }) });
   document = target({
     activeElement: { tagName: 'BODY' },
     title: '',
@@ -482,4 +482,64 @@ test('El perfil resume el progreso, guarda el nombre y saluda con él en el inic
   app.navigate('#');
   assert.match(app.node('#today-panel').innerHTML, /(?:Buenos días|Buenas tardes|Buenas noches), Ana &lt;b&gt;<\/h1>/);
   assert.match(app.node('#today-panel').innerHTML, /Meta semanal: 0 de 3 días/);
+});
+
+test('El perfil ofrece registro e inicio solo con correo y contraseña, incluso si Google está activo en Supabase', () => {
+  const cloud = { state: { available: true, ready: true, user: null, message: '', providers: { google: true } } };
+  const app = environment('#perfil', undefined, cloud);
+  assert.equal(app.node('#auth-email').getAttribute('type'), 'email');
+  assert.equal(app.node('#auth-email').getAttribute('autocomplete'), 'email');
+  assert.equal(app.node('#auth-password').getAttribute('type'), 'password');
+  assert.equal(app.node('#auth-password').getAttribute('autocomplete'), 'new-password');
+  assert.equal(app.node('#auth-password').getAttribute('minlength'), '8');
+  assert.match(app.node('#detail-view').innerHTML, /Correo electrónico/);
+  assert.equal(app.all('[data-auth-google]').length, 0);
+  assert.doesNotMatch(app.node('#detail-view').innerHTML, /Google/);
+
+  app.click(app.all('[data-auth-mode="signin"]').at(-1));
+  assert.equal(app.all('[data-auth-form="signin"]').length, 1);
+  assert.equal(app.node('#auth-password').getAttribute('autocomplete'), 'current-password');
+  assert.equal(app.node('#auth-password').getAttribute('minlength'), null);
+  assert.match(app.node('#detail-view').innerHTML, /¿Olvidaste tu contraseña\?/);
+  assert.doesNotMatch(app.node('#detail-view').innerHTML, /Google/);
+
+  app.click(app.all('[data-auth-mode="reset"]').at(-1));
+  assert.equal(app.all('[data-auth-form="reset"]').length, 1);
+  assert.doesNotMatch(app.node('#detail-view').innerHTML, /id="auth-password"/);
+  assert.match(app.node('#detail-view').innerHTML, /Enviar enlace/);
+});
+
+test('El formulario registra con correo y contraseña y pide confirmar el correo antes de entrar', async () => {
+  const requests = [];
+  const cloud = {
+    state: { available: true, ready: true, user: null, message: '' },
+    signUp: async (email, password) => { requests.push({ email, password }); return { needsConfirmation: true }; }
+  };
+  const app = environment('#perfil', undefined, cloud);
+  app.node('#auth-email').value = '  ana@ejemplo.com  ';
+  app.node('#auth-password').value = 'segura-123';
+  app.document.emit('submit', { target: app.all('[data-auth-form="signup"]').at(-1) });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(requests, [{ email: 'ana@ejemplo.com', password: 'segura-123' }]);
+  assert.equal(app.all('[data-auth-form="signin"]').length, 1);
+  assert.match(app.node('#detail-view').innerHTML, /Te enviamos un correo a ana@ejemplo.com/);
+});
+
+test('El formulario valida el correo y la longitud de la contraseña antes de registrar', () => {
+  let requests = 0;
+  const cloud = {
+    state: { available: true, ready: true, user: null, message: '' },
+    signUp: async () => { requests += 1; return { needsConfirmation: true }; }
+  };
+  const app = environment('#perfil', undefined, cloud);
+  app.node('#auth-email').value = 'correo-invalido';
+  app.node('#auth-password').value = 'segura-123';
+  const form = app.all('[data-auth-form="signup"]').at(-1);
+  app.document.emit('submit', { target: form });
+  assert.equal(app.node('#profile-auth-notice').textContent, 'Revisa que el correo esté bien escrito.');
+  app.node('#auth-email').value = 'ana@ejemplo.com';
+  app.node('#auth-password').value = 'corta';
+  app.document.emit('submit', { target: form });
+  assert.equal(app.node('#profile-auth-notice').textContent, 'La contraseña debe tener al menos 8 caracteres.');
+  assert.equal(requests, 0);
 });
