@@ -1,6 +1,6 @@
 # Zuka · guía para trabajar en este proyecto
 
-Zuka es una **app web progresiva (PWA)** en español para aprender matemáticas y estadística paso a paso: cursos, lecciones cortas con LaTeX y video, retos interactivos, XP, rachas y un zorro como mascota. Se usa en el navegador y se instala en el celular desde Chrome. **No es una app nativa**: nada de Kotlin, Java ni Android Studio.
+Zuka es una **app web progresiva (PWA)** en español para aprender matemáticas y estadística paso a paso: cursos, lecciones cortas con LaTeX y video, retos interactivos, XP, rachas y un destello verde como mascota. Se usa en el navegador y se instala en el celular desde Chrome. **No es una app nativa**: nada de Kotlin, Java ni Android Studio.
 
 Antes de cambiar algo, lee el documento de `docs/` que corresponda:
 

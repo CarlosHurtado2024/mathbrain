@@ -14,7 +14,7 @@
     root.dataset.theme = theme;
     root.dataset.themePreference = preference;
     root.style.colorScheme = theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'light' ? '#ffffff' : '#070b18');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'light' ? '#ffffff' : '#13101d');
     document.querySelectorAll('[data-theme-select]').forEach(control => { control.value = preference; });
     document.querySelectorAll('[data-theme-icon]').forEach(element => {
       if (element.dataset.themeIcon === (preference === 'system' ? 'system' : theme)) element.removeAttribute('hidden');

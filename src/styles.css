@@ -1,4 +1,4 @@
-:root { --paper:#070b18; --ink:#edf3ff; --muted:#a4b0c8; --line:#a0b9ed26; --teal:#8ce5df; --sans:'DM Sans',Arial,sans-serif; --serif:'Lora',Georgia,serif; --sidebar:224px; }
+:root { --paper:#070b18; --ink:#edf3ff; --muted:#a4b0c8; --line:#a0b9ed26; --teal:#8ce5df; --sans:var(--font-ui); --serif:Georgia,serif; --sidebar:224px; }
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; scroll-padding-top:110px; }
 body { margin:0; color:var(--ink); font:14.5px/1.6 var(--sans); -webkit-font-smoothing:antialiased; }

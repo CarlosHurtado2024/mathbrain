@@ -768,9 +768,10 @@
     updateStatsChip();
     select('#player-xp').textContent = player.xp ? `+${player.xp} XP` : '';
     select('#player-meter').innerHTML = playerMeter();
-    const summary = [player.xp ? `+${player.xp} XP` : '', player.firstTry ? `${player.firstTry} de ${challenges} ${challenges === 1 ? 'reto' : 'retos'} a la primera` : ''].filter(Boolean).join(' · ');
-    select('#player-stage').innerHTML = `<div class="player-end" id="player-card" tabindex="-1"><span class="player-end-mascot">${mascot.svg(mood)}</span><h2>${title}</h2>${detail}${summary ? `<p class="player-end-xp">${summary}</p>` : ''}</div>`;
-    select('#player-bar').innerHTML = `<div class="player-bar-inner is-finished"><div class="player-actions player-end-actions"><a class="button button-primary button-big" href="${destination}">${!hasAccount() ? 'Crear cuenta y continuar' : 'Continuar'}${icon('right')}</a>${secondary}</div></div>`;
+    const reward = player.xp ? `<p class="player-end-xp"><span>XP ganados</span><strong>+${player.xp} XP</strong></p>` : '';
+    const accuracy = player.firstTry ? `<p class="player-end-accuracy">${player.firstTry} de ${challenges} ${challenges === 1 ? 'reto' : 'retos'} a la primera</p>` : '';
+    select('#player-stage').innerHTML = `<div class="player-end" id="player-card" tabindex="-1"><span class="player-end-mascot" aria-hidden="true">${mascot.svg(mood)}</span><h1 class="player-end-title">${title}</h1>${reward}${detail}${accuracy}</div>`;
+    select('#player-bar').innerHTML = `<div class="player-bar-inner is-finished"><div class="player-actions player-end-actions"><a class="button button-primary button-success button-big" href="${destination}">${!hasAccount() ? 'Crear cuenta y continuar' : 'Continuar'}${icon('right')}</a>${secondary}</div></div>`;
     player.finished = true;
   }
 

@@ -102,7 +102,7 @@ Por Wi-Fi la dirección no es HTTPS: la app se ve y se navega, pero no se instal
 
 1. Abre Zuka en Chrome (por la forma A o C).
 2. Pulsa el botón **Instalar app** de la cabecera, o en el menú **⋮** de Chrome elige **Instalar app** («Agregar a la pantalla principal → Instalar» en algunas versiones).
-3. Zuka aparece en el cajón de aplicaciones con el icono del zorro y se abre a pantalla completa, sin la barra del navegador.
+3. Zuka aparece en el cajón de aplicaciones con el icono morado y verde de Zuka y se abre a pantalla completa, sin la barra del navegador.
 
 Cuando publiques una versión nueva, la app muestra **«Hay una nueva versión de Zuka»** con el botón *Actualizar*.
 

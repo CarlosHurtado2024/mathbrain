@@ -25,7 +25,7 @@ function environment({ saved = null, systemDark = false, readFails = false, writ
     }, extra);
   };
   const root = { dataset: {}, style: {} };
-  const meta = { content: '#070b18', setAttribute(name, value) { this[name] = value; } };
+  const meta = { content: '#13101d', setAttribute(name, value) { this[name] = value; } };
   const controls = [target({ value: 'dark' }), target({ value: 'dark' })];
   const icons = ['dark', 'light', 'system'].map(preference => ({
     dataset: { themeIcon: preference }, hidden: preference !== 'dark',
@@ -89,7 +89,7 @@ function assertTheme(env, theme, preference = theme, controlsMounted = true) {
   assert.equal(env.root.dataset.theme, theme);
   assert.equal(env.root.dataset.themePreference, preference);
   assert.equal(env.root.style.colorScheme, theme);
-  assert.equal(env.meta.content, theme === 'light' ? '#ffffff' : '#070b18');
+  assert.equal(env.meta.content, theme === 'light' ? '#ffffff' : '#13101d');
   if (controlsMounted) {
     assert.ok(env.controls.every(control => control.value === preference));
     assert.deepEqual(env.icons.filter(icon => !icon.hidden).map(icon => icon.dataset.themeIcon), [preference === 'system' ? 'system' : theme]);

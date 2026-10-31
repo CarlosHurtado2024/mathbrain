@@ -43,7 +43,7 @@ Muchos estudiantes llegan a la universidad con vacíos en álgebra, funciones y 
 
 ## Personalidad
 
-Zuka es cercana, clara y profesional. El zorro acompaña sin infantilizar: celebra los aciertos, anima tras un error y nunca regaña. El diseño es sobrio, con un solo color de acento (el naranja del zorro) y mucho espacio en blanco.
+Zuka es cercana, clara y profesional. Su mascota es un destello verde que acompaña sin infantilizar: celebra los aciertos, anima tras un error y nunca regaña. El diseño usa morado para la identidad y las elecciones, verde para avanzar y celebrar, y superficies claras con espacio para concentrarse.
 
 ## Qué no es Zuka
 

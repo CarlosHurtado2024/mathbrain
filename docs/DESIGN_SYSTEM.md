@@ -1,132 +1,82 @@
-# Sistema de diseño
+# Sistema de diseño de Zuka
 
-Zuka es **moderna, sobria y profesional**: mucho blanco, un solo color de acento (el naranja del zorro), tipografía clara y componentes con bordes finos y sombras suaves. Los colores por curso se usan en tonos suaves para orientar, nunca para decorar.
+La interfaz acompaña a estudiantes que se preparan para ingresar a la universidad o necesitan avanzar y permanecer en su carrera. Debe transmitir claridad, rigor académico y un impulso cercano. La dirección sigue la skill [interface-design](https://github.com/Dammyjay93/interface-design), con la referencia de un destello verde que celebra sobre una base morada.
 
-El tema claro es el principal (`src/fresh.css`). El tema oscuro (`src/space.css`) conserva un fondo espacial con estrellas y acentos turquesa.
+## Identidad y jerarquía
 
-## Color
+El morado identifica la marca, las selecciones y las acciones de acceso. El verde identifica el avance, las respuestas correctas, los logros y las consultas de acompañamiento. Se evita colorear cada materia con un acento diferente. Los fondos recuerdan el papel y la cuadrícula de estudio: blanco, lavanda muy suave y tinta violeta oscura.
 
-### Marca y neutros (tema claro)
+El destello es la firma de Zuka: aparece en el logo, el camino de la landing, el saludo del estudiante, el acceso, el perfil y la celebración de la lección. La mascota acompaña sin competir con el contenido.
 
-| Token | Valor | Uso |
-| --- | --- | --- |
-| `--fun-violet` | `#e0601f` | Acento: botón principal, enlaces activos, barras de progreso |
-| `--fun-violet-dark` | `#b9481a` | Texto sobre fondos claros, enlaces, etiquetas |
-| `--fun-violet-soft` | `#fdeee4` | Fondos de elementos activos |
-| `--fun-heading` | `#1f2328` | Títulos |
-| `--ink` | `#2b2f36` | Texto |
-| `--muted` | `#6b6f7a` | Texto secundario |
-| `--line` | `#e7e5e1` | Bordes y divisores |
-| Fondo | `#ffffff` / `#faf9f7` | Página / barra lateral |
+| Vista | Foco |
+| --- | --- |
+| Landing | La meta del estudiante y las opciones para empezar |
+| Inicio con cuenta | La siguiente lección y «Continuar aprendiendo» |
+| Catálogo | Cursos agrupados por escuela y filtros claros |
+| Lección | Un concepto o un reto a la vez; «Continuar» en verde |
+| Final de lección | Celebración, XP ganados y siguiente paso |
+| Perfil y acceso | Identidad, progreso y formulario de la cuenta |
 
-(Los nombres `--fun-violet*` vienen de una versión anterior; hoy contienen el naranja de la marca).
+## Tokens de color
 
-### Estados
+`src/identity.css` concentra la identidad y sus dos temas. Se carga después de las hojas de componentes y conecta los nombres anteriores (`--z-*`, `--fun-*`, `--m-*`) con los tokens compartidos. Los componentes nuevos deben usar estos tokens, sin añadir colores independientes.
 
-| Token | Valor | Uso |
-| --- | --- | --- |
-| `--fun-green` | `#2e9e6a` | Acierto, completado |
-| `--fun-red` | `#d64545` | Error, acciones destructivas |
-| `--fun-yellow` | `#d9a43b` | Logros, mejor racha |
-| `--fun-orange` | `#d9822b` | Racha |
-
-### Cursos
-
-Cada curso tiene una clase de color que define `--fun`, `--fun-dark` y `--fun-soft`:
-
-| Clase | Curso | Acento | Fondo |
+| Token | Claro | Oscuro | Uso |
 | --- | --- | --- | --- |
-| `.purple` | Fundamentos de Matemáticas | `#5b3fb3` | `#f1edfb` |
-| `.blue` | Cálculo diferencial | `#1f63c2` | `#eaf2fd` |
-| `.sand` | Probabilidad | `#a85f17` | `#fcf1e4` |
-| `.green` | Inferencia estadística | `#1e7a50` | `#e9f6ef` |
-| `.slate` | Cálculo integral | `#137684` | `#e6f5f7` |
-| `.rose` | (reservado) | `#a8385e` | `#fbecf1` |
+| `--brand-primary` | `#6d43cf` | `#b69aef` | Marca, acción principal, selección |
+| `--brand-primary-hover` | `#5832b5` | `#c8b0f6` | Acción principal al pasar el cursor |
+| `--brand-on-primary` | `#ffffff` | `#241637` | Texto del botón morado |
+| `--brand-primary-soft` | `#f0eafa` | `#2e2342` | Selecciones y superficies de marca |
+| `--brand-green` | `#147b4f` | `#79dba4` | Avance y acciones de acompañamiento |
+| `--brand-on-green` | `#ffffff` | `#122b20` | Texto del botón verde |
+| `--brand-green-soft` | `#e9f7ee` | `#19372b` | Aciertos y recompensa |
+| `--brand-canvas` | `#faf9fd` | `#13101d` | Fondo de la plataforma |
+| `--brand-surface` | `#ffffff` | `#1c1729` | Tarjetas y cabecera |
+| `--brand-inset` | `#f4f2f8` | `#241e32` | Campos y controles en reposo |
+| `--brand-ink` | `#262338` | `#f1edf8` | Texto principal |
+| `--brand-secondary` | `#686477` | `#c0b7ce` | Explicaciones y contexto |
+| `--brand-tertiary` | `#726c80` | `#a99fb9` | Metadatos legibles |
+| `--brand-line` | `#e7e3ee` | `#363044` | Separación de superficies |
 
-Todo texto debe cumplir contraste AA (4,5:1; 3:1 en textos grandes).
+Los estados de error y advertencia conservan sus tokens semánticos propios. Las clases históricas de los cursos se agrupan en dos familias: `.purple`, `.blue` y `.rose` usan morado; `.green`, `.sand` y `.slate` usan verde. No se cambian los identificadores ni los temas de los cursos.
 
-## Tipografía
+Los botones principales alcanzan 6,26:1 de contraste en morado y 5,28:1 en verde en el tema claro. Todo texto normal debe alcanzar AA (4,5:1), también en fondos suaves y en el tema oscuro. El texto de los controles oscuros usa tinta oscura sobre los acentos claros.
 
-- **Plus Jakarta Sans** (Google Fonts), pesos 400–800, con DM Sans y Arial como respaldo.
-- Títulos en 700–800 con `letter-spacing: -0.02em`. Etiquetas superiores (`.eyebrow`) en mayúsculas, 700, `letter-spacing: 0.08em`, color `--fun-violet-dark`.
-- Texto base de 14,5 px con interlineado 1,6. Los campos de texto usan 16 px en el celular para que el navegador no haga zoom.
-- Fórmulas: KaTeX con sus propias fuentes, incluidas en la app.
+## Tipografía, superficies y espacio
 
-## Espaciado y forma
-
-- Escala de espaciado: 4, 8, 12, 16, 20, 24, 32 px. Margen lateral de 18 px en el celular.
-- Radios: 8–10 px (controles pequeños, navegación), 12 px (campos, botones), 16–18 px (tarjetas), 50 % (avatares, días de la semana).
-- Sombra de tarjeta: `0 1px 2px rgb(31 35 40 / .05)`. Botón principal: sombra naranja suave.
+- **Manrope**, pesos 400–800, con Arial como respaldo. El archivo variable latino se incluye en `src/assets/fonts/manrope-latin.woff2`, se precarga y funciona sin conexión. Su licencia SIL OFL se distribuye al lado del archivo.
+- Texto base de 14,5–16 px; lectura de lecciones de 16,5 px con interlineado amplio. Campos de al menos 16 px en móvil. Títulos de producto de 27–38 px; la landing usa una escala mayor.
+- Jerarquía mediante tamaño, peso, color y espacio: títulos 700–800, controles 700, texto 400–500, metadatos secundarios. Números de progreso y XP tabulares.
+- Fórmulas con KaTeX y sus fuentes locales. Los símbolos académicos decorativos pueden usar Georgia; no se necesitan servicios externos de fuentes.
+- Unidad de espacio de 4 px: 8, 12, 16, 20, 24, 32, 48. Densidad media en catálogo y perfil; lectura más abierta en lecciones y landing.
+- Profundidad mediante superficies y bordes discretos, sin sombras de color ni botones elevados. Fondo, tarjeta y campo mantienen el mismo matiz.
+- Radios de 10 px en botones y campos, 14–16 px en tarjetas y 20–24 px en contenedores amplios. Círculos solo cuando la forma comunica progreso o avatar.
 
 ## Componentes
 
-| Componente | Clase | Notas |
-| --- | --- | --- |
-| Botón principal | `.button.button-primary` | Naranja, texto blanco. Una acción principal por pantalla |
-| Botón secundario | `.button.button-secondary` | Blanco con borde |
-| Botón de texto | `.text-button` | Naranja oscuro, 600 |
-| Tarjeta de curso | `.course-card`, `.continue-card` | Fondo blanco, color del curso en el icono |
-| Barra de progreso | `.course-progress-track` | 6–8 px, con `role="progressbar"` |
-| Chip de racha y XP | `.stats-chip` | En la cabecera; abre el perfil |
-| Navegación | `.main-nav` | Lateral en escritorio (6 secciones y Materias), barra inferior de 5 accesos en el celular |
-| Camino de niveles | `.path-node` | Nodos en zigzag: completado, actual, siguiente |
-| Lección paso a paso | `.lesson-player` | Sin menús; barra inferior verde al acertar y roja tras un error |
-| Perfil | `.profile-*` | Encabezado con la mascota, estadísticas en cuadrícula, semana y cursos |
-
-## Camino de aprendizaje
-
-Curso → unidades → lecciones → retos. Cada unidad tiene un encabezado con el color suave del curso, su objetivo y un contador `hechas/total`; debajo, sus lecciones como círculos unidos por una línea vertical (`.zunit`, `.znode` en `src/zuka.css`).
-
-| Estado | Aspecto |
+| Componente | Patrón |
 | --- | --- |
-| Completada | Círculo pequeño con check en el color del curso, texto atenuado |
-| Actual | Círculo naranja más grande con anillo suave y una tarjeta con «Empezar» o «Continuar» |
-| Disponible | Círculo blanco con borde gris |
-| Requiere cuenta | Círculo gris con candado y enlace al registro; el texto mantiene contraste legible |
+| Acción principal | `.button-primary` / `.m-button.is-primary`: morado, mínimo 44 px, radio 10 px, texto 14 px/700 |
+| Avanzar | `.button-success`, `.player-continue`, `.home-next-button`: verde con texto de contraste |
+| Consultar | Los botones de WhatsApp usan `.m-button.is-success`; los enlaces conservan su destino y mensaje |
+| Acción secundaria | Fondo de tarjeta, borde suave y texto morado |
+| Campo | Fondo inset, borde neutral, radio 10 px, etiqueta visible y foco morado |
+| Curso | Icono académico suave, título, descripción y metadatos reales; tarjeta con borde discreto |
+| Camino | Nodo actual morado; completado verde; contenido que requiere cuenta con candado y texto legible |
+| Progreso | Barra verde sobre una pista neutral, con etiqueta y `role="progressbar"` |
+| Recompensa | Mascota celebrando, título principal, XP reales destacados en verde y acción para continuar |
+| Retroalimentación | Mascota y explicación; verde al acertar y rojo al reintentar, además de texto explícito |
 
-Con sesión activa todas las unidades, lecciones y repasos están disponibles desde el comienzo. Sin cuenta se puede ver el temario y estudiar únicamente la primera lección de cada curso; los demás nodos y los recursos del buscador indican que requieren cuenta. Los enlaces directos a contenido restringido muestran una invitación a registrarse o iniciar sesión.
+Los controles se construyen con HTML nativo. Las acciones tienen estados de reposo, hover, pulsación, foco y deshabilitado. Las transiciones nuevas animan solo transformaciones durante 160 ms; `prefers-reduced-motion` elimina el movimiento. El foco visible tiene un contorno de 3 px.
 
-La bienvenida ofrece dos opciones: explorar la plataforma o crear una cuenta gratuita con correo y contraseña; debajo aparece el acceso para quienes ya tienen cuenta. En el catálogo se recuerda el alcance de la exploración. El registro y el acceso tienen una pantalla dedicada y, al entrar, devuelven a la lección que se quería abrir.
+## Mascota y logo
 
-## Principios del rediseño
+Zuka es un destello de cuatro puntas suaves, verde, con expresión amable y una pequeña plataforma morada. Se dibuja en SVG en `src/mascot.js`; conserva `MATHBRAIN_MASCOT.svg(estado)` y `MATHBRAIN_MASCOT.say(estado, html)`. Los estados son `saluda`, `feliz`, `piensa`, `animo` y `celebra`. Cada SVG utiliza identificadores de gradiente independientes y escapa sus etiquetas accesibles.
 
-### Páginas públicas
+El logo integra el destello y una Z sobre una base morada. `src/assets/mark.svg` sirve de logo y favicon. `src/assets/icons/app-icon.svg` genera los PNG de 192 y 512 px, el adaptable de Android y el de Apple mediante `node scripts/generate-icons.cjs`, con `sharp` disponible. Los PNG son opacos y el icono adaptable conserva su margen de seguridad.
 
-La landing, los programas, las escuelas y «Sobre Zuka» usan `marketing.css` y los componentes `m-*`, con fondo cálido, naranja, verde oscuro y titulares con acentos en Lora. La ilustración del camino académico se construye con SVG y CSS. No se muestran testimonios, resultados ni cifras inventadas.
+## Comportamiento que debe conservarse
 
-La cabecera pública enlaza a programas, escuelas, acompañamiento, ingreso y registro. En móvil ofrece un menú desplegable nativo. Estas páginas sustituyen el marco de estudio mediante `body.marketing-mode`; el catálogo, las lecciones y la cuenta conservan su navegación habitual. El tema oscuro usa los mismos componentes con sus variables de color.
+La landing presenta programas, escuelas, visión y acompañamiento. Los visitantes pueden explorar y probar la primera lección de cada curso; una cuenta con correo y contraseña habilita todas las lecciones. El rediseño conserva rutas, contacto, progreso, claves `mathbrain-*`, sincronización e instalación PWA. No se añaden cifras, reseñas o resultados inventados.
 
-Los cursos en plataforma y los cursos con acompañamiento tienen acciones diferentes: estudiar en la app o consultar por WhatsApp. «Sobre Zuka» presenta visión, objetivo y apoyo al ingreso y la permanencia, sin foto ni biografía del fundador.
-
-### Plataforma de aprendizaje
-
-- Una sola acción principal por sección. En el inicio del estudiante: «Continuar aprendiendo».
-- Una actividad a la vez en la lección; la retroalimentación explica (abre la solución o la pista).
-- Gamificación moderada: XP discretos, logros ocasionales y una meta semanal opcional. Sin vidas, rankings ni celebraciones ruidosas.
-- Nada de tarjetas o estadísticas para rellenar espacio.
-
-## Iconos
-
-Trazo de 1,6 px, esquinas redondeadas, 24×24, color `currentColor`, definidos en `iconPaths` de `src/app.js` (`home`, `search`, `simulation`, `exercise`, `bookmark`, `user`, `flame`, `star`, `check`…). Siempre con `aria-hidden="true"` cuando acompañan a un texto.
-
-## La mascota
-
-Un zorro sentado de formas planas y geométricas: naranja `#e0601f`, sombra `#c24a14`, crema `#f7e4cb` y patas `#24262c`. Se dibuja en SVG (`src/mascot.js`) con cinco estados:
-
-| Estado | Cuándo |
-| --- | --- |
-| `saluda` | Primera visita |
-| `feliz` | Inicio, perfil |
-| `piensa` | Contenido no encontrado, pistas |
-| `animo` | Tras un error o para mantener la racha |
-| `celebra` | Acierto, lección terminada, meta del día |
-
-`MATHBRAIN_MASCOT.say(estado, html)` lo muestra con un globo de diálogo. Habla en frases cortas, cálidas y sin diminutivos.
-
-## Icono de la app
-
-Cabeza de zorro geométrica en crema sobre naranja. `src/assets/mark.svg` (logo y favicon) y `src/assets/icons/app-icon.svg` (fuente de los PNG de 192, 512, el adaptable de Android y el de Apple). Para regenerarlos: `node scripts/generate-icons.cjs` con `sharp` disponible.
-
-## Movimiento
-
-Transiciones de 150–300 ms. La mascota y el fondo se detienen con `prefers-reduced-motion: reduce`.
+La revisión visual debe cubrir 375 px, tableta y escritorio, ambos temas, formularios, filtros, estados de práctica y final de lección, sin desplazamiento horizontal. Los assets de identidad y la fuente deben estar en el shell del service worker.

@@ -8,7 +8,7 @@ Zuka avanza por etapas pequeñas: cada una se termina, se prueba en el celular y
 - Lecciones en Markdown + LaTeX (KaTeX) con video opcional.
 - Fundamentos de Matemáticas según su programa académico (31 lecciones, 5 unidades).
 - Lecciones paso a paso, 155 retos, repasos por nivel, XP y racha.
-- Mascota (zorro), tema claro por defecto, icono propio, PWA instalable y sin conexión.
+- Mascota (destello verde), tema claro por defecto, icono propio, PWA instalable y sin conexión.
 - Primer video incrustado (lección 1.1).
 
 ## ✅ Etapa 1 · Zuka profesional (versión 1.1)

@@ -1,55 +1,43 @@
-// Zuka, el zorro: un zorro sentado de formas planas y geométricas, naranja con máscara y pecho crema,
-// patas negras y una cola grande con la punta clara. window.MATHBRAIN_MASCOT.svg(estado) devuelve su dibujo SVG.
-// Estados: saluda, feliz, piensa, animo, celebra.
+// Zuka es un destello verde: el pequeño impulso que acompaña cada paso del aprendizaje.
+// Conserva los cinco estados y la API de la mascota para lecciones, perfil y mensajes.
 (() => {
   'use strict';
 
   const moods = ['saluda', 'feliz', 'piensa', 'animo', 'celebra'];
-  const orange = '#e0601f';
-  const shade = '#c24a14';
-  const cream = '#f7e4cb';
-  const creamShade = '#efd3ae';
-  const ink = '#24262c';
+  let drawing = 0;
+  const escapeAttribute = value => String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
+  const spark = (x, y, size) => `<path transform="translate(${x} ${y}) scale(${size})" d="M0-6Q1-1 6 0 1 1 0 6-1 1-6 0-1-1 0-6Z"/>`;
 
-  function svg(mood = 'feliz', { label = 'Zuka, el zorro' } = {}) {
+  function svg(mood = 'feliz', { label = 'Zuka, tu impulso para aprender' } = {}) {
     const state = moods.includes(mood) ? mood : 'feliz';
-    // La cabeza se inclina un poco al pensar y al celebrar, como en el dibujo de referencia.
-    const tilt = { piensa: -8, celebra: 6, saluda: -3, feliz: -4, animo: 0 }[state];
+    const id = `zuka-spark-${++drawing}`;
+    const ink = '#174d37';
     const eyes = {
-      feliz: `<path d="M44 45q4-4 8-.5M64 44.5q4-3.5 8 .5" fill="none" stroke="${ink}" stroke-width="3" stroke-linecap="round"/>`,
-      celebra: `<path d="M43 46q5-6 10-1M63 45q5-5 10 1" fill="none" stroke="${ink}" stroke-width="3.2" stroke-linecap="round"/>`,
-      saluda: `<ellipse cx="48" cy="44.5" rx="3.2" ry="3.8" fill="${ink}"/><ellipse cx="68" cy="44.5" rx="3.2" ry="3.8" fill="${ink}"/><circle cx="49.2" cy="43.2" r="1.1" fill="#fff"/><circle cx="69.2" cy="43.2" r="1.1" fill="#fff"/>`,
-      piensa: `<ellipse cx="49" cy="43.5" rx="3" ry="3.6" fill="${ink}"/><ellipse cx="69" cy="43.5" rx="3" ry="3.6" fill="${ink}"/><circle cx="50" cy="42.2" r="1" fill="#fff"/><circle cx="70" cy="42.2" r="1" fill="#fff"/>`,
-      animo: `<path d="M44 46.5q4-4.5 8-.5M64 46q4-4 8 .5" fill="none" stroke="${ink}" stroke-width="3" stroke-linecap="round"/><path d="M43 39.5l9 2.5M73 39.5l-9 2.5" stroke="${ink}" stroke-width="2.2" stroke-linecap="round"/>`
+      saluda: '<ellipse cx="62" cy="69" rx="3.5" ry="4.5"/><ellipse cx="94" cy="69" rx="3.5" ry="4.5"/>',
+      feliz: '<path d="M57 70q5-7 10 0m22 0q5-7 10 0"/>',
+      piensa: '<ellipse cx="64" cy="69" rx="3.5" ry="4.5"/><ellipse cx="96" cy="69" rx="3.5" ry="4.5"/><path d="m88 58 12-3"/>',
+      animo: '<ellipse cx="62" cy="69" rx="3.5" ry="4.5"/><path d="M89 70q5-7 10 0"/>',
+      celebra: '<path d="m56 69 6-5 6 5m20 0 6-5 6 5"/>'
     }[state];
-    const mouth = state === 'celebra'
-      ? `<path d="M53 61q5 6 10 0z" fill="${ink}"/>`
-      : state === 'piensa' ? `<path d="M55 62.5h6" stroke="${ink}" stroke-width="2.2" stroke-linecap="round"/>`
-        : `<path d="M53.5 61.5q4.5 3.5 9 0" fill="none" stroke="${ink}" stroke-width="2.2" stroke-linecap="round"/>`;
-    // Una pata delantera levantada para saludar o celebrar.
-    const paw = state === 'saluda'
-      ? `<path d="M44 82c-7-4-11-12-10-21" fill="none" stroke="${orange}" stroke-width="9" stroke-linecap="round"/><ellipse cx="34.5" cy="59" rx="5" ry="6" fill="${ink}"/>`
+    const mouth = state === 'piensa'
+      ? '<path d="M73 87q6-3 12 0"/>'
       : state === 'celebra'
-        ? `<path d="M44 82c-8-5-13-14-13-24" fill="none" stroke="${orange}" stroke-width="9" stroke-linecap="round"/><ellipse cx="31" cy="55" rx="5" ry="6" fill="${ink}"/><path d="M73 82c8-5 13-14 13-24" fill="none" stroke="${orange}" stroke-width="9" stroke-linecap="round"/><ellipse cx="86" cy="55" rx="5" ry="6" fill="${ink}"/>`
-        : '';
-    const frontLegs = state === 'celebra'
-      ? ''
-      : state === 'saluda'
-        ? `<rect x="61" y="96" width="8.5" height="20" rx="4.2" fill="${ink}"/>`
-        : `<rect x="47" y="96" width="8.5" height="20" rx="4.2" fill="${ink}"/><rect x="61" y="96" width="8.5" height="20" rx="4.2" fill="${ink}"/>`;
+        ? `<path d="M66 84q12 20 24 0Z" fill="${ink}" stroke="none"/><path d="M73 93q5-4 10 0" stroke="#8df2b3"/>`
+        : '<path d="M65 83q13 13 26 0"/>';
     const extras = state === 'celebra'
-      ? '<g fill="#f2b33d"><path d="M16 22l1.8 4.2 4.2 1.8-4.2 1.8L16 34l-1.8-4.2-4.2-1.8 4.2-1.8z"/><path d="M102 14l1.5 3.5 3.5 1.5-3.5 1.5-1.5 3.5-1.5-3.5-3.5-1.5 3.5-1.5z"/></g>'
-      : state === 'piensa' ? `<text x="94" y="24" fill="${orange}" font-size="20" font-weight="700" font-family="'Plus Jakarta Sans',Arial,sans-serif">?</text>` : '';
-    return `<svg class="zuka-fox" data-mood="${state}" viewBox="0 0 120 124" role="img" aria-label="${label}">${extras}<ellipse cx="62" cy="119" rx="40" ry="4" fill="${ink}" opacity=".08"/>`
-      // Cola enroscada detrás del cuerpo, con la punta crema.
-      + `<path d="M58 118c26 3 50-6 53-26 2-14-7-25-18-25 7 10 7 25-2 34-9 9-21 11-33 11z" fill="${orange}"/><path d="M93 67c11 0 20 11 18 25-1 7-4 13-8 17 2-15 0-30-10-42z" fill="${cream}"/><path d="M66 113c14-2 25-8 31-18" fill="none" stroke="${shade}" stroke-width="2.4" stroke-linecap="round" opacity=".6"/>`
-      // Cuerpo sentado que sube hasta el cuello, con el pecho crema y la pata trasera.
-      + `<path d="M40 117c-5-18-3-36 9-52 5-6 13-6 18 0 13 15 19 35 15 52z" fill="${orange}"/><path d="M49 65c-5 15-4 33 4 51h8c-3-18-1-35 7-51-6-6-14-6-19 0z" fill="${cream}"/><path d="M49 65c-4 13-4 27 0 41-2-14-2-28 4-41z" fill="${creamShade}"/><path d="M67 86c11 0 17 9 16 22l-1 9H67z" fill="${orange}"/><path d="M69 87c7 1 12 6 14 13" fill="none" stroke="${shade}" stroke-width="2.4" stroke-linecap="round" opacity=".6"/>${frontLegs}<rect x="68" y="110" width="17" height="7.5" rx="3.75" fill="${ink}"/>${paw}`
-      // Cabeza con orejas grandes, máscara crema y hocico.
-      + `<g transform="rotate(${tilt} 58 44)"><path d="M33 34 29 6c11 3 20 12 24 20z" fill="${orange}"/><path d="M35 30 33 13c6 3 12 8 15 13z" fill="${cream}"/><path d="M83 34l4-28c-11 3-20 12-24 20z" fill="${orange}"/><path d="M81 30l2-17c-6 3-12 8-15 13z" fill="${cream}"/><path d="M24 40c4-12 16-18 34-18s30 6 34 18c-5 13-18 24-34 28-16-4-29-15-34-28z" fill="${orange}"/><path d="M24 40c8 3 16 8 22 15 5 6 9 9 12 10 3-1 7-4 12-10 6-7 14-12 22-15-5 13-18 24-34 28-16-4-29-15-34-28z" fill="${cream}"/>${eyes}<path d="M53 56.5h10l-5 5.5z" fill="${ink}"/>${mouth}</g></svg>`;
+      ? `<g fill="#24ad65">${spark(23, 35, 1)}${spark(137, 22, .8)}${spark(134, 101, .65)}${spark(28, 110, .65)}</g>`
+      : state === 'piensa'
+        ? '<path d="M124 33c0-8 12-9 12-1 0 5-6 5-6 10m0 7v1" fill="none" stroke="#7950d3" stroke-width="3" stroke-linecap="round"/>'
+        : `<g fill="#7950d3">${spark(132, 36, .7)}</g>`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" class="zuka-spark" data-mood="${state}" viewBox="0 0 160 168" fill="none" role="img" aria-label="${escapeAttribute(label)}">`
+      + `<defs><linearGradient id="${id}" x1="69" y1="26" x2="93" y2="124" gradientUnits="userSpaceOnUse"><stop stop-color="#4cdb88"/><stop offset="1" stop-color="#a6ee79"/></linearGradient></defs>`
+      + `<ellipse cx="80" cy="151" rx="52" ry="11" fill="#7950d3" opacity=".09"/><ellipse cx="80" cy="147" rx="37" ry="10" fill="#7950d3"/><ellipse cx="80" cy="144" rx="30" ry="7" fill="#cbb5f7"/><ellipse cx="80" cy="143" rx="22" ry="4" stroke="#f2ebff" stroke-width="2"/>${extras}`
+      + `<g class="zuka-spark-body"><path d="M78 22c14 0 18 16 27 24s27 13 27 28-17 20-26 29-13 26-28 26-19-17-28-26-26-14-26-29 18-20 27-28 13-24 27-24Z" fill="url(#${id})"/>`
+      + `<path d="M48 55c9-8 14-23 27-26" stroke="#d9ffc4" stroke-width="4" stroke-linecap="round" opacity=".6"/>`
+      + `<g stroke="${ink}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">${eyes}${mouth}</g>`
+      + '<ellipse cx="52" cy="82" rx="6" ry="3" fill="#1aa56d" opacity=".18"/><ellipse cx="105" cy="82" rx="6" ry="3" fill="#1aa56d" opacity=".18"/></g></svg>';
   }
 
-  // Zuka con un globo de diálogo. El texto llega ya escapado desde quien lo usa.
   function say(mood, html, className = '') {
     return `<div class="nebi-say mascot-say ${className}"><span class="nebi-figure mascot-figure">${svg(mood, { label: 'Zuka' })}</span><p class="nebi-bubble mascot-bubble">${html}</p></div>`;
   }

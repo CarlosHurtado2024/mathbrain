@@ -1,47 +1,4 @@
-/*
-  Zuka · rediseño de aprendizaje (se carga al final).
-  Inicio como panel, camino de unidades, lección enfocada, pantalla final y catálogo.
-  Los componentes usan los tokens --z-* definidos para cada tema.
-*/
-:root {
-  --z-brand: #e0601f;
-  --z-brand-dark: #b9481a;
-  --z-soft: #fcede4;
-  --z-text: #20252d;
-  --z-muted: #687386;
-  --z-line: #e5e7eb;
-  --z-line-strong: #d4d7dd;
-  --z-surface: #ffffff;
-  --z-sidebar: #faf8f5;
-  --z-locked: #f1f2f4;
-  --z-locked-text: #9aa1ad;
-  --z-success: #2e9e6a;
-  --z-shadow: 0 1px 2px rgb(32 37 45 / .05), 0 8px 24px -16px rgb(32 37 45 / .18);
-  --z-radius: 18px;
-}
-:root:not([data-theme="light"]) {
-  --z-brand: #f08a4b;
-  --z-brand-dark: #f5a272;
-  --z-soft: #f08a4b1f;
-  --z-text: #edf3ff;
-  --z-muted: #a4b0c8;
-  --z-line: #a0b9ed26;
-  --z-line-strong: #a0b9ed40;
-  --z-surface: #101b2e;
-  --z-sidebar: #080d1d;
-  --z-locked: #ffffff0d;
-  --z-locked-text: #73829b;
-  --z-success: #6fd3a5;
-  --z-shadow: none;
-}
-html[data-theme="light"] {
-  --fun-heading: #20252d;
-  --ink: #2b313b;
-  --muted: #687386;
-  --line: #e5e7eb;
-  --fun-violet-soft: #fcede4;
-}
-
+/* Aprendizaje Zuka: los tokens compartidos se definen en identity.css. */
 /* Navegación: jerarquía clara y estados activos sobrios. */
 @media (min-width: 951px) {
   html[data-theme="light"] .sidebar { background: var(--z-sidebar); border-right-color: var(--z-line); }
@@ -177,7 +134,7 @@ html[data-theme] .course-area { margin: 26px 0 6px; color: var(--z-text); font-s
 .zcard-title { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
 .zcard-title h3 { color: var(--z-text); font-size: 17px; font-weight: 800; letter-spacing: -.01em; }
 .zcard-status { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 999px; background: var(--z-soft); color: var(--z-brand-dark); font-size: 12px; font-weight: 700; }
-.zcard-status.is-done { background: #e9f6ef; color: #1e7a50; }
+.zcard-status.is-done { background: var(--brand-green-soft); color: var(--brand-green); }
 .zcard-status .icon { width: 13px; height: 13px; }
 .zcard-description { margin-top: 4px; color: var(--z-muted); font-size: 14px; line-height: 1.55; }
 .zcard-meta { margin-top: 8px; font-size: 12.5px; }
@@ -200,7 +157,7 @@ html[data-theme] .lesson-choices label { padding: 14px 16px; border-radius: 14px
 html[data-theme] .player-card .answer-row input[type="text"] { min-height: 52px; font-size: 18px; border-radius: 14px; }
 html[data-theme] .player-card .answer-row .button { min-height: 52px; border-radius: 14px; }
 html[data-theme] .player-card :is(.lesson-hint, .lesson-solution) { margin-top: 14px; border-radius: 14px; }
-html[data-theme="light"] .player-card .lesson-solution[open] { background: #f3faf6; border-color: #cbe9d8; }
+html[data-theme="light"] .player-card .lesson-solution[open] { background: var(--brand-green-soft); border-color: var(--brand-green-line); }
 html[data-theme="light"] .player-card .lesson-hint[open] { background: #fdf8ec; border-color: #f0dfb4; }
 .player-gain { display: inline-block; margin-left: 4px; padding: 1px 8px; border-radius: 999px; background: rgb(46 158 106 / .14); color: var(--z-success); font-size: 12.5px; font-weight: 700; }
 html[data-theme] .player-bar .button-primary { min-height: 50px; padding-inline: 26px; font-size: 15.5px; }
@@ -225,7 +182,7 @@ html[data-theme] .player-end h2 { color: var(--z-text); font-size: 28px; font-we
 .profile-name .profile-field { display: grid; gap: 6px; }
 .profile-field label span { color: var(--z-muted); font-weight: 500; }
 .profile-name select { min-height: 44px; padding: 0 12px; border: 1px solid var(--z-line-strong); border-radius: 12px; background: transparent; color: inherit; font-size: 15px; }
-html[data-theme="light"] .profile-name select { background: #faf9f7; }
+html[data-theme="light"] .profile-name select { background: var(--brand-inset); }
 .profile-badges { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
 .profile-badges li { display: grid; gap: 3px; padding: 14px; border: 1px solid var(--z-line); border-radius: 14px; }
 .profile-badges strong { color: var(--z-locked-text); font-size: 14px; }
@@ -307,7 +264,7 @@ html[data-theme="light"] .profile-name select { background: #faf9f7; }
 .profile-auth label { font-size: 14px; font-weight: 600; }
 .profile-auth label span { color: var(--z-muted); font-weight: 500; }
 .profile-auth input { min-height: 46px; padding: 0 14px; border: 1px solid var(--z-line-strong); border-radius: 12px; background: transparent; color: inherit; font-size: 16px; }
-html[data-theme="light"] .profile-auth input { background: #faf9f7; }
+html[data-theme="light"] .profile-auth input { background: var(--brand-inset); }
 html[data-theme="light"] .profile-auth input:focus { outline: 2px solid var(--z-brand); outline-offset: 1px; border-color: transparent; }
 .profile-auth .button { min-height: 46px; }
 .profile-auth-links { margin-top: 10px; }

@@ -121,7 +121,7 @@ function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = regi
     setTimeout: () => 1,
     clearTimeout() {}
   });
-  for (const filename of ['courses.js', 'content.js', 'library.js', 'landing.js']) vm.runInContext(fs.readFileSync(path.join(directory, filename), 'utf8'), context);
+  for (const filename of ['courses.js', 'content.js', 'library.js', 'mascot.js', 'landing.js']) vm.runInContext(fs.readFileSync(path.join(directory, filename), 'utf8'), context);
   prepareLibrary(window.MATHBRAIN_LIBRARY, window.MATHBRAIN_COURSES);
   vm.runInContext(source, context);
   return {
@@ -381,7 +381,7 @@ test('La lección se recorre paso a paso y los retos piden respuesta antes de co
   }
   assert.match(app.node('#player-stage').innerHTML, /¡Lección completada!/);
   assert.match(app.node('#player-stage').innerHTML, /Practicaste <strong>Potenciación y leyes de los exponentes<\/strong>/);
-  assert.match(app.node('#player-stage').innerHTML, /<p class="player-end-xp">\+20 XP<\/p>/);
+  assert.match(app.node('#player-stage').innerHTML, /<p class="player-end-xp"><span>XP ganados<\/span><strong>\+20 XP<\/strong><\/p>/);
   assert.equal((app.node('#player-bar').innerHTML.match(/button-primary/g) || []).length, 1);
   assert.match(app.node('#player-bar').innerHTML, /href="#contenido\/fundamentos-matematicas-7">Continuar/);
   assert.equal(app.node('#streak-count').textContent, '1');

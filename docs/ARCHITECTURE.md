@@ -15,11 +15,12 @@ mathbrain/
 │   ├── fresh.css            Tema claro (por defecto)
 │   ├── zuka.css             Panel del estudiante, camino, lección y catálogo
 │   ├── marketing.css        Landing, programas, escuelas y presentación de la empresa
+│   ├── identity.css         Identidad morada y verde, tokens compartidos y ambos temas
 │   ├── landing.js           Oferta pública, plantillas y contacto (window.ZUKA_MARKETING)
 │   ├── theme.js             Aplica el tema antes de pintar la página
 │   ├── courses.js           Programas de los cursos y sus módulos
 │   ├── library.js           Catálogo: simulaciones, ejercicios resueltos y búsqueda
-│   ├── mascot.js            El zorro en SVG y sus estados de ánimo
+│   ├── mascot.js            El destello verde en SVG y sus estados de ánimo
 │   ├── app.js               Rutas, vistas, lecciones, progreso y perfil
 │   ├── space.js             Animación del fondo del tema oscuro
 │   ├── install.js           Instalación, modo sin conexión y actualizaciones
