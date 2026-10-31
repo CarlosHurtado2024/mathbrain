@@ -8,14 +8,25 @@ Estado: ✅ hecho · 🔜 planificado (ver `ROADMAP.md`).
 
 | Id | Requisito | Estado |
 | --- | --- | --- |
-| RF-00 | Bienvenida con opciones de explorar, registrarse con correo y contraseña o iniciar sesión; sin cuenta solo se accede a la primera lección de cada curso | ✅ |
-| RF-01 | Catálogo de cursos agrupado por área, con nivel, descripción, módulos y progreso | ✅ |
+| RF-00 | Landing con propósito, programas y opciones de explorar, registrarse con correo y contraseña o iniciar sesión; sin cuenta solo se accede a la primera lección de cada curso | ✅ |
+| RF-01 | Catálogo de ingeniería agrupado por escuelas de Matemáticas, Física, Estadística y Programación, con filtros y datos reales de los cursos en plataforma | ✅ |
 | RF-02 | Página de curso con camino de niveles: lecciones completadas, actual y siguientes | ✅ |
 | RF-03 | Programa del curso: objetivos, habilidades, requisitos y módulos; descargable en texto | ✅ |
 | RF-04 | Lecciones escritas en Markdown con fórmulas LaTeX compiladas con KaTeX | ✅ |
 | RF-05 | Video opcional por lección (YouTube, Vimeo o archivo propio) | ✅ |
 | RF-06 | Simulaciones interactivas y ejercicios resueltos asociados a cada módulo | ✅ |
 | RF-07 | Búsqueda de contenidos sin tildes, con filtros de tema, formato y nivel | ✅ |
+
+### Programas y servicios
+
+| Id | Requisito | Estado |
+| --- | --- | --- |
+| RF-40 | PreICFES presenta las cinco áreas oficiales de Saber 11: Lectura Crítica, Matemáticas, Sociales y Ciudadanas, Ciencias Naturales e Inglés | ✅ |
+| RF-41 | Preuniversitario presenta los cursos de Razonamiento lógico y Comprensión lectora | ✅ |
+| RF-42 | Preingeniero conecta las bases de matemáticas, física y programación | ✅ |
+| RF-43 | Tutorías y asesoría en trabajos y preparación para exámenes con consulta por WhatsApp | ✅ |
+| RF-44 | Sobre Zuka presenta la visión y el objetivo de ayudar a ingresar, permanecer y culminar los estudios, sin biografía del fundador | ✅ |
+| RF-45 | Se distingue entre cursos en plataforma y cursos con acompañamiento, sin inventar lecciones publicadas | ✅ |
 
 ### Aprendizaje
 

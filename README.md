@@ -1,6 +1,6 @@
 # Zuka
 
-**Aprende matemáticas paso a paso.** Zuka es una app web progresiva (PWA) en español para estudiar matemáticas y estadística con lecciones cortas, fórmulas LaTeX, videos, retos con respuesta inmediata, XP, rachas y un zorro como mascota. Funciona en el navegador, se instala en el celular o el computador con su propio icono y sigue disponible sin conexión.
+**Tus sueños merecen un camino.** Zuka presenta programas de PreICFES, preuniversitario, preingeniero y cursos de ingeniería organizados por escuelas, además de tutorías y asesorías en trabajos y exámenes. Su plataforma de aprendizaje es una PWA con lecciones cortas de matemáticas y estadística, retos con respuesta inmediata, XP y rachas. Se instala en el celular o el computador y sigue disponible sin conexión.
 
 Está pensada para estudiantes de secundaria, preuniversitarios y primeros semestres. Autor: Carlos Hurtado. (El proyecto se llamó antes MathBrain y luego Euly; el repositorio y los identificadores internos conservan el nombre original).
 

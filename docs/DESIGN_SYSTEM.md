@@ -90,7 +90,17 @@ La bienvenida ofrece dos opciones: explorar la plataforma o crear una cuenta gra
 
 ## Principios del rediseño
 
-- Una sola acción principal por sección. En el inicio: «Continuar aprendiendo».
+### Páginas públicas
+
+La landing, los programas, las escuelas y «Sobre Zuka» usan `marketing.css` y los componentes `m-*`, con fondo cálido, naranja, verde oscuro y titulares con acentos en Lora. La ilustración del camino académico se construye con SVG y CSS. No se muestran testimonios, resultados ni cifras inventadas.
+
+La cabecera pública enlaza a programas, escuelas, acompañamiento, ingreso y registro. En móvil ofrece un menú desplegable nativo. Estas páginas sustituyen el marco de estudio mediante `body.marketing-mode`; el catálogo, las lecciones y la cuenta conservan su navegación habitual. El tema oscuro usa los mismos componentes con sus variables de color.
+
+Los cursos en plataforma y los cursos con acompañamiento tienen acciones diferentes: estudiar en la app o consultar por WhatsApp. «Sobre Zuka» presenta visión, objetivo y apoyo al ingreso y la permanencia, sin foto ni biografía del fundador.
+
+### Plataforma de aprendizaje
+
+- Una sola acción principal por sección. En el inicio del estudiante: «Continuar aprendiendo».
 - Una actividad a la vez en la lección; la retroalimentación explica (abre la solución o la pista).
 - Gamificación moderada: XP discretos, logros ocasionales y una meta semanal opcional. Sin vidas, rankings ni celebraciones ruidosas.
 - Nada de tarjetas o estadísticas para rellenar espacio.

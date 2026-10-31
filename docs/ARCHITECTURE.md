@@ -13,7 +13,9 @@ mathbrain/
 │   ├── themes.css           Variables de cada tema
 │   ├── explore.css          Catálogo, cursos, lecciones, perfil
 │   ├── fresh.css            Tema claro (por defecto)
-│   ├── zuka.css             Rediseño: inicio, camino, lección, catálogo (se carga al final)
+│   ├── zuka.css             Panel del estudiante, camino, lección y catálogo
+│   ├── marketing.css        Landing, programas, escuelas y presentación de la empresa
+│   ├── landing.js           Oferta pública, plantillas y contacto (window.ZUKA_MARKETING)
 │   ├── theme.js             Aplica el tema antes de pintar la página
 │   ├── courses.js           Programas de los cursos y sus módulos
 │   ├── library.js           Catálogo: simulaciones, ejercicios resueltos y búsqueda
@@ -58,22 +60,26 @@ mathbrain/
 Orden de carga en `index.html`:
 
 1. `theme.js` (sin `defer`): aplica el tema guardado antes de pintar.
-2. Con `defer`, en orden: `courses.js` → `content.js` → `library.js` (une lecciones, simulaciones y ejercicios en `window.MATHBRAIN_LIBRARY`) → `mascot.js` → `config.js` → `vendor/supabase/supabase.js` → `cloud.js` (cuenta y sincronización, `window.ZUKA_CLOUD`) → `app.js` → `space.js` → `install.js`.
+2. Con `defer`, en orden: `courses.js` → `content.js` → `library.js` (une lecciones, simulaciones y ejercicios en `window.MATHBRAIN_LIBRARY`) → `mascot.js` → `config.js` → `vendor/supabase/supabase.js` → `cloud.js` (cuenta y sincronización, `window.ZUKA_CLOUD`) → `landing.js` (`window.ZUKA_MARKETING`) → `app.js` → `space.js` → `install.js`.
 
 `app.js` es un módulo autoejecutable que lee el estado guardado, dibuja la vista según la dirección y escucha `hashchange`.
 
 ### Rutas
 
+`landing.js` separa la oferta comercial de los cursos con lecciones. Las páginas públicas usan `marketing.css` y `marketing-mode` para mostrar una cabecera y un pie de empresa. Los cursos se agrupan mediante `course.school`, conservando identificadores y progreso. Los cursos con acompañamiento se consultan al WhatsApp `+57 324 354 6355`; no simulan lecciones ni matrículas. Los nuevos recursos se incluyen en el precaché de la PWA.
+
 | Dirección | Vista |
 | --- | --- |
-| `#` o `#inicio` | Sin sesión: bienvenida para explorar o crear una cuenta. Con sesión: panel de aprendizaje |
+| `#` o `#inicio` | Sin sesión: landing de programas y servicios, con acceso para explorar o registrarse. Con sesión: panel de aprendizaje |
+| `#programas`, `#programa/<id>` | Oferta y detalle de PreICFES, preuniversitario, preingeniero, ingeniería, tutorías y asesorías |
+| `#escuelas`, `#escuela/<id>` | Escuelas de Matemáticas, Física, Estadística y Programación, y sus cursos |
 | `#explorar`, `#cursos` | Catálogo de cursos |
 | `#explorar?q=…&tipo=…&tema=…&nivel=…` | Búsqueda de contenidos |
 | `#simulaciones`, `#ejercicios` | Contenidos de ese formato |
 | `#biblioteca` | Guardados |
 | `#perfil` | Perfil del estudiante |
 | `#registro`, `#ingresar` | Registro con correo y contraseña, inicio de sesión y recuperación de contraseña |
-| `#nosotros` | Sobre Zuka y su autor |
+| `#nosotros` | Visión y objetivo de Zuka: ingreso, permanencia y culminación de los estudios |
 | `#curso/<id>` | Camino de niveles del curso |
 | `#contenido/<id>` | Lección paso a paso, simulación o ejercicio resuelto |
 | `#contenido/<id>?vista=lectura` | Lección completa en una página |

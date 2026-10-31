@@ -137,11 +137,11 @@ test('La instalación prepara únicamente archivos locales existentes, incluyend
   assert.equal(env.calls.claimed, 0);
 });
 
-test('La foto del autor está identificada y disponible sin conexión', async () => {
+test('La foto del docente se conserva para los cursos y sigue disponible sin conexión', async () => {
   const html = fs.readFileSync(path.join(directory, 'index.html'), 'utf8');
-  const photoTag = html.match(/<img\b[^>]*src="assets\/autor-carlos\.jpeg"[^>]*>/);
-  assert.ok(photoTag);
-  assert.match(photoTag[0], /alt="Carlos Hurtado, autor de Zuka"/);
+  assert.doesNotMatch(html, /creator-section|alt="Carlos Hurtado, autor de Zuka"/);
+  const app = fs.readFileSync(path.join(directory, 'app.js'), 'utf8');
+  assert.match(app, /name: 'Carlos Hurtado'.*photo: 'assets\/autor-carlos\.jpeg'/);
   const photo = fs.readFileSync(path.join(directory, 'assets/autor-carlos.jpeg'));
   assert.deepEqual(photo.subarray(0, 2), Buffer.from([255, 216]));
   assert.deepEqual(photo.subarray(-2), Buffer.from([255, 217]));

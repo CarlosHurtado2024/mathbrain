@@ -2,7 +2,26 @@
 
 ## En una frase
 
-Zuka ayuda a estudiantes de habla hispana a **entender** las matemáticas, no solo a memorizarlas, con lecciones de pocos minutos que se aprenden resolviendo.
+Zuka acompaña a estudiantes a **cumplir el sueño de ingresar a la universidad, avanzar en su carrera y graduarse**, con programas de preparación, cursos, tutorías y asesorías.
+
+## Visión de la empresa
+
+Que aprender abra más oportunidades y que cada estudiante encuentre en la educación un camino para transformar su vida. Ser un apoyo cercano desde la preparación para el ingreso hasta los retos de la vida universitaria.
+
+## Objetivo
+
+Ayudar a ingresar, permanecer y culminar los estudios, fortaleciendo conocimientos y acompañando a los estudiantes para que las dificultades académicas no sean una razón para abandonar su proyecto de vida.
+
+## Programas y servicios
+
+- **PreICFES:** Lectura Crítica, Matemáticas, Sociales y Ciudadanas, Ciencias Naturales e Inglés, las cinco pruebas de [Saber 11 según el Icfes](https://www.icfes.gov.co/evaluaciones-icfes/saber-11/).
+- **Preuniversitario:** Razonamiento lógico y Comprensión lectora.
+- **Preingeniero:** bases de matemáticas, física y programación.
+- **Cursos de ingeniería:** escuelas de Matemáticas, Física, Estadística y Programación.
+- **Tutorías:** refuerzo por tema y acompañamiento académico.
+- **Asesorías:** orientación en trabajos y preparación para exámenes.
+
+Los cursos publicados en la PWA conservan sus lecciones y su progreso. Los cursos con acompañamiento y los servicios se consultan por WhatsApp al **+57 324 354 6355**. La landing y «Sobre Zuka» presentan el propósito de la empresa, sin una biografía del fundador.
 
 ## El problema
 

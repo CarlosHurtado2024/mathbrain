@@ -4,8 +4,8 @@ const CACHE_PREFIX = 'mathbrain-shell-';
 const CACHE_NAME = 'mathbrain-shell-dev';
 const APP_ROOT = new URL('./', self.location.href);
 const SHELL_FILES = [
-  './', './index.html', './styles.css', './space.css', './themes.css', './explore.css', './fresh.css', './zuka.css', './theme.js',
-  './courses.js', './content.js', './library.js', './mascot.js', './config.js', './vendor/supabase/supabase.js', './cloud.js', './app.js', './space.js', './install.js',
+  './', './index.html', './styles.css', './space.css', './themes.css', './explore.css', './fresh.css', './zuka.css', './marketing.css', './theme.js',
+  './courses.js', './content.js', './library.js', './mascot.js', './config.js', './vendor/supabase/supabase.js', './cloud.js', './landing.js', './app.js', './space.js', './install.js',
   './manifest.webmanifest', './assets/mark.svg', './assets/stars.svg',
   './assets/autor-carlos.jpeg', './assets/icons/icon-192.png',
   './assets/icons/icon-512.png', './assets/icons/icon-maskable-512.png',

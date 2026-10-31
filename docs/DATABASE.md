@@ -67,7 +67,7 @@ El service worker guarda los archivos de la app en Cache Storage con el nombre `
 ```js
 {
   id: 'probabilidad',           // también nombra la carpeta content/probabilidad/
-  title, description, intro, label, level, category, art, color,
+  title, description, intro, label, level, category, school, art, color,
   prerequisite, outcomes: [], skills: [],
   modules: [{ title: 'Módulo 1 · …', summary, objectives: [], extras: ['sim-azar'] }]
 }

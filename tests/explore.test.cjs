@@ -95,6 +95,7 @@ function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = regi
   }]));
   const window = target({ location, ZUKA_CLOUD: cloud, scrollTo() {}, matchMedia: () => ({ matches: false }) });
   document = target({
+    body: staticElements.find(node => node.tagName === 'BODY'),
     activeElement: { tagName: 'BODY' },
     title: '',
     querySelector(selector) {
@@ -120,7 +121,7 @@ function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = regi
     setTimeout: () => 1,
     clearTimeout() {}
   });
-  for (const filename of ['courses.js', 'content.js', 'library.js']) vm.runInContext(fs.readFileSync(path.join(directory, filename), 'utf8'), context);
+  for (const filename of ['courses.js', 'content.js', 'library.js', 'landing.js']) vm.runInContext(fs.readFileSync(path.join(directory, filename), 'utf8'), context);
   prepareLibrary(window.MATHBRAIN_LIBRARY, window.MATHBRAIN_COURSES);
   vm.runInContext(source, context);
   return {
@@ -559,7 +560,7 @@ test('La bienvenida ofrece explorar, crear una cuenta por correo y entrar con un
   assert.match(html, /href="#explorar">Explorar la plataforma/);
   assert.match(html, /href="#registro">Crear mi cuenta/);
   assert.match(html, /href="#ingresar">Inicia sesión/);
-  assert.match(html, /primera lección de cada uno/);
+    assert.match(html, /primera lección de cada curso/);
   assert.equal(app.node('#explore-notice').hidden, true);
   app.navigate('#explorar');
   assertCourses(app, app.courses.length);
@@ -704,4 +705,126 @@ test('Sin Supabase se puede explorar la primera lección pero no se habilita tod
   assert.match(app.node('#detail-view').innerHTML, /id="lesson-player"/);
   app.navigate('#contenido/probabilidad-2');
   assert.match(app.node('#detail-view').innerHTML, /Crea tu cuenta para continuar/);
+});
+
+test('La landing presenta el propósito, los seis servicios y las cuatro escuelas', () => {
+  const app = environment('#', undefined, guestCloud());
+  const html = app.node('#today-panel').innerHTML;
+  assert.match(html, /Tus sueños/);
+  assert.match(html, /merecen/);
+  assert.match(html, /ingresar a la universidad/);
+  assert.equal(app.document.body.classList.contains('marketing-mode'), true);
+  for (const id of ['preicfes', 'preuniversitario', 'preingeniero', 'ingenieria', 'tutorias', 'asesorias']) {
+    assert.ok(html.includes(`href="#programa/${id}"`), id);
+    app.navigate(`#programa/${id}`);
+    assert.match(app.node('#detail-view').innerHTML, /id="detail-title"/);
+    assert.doesNotMatch(app.node('#detail-view').innerHTML, /No encontramos/);
+    assert.equal(app.document.body.classList.contains('marketing-mode'), true);
+  }
+  for (const school of ['matematicas', 'fisica', 'estadistica', 'programacion']) assert.ok(html.includes(`href="#escuela/${school}"`), school);
+});
+
+test('PreICFES presenta exactamente las cinco pruebas de Saber 11 y enlaza al Icfes', () => {
+  const app = environment('#programa/preicfes', undefined, guestCloud());
+  const html = app.node('#detail-view').innerHTML;
+  const subjects = [...html.matchAll(/data-subject="([^"]+)"/g)].map(match => match[1]);
+  assert.deepEqual(subjects, ['Lectura Crítica', 'Matemáticas', 'Sociales y Ciudadanas', 'Ciencias Naturales', 'Inglés']);
+  assert.match(html, /href="https:\/\/www\.icfes\.gov\.co\/evaluaciones-icfes\/saber-11\/"/);
+  assert.match(html, /href="#curso\/fundamentos-matematicas"/);
+  assert.equal(app.node('#explore-notice').hidden, true, 'La descripción del servicio es pública');
+});
+
+test('Preuniversitario ofrece Razonamiento lógico y Comprensión lectora con consulta por WhatsApp', () => {
+  const app = environment('#programa/preuniversitario', undefined, guestCloud());
+  const html = app.node('#detail-view').innerHTML;
+  const subjects = [...html.matchAll(/data-subject="([^"]+)"/g)].map(match => match[1]);
+  assert.deepEqual(subjects, ['Razonamiento lógico', 'Comprensión lectora']);
+  assert.equal((html.match(/Consultar este curso/g) || []).length, 2);
+  assert.match(html, /Los cursos con acompañamiento se consultan por WhatsApp/);
+  assert.doesNotMatch(html, /href="#curso\/(?:razonamiento-logico|comprension-lectora)"/, 'No se inventan lecciones publicadas');
+});
+
+test('Preingeniero conecta las bases matemáticas, de física y de programación', () => {
+  const app = environment('#programa/preingeniero', undefined, guestCloud());
+  const html = app.node('#detail-view').innerHTML;
+  assert.match(html, /Fundamentos matemáticos/);
+  assert.match(html, /Bases de física/);
+  assert.match(html, /Pensamiento computacional/);
+  for (const destination of ['#curso/fundamentos-matematicas', '#escuela/fisica', '#escuela/programacion']) assert.ok(html.includes(`href="${destination}"`));
+});
+
+test('Los cursos se agrupan por escuelas conservando su contenido y su progreso', () => {
+  const app = environment('#explorar');
+  const html = app.node('#course-grid').innerHTML;
+  assertCourses(app, 5);
+  for (const school of ['matematicas', 'fisica', 'estadistica', 'programacion']) assert.ok(html.includes(`data-school="${school}"`), school);
+  const math = html.match(/<section class="course-school" data-school="matematicas"[\s\S]*?<\/section>/)[0];
+  const stats = html.match(/<section class="course-school" data-school="estadistica"[\s\S]*?<\/section>/)[0];
+  for (const id of ['fundamentos-matematicas', 'calculo-diferencial', 'calculo-integral']) assert.ok(math.includes(`href="#curso/${id}"`), id);
+  for (const id of ['probabilidad', 'inferencia-estadistica']) assert.ok(stats.includes(`href="#curso/${id}"`), id);
+  assert.doesNotMatch(math, /href="#curso\/probabilidad"/);
+  assert.match(html, /CURSO CON ACOMPAÑAMIENTO/);
+  app.navigate('#explorar?curso_tema=calculo&curso_nivel=Intermedio');
+  assertCourses(app, 2);
+  assert.doesNotMatch(app.node('#course-grid').innerHTML, /data-school="fisica"|CURSO CON ACOMPAÑAMIENTO/);
+});
+
+test('Cada escuela abre sus cursos reales o las opciones de acompañamiento correspondientes', () => {
+  const app = environment('#escuelas', undefined, guestCloud());
+  assert.equal((app.node('#detail-view').innerHTML.match(/class="m-school-card/g) || []).length, 4);
+  for (const [id, title] of [['matematicas', 'Matemáticas'], ['fisica', 'Física'], ['estadistica', 'Estadística'], ['programacion', 'Programación']]) {
+    app.navigate(`#escuela/${id}`);
+    const html = app.node('#detail-view').innerHTML;
+    assert.ok(html.includes(`Escuela de ${title}`));
+    for (const course of app.courses.filter(course => course.school === id)) assert.ok(html.includes(`href="#curso/${course.id}"`));
+    if (['fisica', 'programacion'].includes(id)) {
+      assert.match(html, /Cursos con acompañamiento/);
+      assert.match(html, /Consultar curso/);
+    }
+  }
+});
+
+test('Sobre Zuka presenta la visión y el objetivo sin la biografía ni la foto del fundador', () => {
+  const app = environment('#nosotros', undefined, guestCloud());
+  const html = app.node('#about-view').innerHTML;
+  assert.match(html, /NUESTRA VISIÓN/);
+  assert.match(html, /NUESTRO OBJETIVO/);
+  assert.match(html, /ingresar a la universidad y culminar una carrera/);
+  assert.match(html, /razón para abandonar/);
+  assert.doesNotMatch(html, /Carlos Hurtado|autor-carlos|creator-section|fundador/);
+  assert.equal(app.document.body.classList.contains('marketing-mode'), true);
+  app.navigate('#explorar');
+  assert.equal(app.document.body.classList.contains('marketing-mode'), false);
+});
+
+test('Los contactos de los programas y servicios usan el WhatsApp colombiano indicado y conservan el tema', () => {
+  const app = environment('#programas', undefined, guestCloud());
+  for (const route of ['#programas', '#programa/tutorias', '#programa/asesorias', '#escuela/programacion']) {
+    app.navigate(route);
+    const html = app.node('#detail-view').innerHTML;
+    const contacts = [...html.matchAll(/href="(https:\/\/wa\.me\/[^"]+)"([^>]*)/g)];
+    assert.ok(contacts.length >= 2, route);
+    for (const [, address, attributes] of contacts) {
+      const url = new URL(address);
+      assert.equal(url.pathname, '/573243546355');
+      assert.match(url.searchParams.get('text'), /^Hola, equipo Zuka\./);
+      assert.match(attributes, /target="_blank"/);
+      assert.match(attributes, /rel="noopener noreferrer"/);
+    }
+  }
+  assert.match(app.node('#detail-view').innerHTML, /324 354 6355/);
+});
+
+test('Las páginas públicas conservan el panel del estudiante y el acceso limitado de visitantes', () => {
+  const app = environment('#programas');
+  assert.match(app.node('#detail-view').innerHTML, /Mi aprendizaje/);
+  app.navigate('#');
+  assert.equal(app.document.body.classList.contains('marketing-mode'), false);
+  assert.match(app.node('#today-panel').innerHTML, /Empezar a aprender/);
+  const guest = environment('#programa/ingenieria', undefined, guestCloud());
+  guest.navigate('#contenido/calculo-diferencial-2');
+  assert.equal(guest.document.body.classList.contains('marketing-mode'), false);
+  assert.match(guest.node('#detail-view').innerHTML, /Crea tu cuenta para continuar/);
+  guest.navigate('#contenido/calculo-diferencial-1');
+  assert.match(guest.node('#detail-view').innerHTML, /id="lesson-player"/);
 });

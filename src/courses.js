@@ -8,7 +8,7 @@
 //   summary y objectives describen el módulo; extras añade simulaciones o ejercicios resueltos de src/library.js.
 window.MATHBRAIN_COURSES = [
   {
-    id: 'fundamentos-matematicas', title: 'Fundamentos de Matemáticas', category: 'fundamentos', label: 'FUNDAMENTOS', level: 'Inicial', art: 'algebra', color: 'purple',
+    id: 'fundamentos-matematicas', title: 'Fundamentos de Matemáticas', category: 'fundamentos', school: 'matematicas', label: 'FUNDAMENTOS', level: 'Inicial', art: 'algebra', color: 'purple',
     description: 'De los números reales a los números complejos. Aritmética, álgebra, funciones y trigonometría: la base para el cálculo y las ciencias.',
     intro: 'Un recorrido en espiral por cinco unidades: números reales, álgebra fundamental, funciones, trigonometría y números complejos. Cada módulo parte de la intuición, deduce sus fórmulas y termina con práctica.',
     prerequisite: 'Ninguno formal. Se recomienda dominar las operaciones aritméticas básicas.',
@@ -30,7 +30,7 @@ window.MATHBRAIN_COURSES = [
     ]
   },
   {
-    id: 'calculo-diferencial', title: 'Cálculo diferencial', category: 'calculo', label: 'CÁLCULO', level: 'Intermedio', art: 'derivative', color: 'blue',
+    id: 'calculo-diferencial', title: 'Cálculo diferencial', category: 'calculo', school: 'matematicas', label: 'CÁLCULO', level: 'Intermedio', art: 'derivative', color: 'blue',
     description: 'El cambio tiene su propio lenguaje. Descubre los límites, las derivadas y las ideas que les dan sentido.',
     intro: '¿Cómo describimos algo que cambia a cada instante? En este curso construiremos la idea de derivada desde la intuición geométrica hasta sus aplicaciones.',
     prerequisite: 'Funciones y álgebra básica',
@@ -47,7 +47,7 @@ window.MATHBRAIN_COURSES = [
     ]
   },
   {
-    id: 'probabilidad', title: 'Probabilidad', category: 'estadistica', label: 'PROBABILIDAD', level: 'Inicial', art: 'probability', color: 'sand',
+    id: 'probabilidad', title: 'Probabilidad', category: 'estadistica', school: 'estadistica', label: 'PROBABILIDAD', level: 'Inicial', art: 'probability', color: 'sand',
     description: 'Dale sentido al azar. Una forma visual de pensar en la incertidumbre y los eventos que nos rodean.',
     intro: 'El azar tiene patrones. Este curso presenta las herramientas para describir la incertidumbre, desde experimentos sencillos hasta distribuciones de probabilidad.',
     prerequisite: 'Aritmética y nociones de conjuntos',
@@ -64,7 +64,7 @@ window.MATHBRAIN_COURSES = [
     ]
   },
   {
-    id: 'inferencia-estadistica', title: 'Inferencia estadística', category: 'estadistica', label: 'ESTADÍSTICA', level: 'Intermedio', art: 'inference', color: 'green',
+    id: 'inferencia-estadistica', title: 'Inferencia estadística', category: 'estadistica', school: 'estadistica', label: 'ESTADÍSTICA', level: 'Intermedio', art: 'inference', color: 'green',
     description: 'De una muestra a una conclusión. Aprende a escuchar lo que los datos pueden decir y lo que no.',
     intro: 'Una muestra es una ventana a una población. Exploraremos cómo estimar cantidades, expresar incertidumbre y contrastar hipótesis con cuidado.',
     prerequisite: 'Probabilidad y estadística descriptiva',
@@ -81,7 +81,7 @@ window.MATHBRAIN_COURSES = [
     ]
   },
   {
-    id: 'calculo-integral', title: 'Cálculo integral', category: 'calculo', label: 'CÁLCULO', level: 'Intermedio', art: 'integral', color: 'slate',
+    id: 'calculo-integral', title: 'Cálculo integral', category: 'calculo', school: 'matematicas', label: 'CÁLCULO', level: 'Intermedio', art: 'integral', color: 'slate',
     description: 'El poder de sumar lo pequeño. Descubre cómo las áreas nos ayudan a entender la acumulación.',
     intro: 'Sumar piezas pequeñas permite resolver grandes preguntas. Construiremos la integral como acumulación y exploraremos su relación con la derivada.',
     prerequisite: 'Cálculo diferencial',

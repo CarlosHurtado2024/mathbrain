@@ -66,6 +66,10 @@ Ejecuta `npm run dev` y abre la lección. `npm test` comprueba que todas las lec
 
 ## Programas de los cursos
 
+Cada curso en `src/courses.js` declara una escuela en `school`: `matematicas`, `fisica`, `estadistica` o `programacion`. Esta agrupación no sustituye `category`, que conserva los filtros por tema, ni cambia los identificadores de las lecciones.
+
+La oferta de servicios, los temas de PreICFES y los cursos con acompañamiento se editan en `src/landing.js`. Un curso con consulta por WhatsApp no es un curso interactivo publicado: para que se pueda estudiar en la plataforma necesita sus datos en `courses.js` y sus lecciones Markdown. El contacto actual es `+57 324 354 6355`.
+
 En `src/courses.js` se editan el título, la descripción, el nivel, los prerrequisitos y la presentación de cada curso, además de:
 
 - `outcomes`: la lista «Lo que aprenderás».

@@ -9,10 +9,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Zuka">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="description" content="Encuentra explicaciones de matemáticas, explora simulaciones y aprende con ejercicios resueltos. Tu universo de ideas, a tu ritmo.">
-  <meta property="og:title" content="Zuka — Aprende matemáticas paso a paso">
-  <meta property="og:description" content="Explicaciones, simulaciones y ejercicios resueltos. Encuentra la idea que necesitas entender.">
-  <title>Zuka — Aprende matemáticas paso a paso</title>
+  <meta name="description" content="Tus sueños merecen un camino. PreICFES, preuniversitario, preingeniero, escuelas de ingeniería, tutorías y asesorías para ingresar a la universidad y avanzar en tu carrera.">
+  <meta property="og:title" content="Zuka — Tus sueños merecen un camino">
+  <meta property="og:description" content="Te acompañamos para ingresar, aprender, avanzar y graduarte. Conoce nuestros programas, cursos por escuelas, tutorías y asesorías.">
+  <title>Zuka — Tus sueños merecen un camino</title>
   <script src="theme.js"></script>
   <link rel="icon" type="image/svg+xml" href="assets/mark.svg">
   <link rel="manifest" href="manifest.webmanifest">
@@ -27,6 +27,7 @@
   <link rel="stylesheet" href="explore.css">
   <link rel="stylesheet" href="fresh.css">
   <link rel="stylesheet" href="zuka.css">
+  <link rel="stylesheet" href="marketing.css">
   <script defer src="courses.js"></script>
   <script defer src="content.js"></script>
   <script defer src="library.js"></script>
@@ -34,6 +35,7 @@
   <script defer src="config.js"></script>
   <script defer src="vendor/supabase/supabase.js"></script>
   <script defer src="cloud.js"></script>
+  <script defer src="landing.js"></script>
   <script defer src="app.js"></script>
   <script defer src="space.js"></script>
   <script defer src="install.js"></script>
@@ -52,7 +54,7 @@
       <a href="#perfil" data-nav="perfil"><span data-icon="user"></span><span>Perfil</span></a>
     </nav>
     <div class="sidebar-topics"><p class="sidebar-label">MATERIAS</p><a href="#explorar?tema=fundamentos"><i class="topic-dot purple"></i>Fundamentos</a><a href="#explorar?tema=calculo"><i class="topic-dot blue"></i>Cálculo</a><a href="#explorar?tema=probabilidad"><i class="topic-dot sand"></i>Probabilidad</a><a href="#explorar?tema=estadistica"><i class="topic-dot green"></i>Estadística</a></div>
-    <div class="sidebar-bottom"><a href="#nosotros">Sobre Zuka</a></div>
+    <div class="sidebar-bottom"><a href="#programas">Programas y servicios</a><a href="#escuelas">Escuelas de ingeniería</a><a href="#nosotros">Sobre Zuka</a></div>
   </aside>
   <div class="app-shell">
     <header class="topbar">
@@ -65,7 +67,7 @@
       <aside id="explore-notice" class="explore-notice" aria-label="Modo de exploración" hidden><span aria-hidden="true" data-icon="lock"></span><p><strong>Estás explorando.</strong> Prueba la primera lección de cada curso. <a href="#registro">Crea tu cuenta gratis</a> para acceder a todo.</p><a class="text-button" href="#ingresar">Iniciar sesión</a></aside>
       <div id="home-view"><div id="today-panel"></div></div>
       <section id="courses-view" class="course-browser" aria-labelledby="courses-title" hidden>
-        <header class="course-browser-heading"><div><p class="eyebrow">EXPLORAR</p><h1 id="courses-title" tabindex="-1">Elige qué aprender</h1><p>Cursos organizados por materia y nivel, con lecciones cortas y práctica en cada paso.</p></div></header>
+        <header class="course-browser-heading"><div><p class="eyebrow">ESCUELAS DE INGENIERÍA</p><h1 id="courses-title" tabindex="-1">Elige qué aprender</h1><p>Cursos organizados por escuelas, con lecciones para estudiar a tu ritmo y opciones de acompañamiento.</p></div></header>
         <div class="course-browser-toolbar"><div id="course-topics" class="course-topics" role="group" aria-label="Filtrar cursos por tema"></div><label class="course-level"><span>Nivel</span><select id="course-level-filter" aria-label="Filtrar cursos por nivel"><option value="all">Todos los niveles</option><option value="Inicial">Inicial</option><option value="Intermedio">Intermedio</option></select></label></div>
         <section class="course-collection" aria-labelledby="course-collection-title"><div class="course-collection-heading"><div><h2 id="course-collection-title">Todos los cursos</h2><p id="course-results" role="status" aria-live="polite"></p></div><a class="course-content-link" href="#explorar?vista=contenidos">Buscar un contenido <span data-icon="right"></span></a></div><div id="course-grid" class="course-grid"></div><div id="course-empty" class="course-empty" hidden><h3>No hay cursos con esta combinación.</h3><p>Prueba otro tema o nivel para encontrar tu siguiente idea.</p><button class="button button-secondary" type="button" data-reset-courses>Ver todos los cursos</button></div></section>
       </section>
@@ -77,7 +79,7 @@
         <div id="empty-state" class="empty-state" hidden><span data-icon="search"></span><h2 id="empty-title">Todavía no encontramos esa idea.</h2><p id="empty-description">Prueba con «derivadas», «ecuaciones» o «probabilidad», o cambia los filtros.</p><button class="button button-secondary" id="reset-filters" type="button">Explorar todo el contenido</button></div>
       </section>
       <section id="detail-view" class="detail-view" hidden></section>
-      <section id="about-view" class="about-view" aria-labelledby="about-title" hidden><p class="eyebrow">SOBRE ZUKA</p><h1 id="about-title" tabindex="-1">Las matemáticas,<br>con otros ojos.</h1><p class="about-intro">Primero la intuición. Después, la fórmula. Un espacio para explorar, visualizar y entender las ideas detrás de los números.</p><article class="creator-section"><img src="assets/autor-carlos.jpeg" alt="Carlos Hurtado, autor de Zuka" width="734" height="1598" loading="lazy" decoding="async"><div><p class="eyebrow">HOLA, SOY</p><h2>Carlos Hurtado</h2><p class="creator-credential">Soy estadístico de la Universidad Nacional de Colombia.</p><p>Soy un apasionado por la enseñanza de las matemáticas. Con Zuka, quiero acercarte a las matemáticas y la estadística para que comprendas las ideas detrás de los procedimientos y descubras el sentido de cada fórmula.</p><p>Mi propuesta parte de la curiosidad: explorar una pregunta, visualizar un concepto y conectar la teoría con ejemplos que tengan sentido. Quiero ayudarte a construir bases sólidas y a avanzar con confianza.</p><blockquote>Hacer que aprender sea un camino de descubrimiento, una idea a la vez.</blockquote><a class="button button-primary" href="#explorar">Empieza por una idea <span aria-hidden="true">↗</span></a></div></article></section>
+      <section id="about-view" class="about-view" aria-labelledby="about-title" hidden><h1 id="about-title" tabindex="-1">El propósito de Zuka</h1><p>Ayudarte a ingresar a la universidad, avanzar en tu carrera y cumplir tus sueños.</p></section>
       <noscript><p class="empty-state">Activa JavaScript para buscar contenidos y utilizar las simulaciones de Zuka.</p></noscript>
     </main>
     <footer class="site-footer"><a href="#" class="footer-brand">Zuka</a><p>Matemáticas con sentido, una idea a la vez.</p><button type="button" class="footer-install" data-install aria-haspopup="dialog" aria-controls="install-dialog">Instalar Zuka <span aria-hidden="true">↓</span></button><a href="#nosotros">Hecho para entender. <span aria-hidden="true">↗</span></a></footer>

@@ -3,6 +3,7 @@
 
   const library = window.MATHBRAIN_LIBRARY;
   const courses = window.MATHBRAIN_COURSES;
+  const marketing = window.ZUKA_MARKETING;
   const select = (selector, root = document) => root.querySelector(selector);
   const selectAll = (selector, root = document) => [...root.querySelectorAll(selector)];
   const escape = value => String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
@@ -49,8 +50,24 @@
   const studyHref = resource => canStudy(resource) ? `#${contentDestination(resource)}` : authHref('signup', contentDestination(resource));
 
   function renderWelcome() {
-    select('#today-panel').innerHTML = `<section class="welcome" aria-labelledby="home-title"><header class="welcome-heading"><span class="welcome-mascot" aria-hidden="true">${mascot.svg('saluda')}</span><p class="eyebrow">BIENVENIDO A ZUKA</p><h1 id="home-title" tabindex="-1">Tu siguiente idea<br>empieza aquí.</h1><p>Aprende matemáticas paso a paso, con explicaciones claras y retos para ponerlas en práctica.</p></header><div class="welcome-options"><article class="welcome-option"><span class="welcome-option-icon" aria-hidden="true">${icon('search')}</span><h2>Explora a tu ritmo</h2><p>Conoce los cursos y prueba la primera lección de cada uno sin crear una cuenta.</p><a class="button button-secondary" href="#explorar">Explorar la plataforma${icon('right')}</a></article><article class="welcome-option is-featured"><span class="welcome-option-icon" aria-hidden="true">${icon('book')}</span><p class="welcome-tag">ACCESO COMPLETO · GRATIS</p><h2>Empieza tu camino</h2><p>Crea tu cuenta con correo y contraseña para acceder a todas las lecciones, los repasos y las simulaciones.</p><a class="button button-primary" href="#registro">Crear mi cuenta${icon('right')}</a></article></div><p class="welcome-signin">¿Ya tienes una cuenta? <a href="#ingresar">Inicia sesión</a></p></section>`;
-    document.title = 'Bienvenido a Zuka';
+    select('#today-panel').innerHTML = marketing.home(false);
+    document.body?.classList.toggle('marketing-mode', true);
+    document.title = 'Zuka — Tus sueños merecen un camino';
+  }
+
+  function renderMarketingPage(destination) {
+    const program = marketing.programs.find(item => destination === `programa/${item.id}`);
+    const school = marketing.schools.find(item => destination === `escuela/${item.id}`);
+    if (program) {
+      select('#detail-view').innerHTML = marketing.programPage(program, hasAccount());
+      document.title = `${program.title} | Zuka`;
+    } else if (school) {
+      select('#detail-view').innerHTML = marketing.schoolPage(school, courses, courseCard, hasAccount());
+      document.title = `${school.title} | Zuka`;
+    } else if (destination === 'escuelas' || destination === 'programas') {
+      select('#detail-view').innerHTML = destination === 'escuelas' ? marketing.schoolsPage(hasAccount()) : marketing.programsPage(hasAccount());
+      document.title = `${destination === 'escuelas' ? 'Escuelas de ingeniería' : 'Programas y servicios'} | Zuka`;
+    } else missingResource();
   }
 
   function renderAccessGate(title, destination) {
@@ -236,11 +253,11 @@
     });
     select('#course-collection-title').textContent = courseFilters.topic === 'all' ? courseFilters.level === 'all' ? 'Todos los cursos' : 'Cursos de nivel ' + courseFilters.level.toLowerCase() : topicName(courseFilters.topic);
     select('#course-results').textContent = `${visibleCourses.length} ${visibleCourses.length === 1 ? 'curso' : 'cursos'} · Explicaciones y práctica a tu ritmo`;
-    // Los cursos se agrupan por área; cada área lista sus cursos en orden.
-    const areas = { fundamentos: 'Fundamentos', calculo: 'Cálculo', estadistica: 'Probabilidad y estadística' };
-    const groups = [...new Set(visibleCourses.map(course => course.category))].map(category => ({ category, items: visibleCourses.filter(course => course.category === category) }));
+    // Las escuelas agrupan los cursos sin alterar sus identificadores, temas ni progreso.
+    const showAccompanied = courseFilters.topic === 'all' && courseFilters.level === 'all';
+    const groups = marketing.schools.map(school => ({ school, items: visibleCourses.filter(course => course.school === school.id) })).filter(({ school, items }) => items.length || (showAccompanied && school.guided.length));
     select('#course-grid').classList.add('is-list');
-    select('#course-grid').innerHTML = groups.map(({ category, items }) => `${groups.length > 1 ? `<h3 class="course-area">${escape(areas[category] || category)}</h3>` : ''}${items.map(courseCard).join('')}`).join('');
+    select('#course-grid').innerHTML = groups.map(({ school, items }) => `<section class="course-school" data-school="${school.id}" aria-labelledby="school-${school.id}"><div class="course-school-heading"><h3 class="course-area" id="school-${school.id}">${escape(school.title)}</h3><a class="text-button" href="#escuela/${school.id}">Ver escuela${icon('right')}</a></div>${items.map(courseCard).join('')}${showAccompanied && school.guided.length ? `<div class="m-guided-grid">${school.guided.map(marketing.guidedCard).join('')}</div>` : ''}</section>`).join('');
     select('#course-empty').hidden = visibleCourses.length > 0;
     document.title = 'Explorar cursos | Zuka';
   }
@@ -275,6 +292,7 @@
       return;
     }
     if (!hasAccount()) { renderWelcome(); return; }
+    document.body?.classList.toggle('marketing-mode', false);
     const course = activeCourse();
     const progress = courseProgress(course);
     const state = pathState(course);
@@ -1033,7 +1051,7 @@
     const parameters = new URLSearchParams(rawParameters);
     filters = { query: (parameters.get('q') || '').slice(0, 160), type: library.formats[parameters.get('tipo')] ? parameters.get('tipo') : 'all', topic: library.topics.some(topic => topic.id === parameters.get('tema')) ? parameters.get('tema') : 'all', level: ['Inicial', 'Intermedio'].includes(parameters.get('nivel')) ? parameters.get('nivel') : 'all' };
     courseFilters = { topic: library.topics.some(topic => topic.id === parameters.get('curso_tema')) ? parameters.get('curso_tema') : 'all', level: ['Inicial', 'Intermedio'].includes(parameters.get('curso_nivel')) ? parameters.get('curso_nivel') : 'all' };
-    page = !destination || destination === 'inicio' ? 'inicio' : destination === 'biblioteca' ? 'biblioteca' : destination === 'nosotros' ? 'nosotros' : destination === 'perfil' ? 'perfil' : ['registro', 'ingresar'].includes(destination) ? 'acceso' : ['explorar', 'cursos', 'enfoque', 'simulaciones', 'ejercicios'].includes(destination) ? 'explorar' : 'detalle';
+    page = !destination || destination === 'inicio' ? 'inicio' : destination === 'biblioteca' ? 'biblioteca' : destination === 'nosotros' ? 'nosotros' : destination === 'perfil' ? 'perfil' : ['programas', 'escuelas'].includes(destination) || /^(?:programa|escuela)\/[\w-]+$/.test(destination) ? 'oferta' : ['registro', 'ingresar'].includes(destination) ? 'acceso' : ['explorar', 'cursos', 'enfoque', 'simulaciones', 'ejercicios'].includes(destination) ? 'explorar' : 'detalle';
     if (page === 'acceso') {
       authMode = destination === 'registro' ? 'signup' : parameters.get('modo') === 'reset' ? 'reset' : 'signin';
       if (parameters.has('continuar')) rememberAuthDestination(parameters.get('continuar'));
@@ -1042,10 +1060,14 @@
     if (['explorar', 'cursos'].includes(destination) && !filters.query && filters.type === 'all' && filters.topic === 'all' && filters.level === 'all' && parameters.get('vista') !== 'contenidos') page = 'cursos';
     if (destination === 'simulaciones') filters.type = 'simulation';
     if (destination === 'ejercicios') filters.type = 'exercise';
+    // Las páginas públicas comparten componentes: vacía las vistas ocultas para no duplicar sus identificadores.
+    if (page !== 'inicio') select('#today-panel').replaceChildren();
+    if (page !== 'nosotros') select('#about-view').replaceChildren();
+    if (page !== 'cursos') select('#course-grid').replaceChildren();
     select('#home-view').hidden = page !== 'inicio';
     select('#courses-view').hidden = page !== 'cursos';
     select('.discovery').hidden = !['explorar', 'biblioteca'].includes(page);
-    select('#detail-view').hidden = !['detalle', 'perfil', 'acceso'].includes(page);
+    select('#detail-view').hidden = !['detalle', 'perfil', 'acceso', 'oferta'].includes(page);
     select('#about-view').hidden = page !== 'nosotros';
     select('#explore-notice').hidden = hasAccount() || !(['cursos', 'explorar', 'biblioteca'].includes(page) || (page === 'detalle' && /^curso\/[\w-]+$/.test(destination)));
     select('#content-search').value = filters.query;
@@ -1070,8 +1092,11 @@
       renderProfile();
     } else if (page === 'acceso') {
       renderAuthPage();
+    } else if (page === 'oferta') {
+      renderMarketingPage(destination);
     } else if (page === 'nosotros') {
       select('#detail-view').replaceChildren();
+      select('#about-view').innerHTML = marketing.about(hasAccount());
       document.title = 'Sobre Zuka | Zuka';
     } else {
       select('#detail-view').replaceChildren();
@@ -1080,6 +1105,7 @@
     }
     // Durante una lección paso a paso, la interfaz se concentra en la lección, como en una app de aprendizaje.
     document.body?.classList.toggle('lesson-mode', Boolean(player));
+    document.body?.classList.toggle('marketing-mode', page === 'oferta' || page === 'nosotros' || (page === 'inicio' && !hasAccount()));
     updateStatsChip();
     const activeNav = page === 'acceso' ? 'perfil' : page === 'cursos' || (page === 'detalle' && destination.startsWith('curso/')) ? 'explorar' : page === 'explorar' ? filters.type === 'simulation' ? 'simulaciones' : filters.type === 'exercise' ? 'ejercicios' : 'explorar' : page;
     selectAll('[data-nav]').forEach(link => {
@@ -1090,7 +1116,7 @@
     });
     if (shouldFocus) {
       window.scrollTo({ top: 0, behavior: 'instant' });
-      const heading = ['detalle', 'perfil', 'acceso'].includes(page) ? select('#detail-title') : page === 'nosotros' ? select('#about-title') : page === 'inicio' ? select('#home-title') : page === 'cursos' ? select('#courses-title') : select('#catalog-title');
+      const heading = ['detalle', 'perfil', 'acceso', 'oferta'].includes(page) ? select('#detail-title') : page === 'nosotros' ? select('#about-title') : page === 'inicio' ? select('#home-title') : page === 'cursos' ? select('#courses-title') : select('#catalog-title');
       heading?.focus({ preventScroll: true });
     }
   }
