@@ -60,9 +60,15 @@ Zuka avanza por etapas pequeñas: cada una se termina, se prueba en el celular y
 - Las lecciones se configuran desde la base de datos y conservan respaldo sin conexión.
 - Cada lección se retoma en el bloque exacto, en el dispositivo y en `lesson_sessions` (sesión anónima).
 
+## ✅ Plataforma modular · Fase 2: sistema de ejercicios
+
+- 12 tipos de ejercicio con enunciado, visual opcional, respuesta esperada, validación, solución, pistas progresivas, intentos y retroalimentación que explica por qué.
+- Diagnóstico automático de errores numéricos y simbólicos; explicaciones escritas para las 80 opciones incorrectas de opción múltiple.
+- Registro de desempeño en el dispositivo y en `exercise_attempts`.
+- Un ejercicio real de cada tipo nuevo en las lecciones.
+
 ## 🔜 Plataforma modular · Fases siguientes
 
-- Fase 2: sistema de ejercicios extensible (12 tipos, pistas progresivas, intentos, retroalimentación específica y registro de desempeño).
 - Fase 3: motores de visualización (Manim, p5.js, JSXGraph, Three.js) como bloques `simulation`, `interactive_graph` y `visual_proof`.
 - Fase 4: unidades de microaprendizaje con secuencia flexible, `assessment` y `spaced_review`.
 - Fase 5: rutas, metas diarias opcionales, habilidades, retos semanales, logros de dominio y recomendaciones de repaso.

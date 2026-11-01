@@ -49,8 +49,8 @@ solucion: Con $x = 2$: $9 = 3A$, así que $A = 3$. Con $x = -1$: $-6 = -3B$, as�
 
 :::ejercicio
 ¿Qué ocurre en $x = -2$ con $r(x) = \dfrac{2x^2 - 8}{x^2 - x - 6}$?
-- [ ] Hay una asíntota vertical
+- [ ] Hay una asíntota vertical :: El factor $x + 2$ se cancela con el numerador: en $x = -2$ queda un hueco, no una asíntota.
 - [x] Hay un hueco
-- [ ] La función vale $0$
+- [ ] La función vale $0$ :: En $x = -2$ el denominador vale $0$: la función no está definida ahí.
 solucion: El factor $x + 2$ se cancela, así que la gráfica tiene un hueco en $x = -2$, no una asíntota.
 :::

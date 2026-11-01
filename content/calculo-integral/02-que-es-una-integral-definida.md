@@ -38,8 +38,8 @@ solucion: Las áreas de $[-2, 0]$ y $[0, 2]$ son iguales y de signo contrario: s
 
 :::ejercicio
 Una integral definida es negativa cuando…
-- [ ] la función es creciente.
+- [ ] la función es creciente. :: Una función creciente puede estar toda por encima del eje y dar una integral positiva.
 - [x] predomina el área situada debajo del eje $x$.
-- [ ] el intervalo es muy pequeño.
+- [ ] el intervalo es muy pequeño. :: El tamaño del intervalo cambia la magnitud de la integral, no su signo.
 solucion: Las regiones bajo el eje aportan valores negativos; si predominan, la integral es negativa.
 :::

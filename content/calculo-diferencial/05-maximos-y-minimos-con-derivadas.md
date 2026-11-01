@@ -39,7 +39,7 @@ solucion: $f(3) = 9 - 18 + 2 = -7$. La derivada pasa de negativa a positiva, as�
 :::ejercicio
 En $x = a$ se cumple $f'(a) = 0$ y la derivada pasa de positiva a negativa. ¿Qué hay en $a$?
 - [x] Un máximo local.
-- [ ] Un mínimo local.
-- [ ] No se puede saber nada.
+- [ ] Un mínimo local. :: Si la derivada pasa de positiva a negativa, la función sube y luego baja: eso es un máximo.
+- [ ] No se puede saber nada. :: El cambio de signo de la derivada sí basta: es el criterio de la primera derivada.
 solucion: La función sube antes de $a$ y baja después: alcanza un máximo local.
 :::

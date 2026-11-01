@@ -40,16 +40,16 @@ solucion: $P(x) = (x - 1)(x^2 - 2x + 2)$. El cociente tiene $\Delta = 4 - 8 < 0$
 
 :::ejercicio
 ¿Cuáles son los ceros de $P(x) = x^4 + 13x^2 + 36$?
-- [ ] $\pm 2$ y $\pm 3$
+- [ ] $\pm 2$ y $\pm 3$ :: Con $x$ real, $x^4 + 13x^2 + 36$ siempre es positivo: no tiene ceros reales.
 - [x] $\pm 2i$ y $\pm 3i$
-- [ ] $\pm 4i$ y $\pm 9i$
+- [ ] $\pm 4i$ y $\pm 9i$ :: De $x^2 = -4$ y $x^2 = -9$ salen $\pm 2i$ y $\pm 3i$: falta sacar la raíz.
 solucion: $x^4 + 13x^2 + 36 = (x^2 + 4)(x^2 + 9)$, así que $x^2 = -4$ o $x^2 = -9$.
 :::
 
 :::ejercicio
 ¿Puede un polinomio de grado $3$ con coeficientes reales tener exactamente dos ceros no reales y ninguno real?
-- [ ] Sí, por ejemplo $x^3 + 1$
+- [ ] Sí, por ejemplo $x^3 + 1$ :: $x^3 + 1$ tiene el cero real $x = -1$. Todo polinomio real de grado impar tiene al menos un cero real.
 - [x] No: tiene tres ceros y los no reales vienen en pares, así que al menos uno es real
-- [ ] Solo si su coeficiente principal es negativo
+- [ ] Solo si su coeficiente principal es negativo :: El signo del coeficiente principal no cambia cuántos ceros reales tiene: un grado impar siempre deja uno real.
 solucion: Tiene exactamente $3$ ceros. Los no reales aparecen en pares conjugados, así que no pueden ser los tres: al menos uno es real.
 :::

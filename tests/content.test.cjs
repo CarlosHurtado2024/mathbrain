@@ -44,15 +44,34 @@ test('El Markdown se escapa y admite subtítulos, listas, negrita, cursiva, cód
   assert.match(html, /Cuesta \$5\./);
 });
 
-test('Los ejercicios numéricos y de opción múltiple generan formularios con pista y solución', () => {
-  const result = compile(':::ejercicio\n¿Cuánto vale $2 + 2$?\nrespuesta: 4\ntolerancia: 0,01\npista: Suma.\nsolucion: $2 + 2 = 4$.\n:::\n\n:::ejercicio\nElige:\n- [ ] Tres\n- [x] Cuatro\n:::');
+test('Los ejercicios numéricos y de opción múltiple generan su especificación con pistas, errores frecuentes y solución', () => {
+  const result = compile(':::ejercicio\n¿Cuánto vale $2 + 2$?\nrespuesta: 4\ntolerancia: 0,01\npista: Suma.\npista: Cuenta con los dedos.\nerror: 22 :: Escribiste los dos números juntos.\nsolucion: $2 + 2 = 4$.\n:::\n\n:::ejercicio\nElige:\n- [ ] Tres :: Te falta una unidad.\n- [x] Cuatro\n:::');
   assert.equal(result.exercises, 2);
-  assert.match(result.html, /<form class="lesson-exercise" data-kind="number" data-answer="4" data-tolerance="0.01" novalidate>/);
-  assert.match(result.html, /<details class="lesson-hint"><summary>Ver una pista<\/summary>/);
-  assert.match(result.html, /<form class="lesson-exercise" data-kind="choice" novalidate>/);
-  assert.equal((result.html.match(/type="radio"/g) || []).length, 2);
-  assert.equal((result.html.match(/data-correct/g) || []).length, 1);
-  assert.match(result.html, /id="prueba-1-ejercicio-1"/);
+  const [numeric, choice] = result.steps.filter(step => step.type === 'exercise').map(step => step.data.exercise);
+  assert.equal(numeric.id, 'prueba-1-ejercicio-1');
+  assert.equal(numeric.kind, 'numeric');
+  assert.equal(numeric.answer, '4');
+  assert.equal(numeric.tolerance, 0.01);
+  assert.deepEqual(numeric.hints, ['Suma.', 'Cuenta con los dedos.']);
+  assert.deepEqual(numeric.mistakes, [{ answer: '22', why: 'Escribiste los dos números juntos.' }]);
+  assert.match(numeric.statement, /class="katex"/);
+  assert.match(numeric.solution, /^<p>.*class="katex"/);
+  assert.equal(choice.kind, 'choice');
+  assert.deepEqual(choice.options.map(option => [option.html, Boolean(option.correct), option.why]), [['Tres', false, 'Te falta una unidad.'], ['Cuatro', true, undefined]]);
+});
+
+test('Los bloques :::interactivo compilan sus textos con LaTeX y se validan con el sistema de ejercicios', () => {
+  const result = compile(':::interactivo\n{ "kind": "order", "statement": "Ordena los pasos para resolver $2x + 3 = 7$.", "steps": [{ "text": "Resta 3: $2x = 4$" }, { "text": "Divide entre 2: $x = 2$", "why": "Solo se divide cuando $x$ está **sola** con su coeficiente." }], "hints": ["Deshaz primero la suma."] }\n:::');
+  const spec = result.steps.find(step => step.type === 'exercise').data.exercise;
+  assert.equal(spec.kind, 'order');
+  assert.match(spec.statement, /^<p>Ordena los pasos.*class="katex"/);
+  assert.match(spec.steps[0].html, /^Resta 3: <span class="katex">/);
+  assert.match(spec.steps[1].why, /<strong>sola<\/strong>/);
+  assert.equal(spec.steps[0].text, undefined);
+  assert.throws(() => compile(':::interactivo\n{ "kind": "order", "statement": "x" \n:::'), /no es JSON válido/);
+  assert.throws(() => compile(':::interactivo\n{ "kind": "magia", "statement": "x" }\n:::'), /Tipo «magia» desconocido/);
+  assert.throws(() => compile(':::interactivo\n{ "kind": "symbolic", "statement": "Deriva", "answer": "2x+(" }\n:::'), /No se puede leer la expresión/);
+  assert.throws(() => compile(':::interactivo\n{ "kind": "error", "statement": "Busca", "lines": ["a", "b"], "wrong": 5 }\n:::'), /índice de la línea/);
 });
 
 test('Los errores de contenido indican el archivo, la línea y el motivo', () => {
@@ -60,6 +79,7 @@ test('Los errores de contenido indican el archivo, la línea y el motivo', () =>
   assert.throws(() => compile('Precio $5 sin cerrar.'), /signo \$ sin cerrar/);
   assert.throws(() => compile(':::ejercicio\nPregunta\nrespuesta: cuatro\n:::'), /no es un número/);
   assert.throws(() => compile(':::ejercicio\nPregunta\n- [x] A\n- [x] B\n:::'), /exactamente una opción correcta/);
+  assert.throws(() => compile(':::ejercicio\nPregunta\nrespuesta: 4\nerror: 5\n:::'), /error: valor :: explicación/);
   assert.throws(() => compile(':::resumen\nTexto\n:::'), /Bloque :::resumen desconocido/);
   assert.throws(() => compileLesson('---\ntitulo: X\n---\nTexto', 'a.md', 'a-1'), /Falta el campo «descripcion»/);
   assert.throws(() => compileLesson('---\ntitulo: X\ndescripcion: Y\nvideo: http://inseguro.com/v\n---\n:::idea\nZ\n:::', 'a.md', 'a-1'), /enlace https/);

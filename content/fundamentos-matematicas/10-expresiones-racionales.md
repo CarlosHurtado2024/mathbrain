@@ -51,8 +51,8 @@ solucion: $\dfrac{2(x + 1) - 3(x - 1) + 6}{x^2 - 1} = \dfrac{11 - x}{x^2 - 1}$. 
 
 :::ejercicio
 ¿A qué es igual la fracción compleja $\dfrac{\frac{1}{x} - \frac{1}{a}}{x - a}$?
-- [ ] $\dfrac{1}{ax}$
+- [ ] $\dfrac{1}{ax}$ :: Revisa el signo: $\frac{1}{x} - \frac{1}{a} = \frac{a - x}{ax}$, y $a - x = -(x - a)$.
 - [x] $-\dfrac{1}{ax}$
-- [ ] $\dfrac{x - a}{ax}$
+- [ ] $\dfrac{x - a}{ax}$ :: Falta dividir entre $x - a$: al simplificar, ese factor se cancela.
 solucion: $\dfrac{1}{x} - \dfrac{1}{a} = \dfrac{a - x}{ax} = -\dfrac{x - a}{ax}$. Al dividir entre $x - a$ queda $-\dfrac{1}{ax}$.
 :::

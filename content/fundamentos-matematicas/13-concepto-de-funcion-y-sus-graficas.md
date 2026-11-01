@@ -35,9 +35,9 @@ $y = -2(x - 1)^2 + 3$ se obtiene de $y = x^2$: se desplaza $1$ a la derecha, se 
 
 :::ejercicio
 ¿Cuál es el dominio de $f(x) = \dfrac{\sqrt{4 - x}}{x^2 - 1}$?
-- [ ] $x \le 4$
+- [ ] $x \le 4$ :: Además, el denominador $x^2 - 1$ no puede ser $0$: hay que excluir $x = 1$ y $x = -1$.
 - [x] $x \le 4$, con $x \ne 1$ y $x \ne -1$
-- [ ] $x \ge 4$, con $x \ne \pm 1$
+- [ ] $x \ge 4$, con $x \ne \pm 1$ :: La raíz exige $4 - x \ge 0$, es decir, $x \le 4$, no $x \ge 4$.
 solucion: La raíz exige $4 - x \ge 0$, es decir, $x \le 4$. El denominador se anula en $x = \pm 1$.
 :::
 
@@ -50,8 +50,8 @@ solucion: $f(-3) = -1$ y $f(2) = 4$. La suma es $3$.
 
 :::ejercicio
 ¿Cómo es $f(x) = x^3 - x$?
-- [ ] Par
+- [ ] Par :: Una función par cumple $f(-x) = f(x)$. Aquí $f(-x) = -x^3 + x = -f(x)$.
 - [x] Impar
-- [ ] Ni par ni impar
+- [ ] Ni par ni impar :: Comprueba $f(-x) = -x^3 + x = -f(x)$: sí cumple la condición de función impar.
 solucion: $f(-x) = -x^3 + x = -(x^3 - x) = -f(x)$.
 :::

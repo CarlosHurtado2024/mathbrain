@@ -232,3 +232,133 @@ html[data-theme] .player-card .lesson-exercise:not([data-state="correct"]):not([
 .block-steps > li:focus { outline: none; }
 .block-steps > li:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 4px; border-radius: 6px; }
 .block-steps-next { margin-top: 18px; }
+
+/* ---------- Sistema de ejercicios (src/exercises.js) ----------
+   Un componente por tipo de ejercicio sobre los tokens de identidad; funcionan igual en ambos temas.
+   La tarjeta de la lección es el único contenedor: dentro hay superficies tonales, no tarjetas anidadas. */
+html[data-theme] .exercise { display: grid; gap: 16px; }
+html[data-theme] .player-card .exercise-submit { display: none; }
+html[data-theme] .exercise-answer { display: grid; gap: 14px; min-width: 0; }
+html[data-theme] .exercise-help { margin: 0; color: var(--brand-secondary); font-size: 14px; line-height: 1.55; }
+html[data-theme] .exercise-meta { margin: 0; color: var(--brand-tertiary); font-size: 13px; font-variant-numeric: tabular-nums; }
+html[data-theme] .exercise-meta:empty { display: none; }
+html[data-theme] .exercise-visual { margin: 0; padding: 12px; border-radius: 12px; background: var(--brand-inset); }
+html[data-theme] .exercise-visual :is(img, svg) { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+html[data-theme] .exercise-visual figcaption { margin-top: 8px; color: var(--brand-secondary); font-size: 13px; text-align: center; }
+html[data-theme] .exercise-unit { align-self: center; color: var(--brand-secondary); font-weight: 700; }
+
+/* Retroalimentación: explica por qué. El color nunca es la única señal: el texto empieza con el veredicto. */
+html[data-theme] .exercise-feedback { padding: 14px 16px; border: 1px solid var(--brand-line-strong); border-radius: 12px; background: var(--brand-inset); color: var(--brand-ink); font-size: 15px; line-height: 1.6; }
+html[data-theme] .exercise-feedback[hidden] { display: none; }
+html[data-theme] .exercise-feedback p { margin: 0; }
+html[data-theme] .exercise-feedback p + p { margin-top: 6px; }
+html[data-theme] .exercise-feedback strong { margin-right: 4px; }
+html[data-theme] .exercise-feedback.is-correct { border-color: var(--brand-primary-line); background: var(--brand-primary-soft); }
+html[data-theme] .exercise-feedback.is-correct strong { color: var(--brand-primary); }
+html[data-theme] .exercise-feedback.is-incorrect { border-color: color-mix(in srgb, var(--brand-danger) 45%, transparent); background: var(--brand-danger-soft); }
+html[data-theme] .exercise-feedback.is-incorrect strong { color: var(--brand-danger); }
+html[data-theme] .exercise-feedback.is-revealed { border-color: color-mix(in srgb, var(--brand-warning) 45%, transparent); background: var(--brand-warning-soft); }
+html[data-theme] .exercise-feedback-hint { color: var(--brand-secondary); font-size: 14px; }
+
+/* Pistas progresivas: aparecen una a una, numeradas. */
+html[data-theme] .exercise-hints { display: grid; gap: 8px; }
+html[data-theme] .exercise-hints ol { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+html[data-theme] .exercise-hints li { padding: 12px 14px; border-radius: 12px; background: var(--brand-inset); color: var(--brand-ink); font-size: 15px; line-height: 1.6; }
+html[data-theme] .exercise-hints li[hidden] { display: none; }
+html[data-theme] .exercise-hint-label { display: block; margin-bottom: 2px; color: var(--brand-accent-text); font-size: 13px; font-weight: 800; }
+html[data-theme] .exercise-hint-button { justify-self: start; min-height: 44px; color: var(--brand-primary); font-weight: 700; }
+
+/* Respuestas escritas y espacios en blanco. */
+html[data-theme] .exercise-expression input[type="text"] { font-size: 18px; letter-spacing: .01em; }
+html[data-theme] .exercise-equation { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 6px; margin: 0; font-size: 18px; line-height: 2; }
+html[data-theme] .exercise-blank { width: 4.6em; min-height: 44px; padding: 0 8px; border: 2px solid var(--brand-line-strong); border-radius: 10px; background: var(--brand-inset); color: var(--brand-ink); font: inherit; font-size: 17px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
+html[data-theme] :is(.exercise-blank, .exercise-proof select):focus-visible { outline: 3px solid var(--brand-primary); outline-offset: 2px; }
+html[data-theme] :is(.exercise-blank, .exercise-proof select)[aria-invalid="true"] { border-color: var(--brand-danger); background: var(--brand-danger-soft); }
+
+/* Ordenar pasos: filas numeradas que se mueven con botones o arrastrando. */
+html[data-theme] .exercise-order { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; counter-reset: paso; }
+html[data-theme] .exercise-order li { counter-increment: paso; display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 8px 8px 12px; border: 2px solid var(--brand-line); border-radius: 12px; background: var(--brand-inset); cursor: grab; transition: border-color .2s var(--brand-ease), background-color .2s var(--brand-ease); }
+html[data-theme] .exercise-order li::before { content: counter(paso); display: grid; place-items: center; width: 26px; height: 26px; border-radius: 999px; background: var(--brand-surface); color: var(--brand-secondary); font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; }
+html[data-theme] .exercise-order-text { min-width: 0; font-size: 15.5px; line-height: 1.5; overflow-wrap: anywhere; }
+html[data-theme] .exercise-order-moves { display: flex; gap: 4px; }
+html[data-theme] .exercise-move { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid var(--brand-line-strong); border-radius: 10px; background: var(--brand-surface); color: var(--brand-ink); cursor: pointer; }
+html[data-theme] .exercise-move:hover { border-color: var(--brand-primary-line); color: var(--brand-primary); }
+html[data-theme] .exercise-move:focus-visible { outline: 3px solid var(--brand-primary); outline-offset: 2px; }
+html[data-theme] .exercise-order li:first-child [data-move="-1"], html[data-theme] .exercise-order li:last-child [data-move="1"] { opacity: .35; pointer-events: none; }
+html[data-theme] .exercise-order li.is-dragging { border-style: dashed; opacity: .7; }
+html[data-theme] .exercise-order li.is-ok { border-color: var(--brand-primary-line); }
+html[data-theme] .exercise-order li.is-ok::before { background: var(--brand-primary-soft); color: var(--brand-primary); }
+html[data-theme] .exercise-order li.is-wrong { border-color: var(--brand-danger); background: var(--brand-danger-soft); }
+
+/* Arrastrar y soltar: fichas que van del montón a su grupo. */
+html[data-theme] .exercise-pool, html[data-theme] .exercise-zone-items { display: flex; flex-wrap: wrap; gap: 8px; min-height: 60px; align-content: flex-start; }
+html[data-theme] .exercise-pool { padding: 10px; border: 1px dashed var(--brand-line-strong); border-radius: 12px; }
+html[data-theme] .exercise-pool:empty::after { content: "Colocaste todas las fichas."; align-self: center; color: var(--brand-tertiary); font-size: 14px; }
+html[data-theme] .exercise-zones { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+html[data-theme] .exercise-zone { display: grid; align-content: start; gap: 10px; padding: 12px; border: 2px solid var(--brand-line); border-radius: 12px; background: var(--brand-inset); transition: border-color .2s var(--brand-ease); }
+html[data-theme] .exercise-zone-title { margin: 0; color: var(--brand-ink); font-size: 14px; font-weight: 800; }
+html[data-theme] .exercise-zone-drop { display: none; min-height: 44px; border: 1px dashed var(--brand-primary-line); border-radius: 10px; background: transparent; color: var(--brand-primary); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+html[data-theme] .exercise-classify.is-placing .exercise-zone { border-color: var(--brand-primary-line); }
+html[data-theme] .exercise-classify.is-placing .exercise-zone-drop { display: block; }
+html[data-theme] .exercise-chip { display: inline-flex; align-items: center; min-height: 44px; padding: 6px 14px; border: 2px solid var(--brand-line-strong); border-radius: 999px; background: var(--brand-surface); color: var(--brand-ink); font: inherit; font-size: 16px; font-weight: 700; cursor: grab; touch-action: none; user-select: none; }
+html[data-theme] .exercise-chip[aria-pressed="true"] { border-color: var(--brand-primary); background: var(--brand-primary-soft); color: var(--brand-primary); }
+html[data-theme] .exercise-chip.is-dragging { position: relative; z-index: 5; cursor: grabbing; box-shadow: 0 12px 28px rgb(0 0 0 / .35); }
+html[data-theme] .exercise-chip.is-wrong { border-color: var(--brand-danger); background: var(--brand-danger-soft); }
+html[data-theme] .exercise-chip:focus-visible { outline: 3px solid var(--brand-primary); outline-offset: 2px; }
+
+/* Plano cartesiano para construir gráficas y mover parámetros. */
+html[data-theme] .exercise-plot { display: block; width: 100%; max-width: 440px; height: auto; margin: 0 auto; border-radius: 12px; background: var(--brand-inset); touch-action: manipulation; }
+html[data-theme] .exercise-graph .exercise-plot { cursor: crosshair; }
+html[data-theme] .exercise-plot .plot-grid { stroke: var(--brand-line); stroke-width: 1; }
+html[data-theme] .exercise-plot .plot-axis { stroke: var(--brand-line-strong); stroke-width: 1.6; }
+html[data-theme] .exercise-plot .plot-label { fill: var(--brand-secondary); font-size: 12px; font-style: italic; }
+html[data-theme] .exercise-plot .plot-student { fill: none; stroke: var(--brand-primary); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+html[data-theme] .exercise-plot .plot-target { fill: none; stroke: var(--brand-warning); stroke-width: 2; stroke-dasharray: 6 5; }
+html[data-theme] .exercise-plot .plot-point { fill: var(--brand-primary); stroke: var(--brand-surface); stroke-width: 2.5; cursor: pointer; }
+html[data-theme] .exercise-plot .plot-point.is-wrong { fill: var(--brand-danger); }
+html[data-theme] .exercise-plot .plot-goal { fill: none; stroke: var(--brand-warning); stroke-width: 2.5; }
+html[data-theme] .exercise-graph-tools { display: grid; gap: 10px; }
+html[data-theme] .exercise-graph-input { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+html[data-theme] .exercise-graph-input label { display: inline-flex; align-items: center; gap: 6px; color: var(--brand-secondary); font-weight: 700; font-style: italic; }
+html[data-theme] .exercise-graph-input input { width: 4.2em; min-height: 44px; padding: 0 8px; border: 1px solid var(--brand-line-strong); border-radius: 10px; background: var(--brand-inset); color: var(--brand-ink); font: inherit; font-size: 16px; font-style: normal; text-align: center; }
+html[data-theme] .exercise-params { display: grid; gap: 12px; }
+html[data-theme] .exercise-param { display: grid; gap: 4px; color: var(--brand-ink); font-size: 15px; }
+html[data-theme] .exercise-param output { font-weight: 800; font-variant-numeric: tabular-nums; color: var(--brand-primary); }
+html[data-theme] .exercise-param input[type="range"] { width: 100%; min-height: 44px; accent-color: var(--brand-primary); }
+
+/* Demostraciones: cada paso con su justificación. */
+html[data-theme] .exercise-proof { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+html[data-theme] .exercise-proof li { display: grid; gap: 8px; padding: 12px 14px; border-radius: 12px; background: var(--brand-inset); }
+html[data-theme] .exercise-proof-statement { min-width: 0; font-size: 17px; overflow-x: auto; }
+html[data-theme] .exercise-proof select { width: 100%; min-height: 44px; padding: 0 12px; border: 2px solid var(--brand-line-strong); border-radius: 10px; background: var(--brand-surface); color: var(--brand-ink); font: inherit; font-size: 15px; }
+
+/* Simulación: primero estimar, después comparar con la frecuencia. */
+html[data-theme] .exercise-sim { display: grid; gap: 12px; padding: 14px; border-radius: 12px; background: var(--brand-inset); }
+html[data-theme] .exercise-sim-event { margin: 0; color: var(--brand-ink); font-weight: 700; }
+html[data-theme] .exercise-sim-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+html[data-theme] .exercise-sim-result p { margin: 0; color: var(--brand-secondary); font-size: 14.5px; font-variant-numeric: tabular-nums; }
+html[data-theme] .exercise-sim-result strong { color: var(--brand-ink); }
+html[data-theme] .exercise-sim-bar { height: 10px; margin-top: 8px; border-radius: 999px; background: var(--brand-surface); overflow: hidden; }
+html[data-theme] .exercise-sim-bar span { display: block; height: 100%; border-radius: inherit; background: var(--brand-primary); transition: width .5s var(--brand-ease); }
+
+/* Encontrar el error: líneas numeradas que se tocan. */
+html[data-theme] .exercise-lines { display: grid; gap: 8px; margin: 0; padding: 0; border: 0; }
+html[data-theme] .exercise-line { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr); align-items: center; gap: 10px; min-height: 54px; padding: 8px 14px 8px 10px; border: 2px solid var(--brand-line); border-radius: 12px; background: var(--brand-inset); cursor: pointer; }
+html[data-theme] .exercise-line input { position: absolute; opacity: 0; pointer-events: none; }
+html[data-theme] .exercise-line-number { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 999px; background: var(--brand-surface); color: var(--brand-secondary); font-size: 13px; font-weight: 800; }
+html[data-theme] .exercise-line-text { min-width: 0; font-size: 17px; overflow-x: auto; }
+html[data-theme] .exercise-line:has(input:focus-visible) { outline: 3px solid var(--brand-primary); outline-offset: 2px; }
+html[data-theme] .exercise-line:has(input:checked) { border-color: var(--brand-primary); background: var(--brand-primary-soft); }
+html[data-theme] .exercise-line:has(input:checked) .exercise-line-number { background: var(--brand-primary); color: var(--brand-on-primary); }
+html[data-theme] .lesson-exercise[data-state="incorrect"] .exercise-line:has(input:checked) { border-color: var(--brand-danger); background: var(--brand-danger-soft); }
+html[data-theme] .lesson-exercise[data-state="incorrect"] .exercise-line:has(input:checked) .exercise-line-number { background: var(--brand-danger); color: var(--brand-surface); }
+html[data-theme] .exercise-line.is-answer { border-color: var(--brand-warning); }
+
+/* Problema en contexto: la situación va en una superficie propia, antes de la pregunta. */
+html[data-theme] .exercise-context { padding: 14px 16px; border-radius: 12px; background: var(--brand-inset); color: var(--brand-ink); font-size: 15.5px; line-height: 1.65; }
+html[data-theme] .exercise-context p { margin: 0; }
+html[data-theme] .exercise-ask p { margin: 0; font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme] :is(.exercise-order li, .exercise-zone, .exercise-sim-bar span) { transition: none; }
+}

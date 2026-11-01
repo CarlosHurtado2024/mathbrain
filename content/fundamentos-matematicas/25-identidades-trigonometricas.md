@@ -43,8 +43,8 @@ solucion: $\cos^2 x \cdot \sec^2 x = 1$.
 :::ejercicio
 ¿A qué es igual $\dfrac{\sec x - \cos x}{\tan x}$?
 - [x] $\sen x$
-- [ ] $\cos x$
-- [ ] $\tan x$
+- [ ] $\cos x$ :: Escribe todo con senos y cosenos: $\frac{\sec x - \cos x}{\tan x} = \frac{\sen^2 x / \cos x}{\sen x / \cos x} = \sen x$.
+- [ ] $\tan x$ :: Al simplificar, el $\cos x$ del numerador y del denominador se cancela y queda $\sen x$.
 solucion: $\dfrac{\frac{1}{\cos x} - \cos x}{\frac{\sen x}{\cos x}} = \dfrac{1 - \cos^2 x}{\sen x} = \dfrac{\sen^2 x}{\sen x} = \sen x$.
 :::
 
@@ -53,4 +53,55 @@ Para mostrar que $\sen(x + y) = \sen x + \sen y$ no es una identidad, toma $x = 
 respuesta: 2
 pista: $\sen\tfrac{\pi}{2} = 1$.
 solucion: El lado derecho vale $1 + 1 = 2$, pero el izquierdo vale $\sen\pi = 0$. Un solo contraejemplo basta.
+:::
+
+:::interactivo
+{
+  "kind": "proof",
+  "statement": "Demuestra que $1 + \\tan^2 x = \\sec^2 x$ eligiendo la justificación de cada paso.",
+  "reasons": [
+    {
+      "id": "tan",
+      "label": "Definición de tangente"
+    },
+    {
+      "id": "suma",
+      "label": "Suma de fracciones con el mismo denominador"
+    },
+    {
+      "id": "pitagoras",
+      "label": "Identidad pitagórica"
+    },
+    {
+      "id": "sec",
+      "label": "Definición de secante"
+    }
+  ],
+  "steps": [
+    {
+      "text": "$1 + \\tan^2 x = 1 + \\frac{\\sen^2 x}{\\cos^2 x}$",
+      "reason": "tan",
+      "why": "Aquí se reemplazó $\\tan x$ por $\\frac{\\sen x}{\\cos x}$: es su definición."
+    },
+    {
+      "text": "$= \\frac{\\cos^2 x + \\sen^2 x}{\\cos^2 x}$",
+      "reason": "suma",
+      "why": "Se escribió $1 = \\frac{\\cos^2 x}{\\cos^2 x}$ y se sumaron dos fracciones con el mismo denominador."
+    },
+    {
+      "text": "$= \\frac{1}{\\cos^2 x}$",
+      "reason": "pitagoras",
+      "why": "El numerador cambió por $1$ gracias a $\\sen^2 x + \\cos^2 x = 1$."
+    },
+    {
+      "text": "$= \\sec^2 x$",
+      "reason": "sec",
+      "why": "Por definición, $\\sec x = \\frac{1}{\\cos x}$."
+    }
+  ],
+  "hints": [
+    "Mira qué cambió de una línea a la siguiente."
+  ],
+  "solution": "Tangente como cociente, suma con denominador común, identidad pitagórica y definición de secante."
+}
 :::

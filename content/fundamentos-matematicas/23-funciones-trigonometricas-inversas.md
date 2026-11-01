@@ -40,9 +40,9 @@ solucion: $\sen(-30^\circ) = -\tfrac{1}{2}$, así que $\sen^{-1}\left(-\tfrac{1}
 
 :::ejercicio
 ¿Cuánto vale $\sen^{-1}\left(\sen\tfrac{5\pi}{6}\right)$?
-- [ ] $\tfrac{5\pi}{6}$
+- [ ] $\tfrac{5\pi}{6}$ :: $\sen^{-1}$ solo devuelve ángulos entre $-\frac{\pi}{2}$ y $\frac{\pi}{2}$, y $\frac{5\pi}{6}$ está fuera.
 - [x] $\tfrac{\pi}{6}$
-- [ ] $-\tfrac{\pi}{6}$
+- [ ] $-\tfrac{\pi}{6}$ :: $\sen \frac{5\pi}{6} = \frac{1}{2}$ es positivo, así que el ángulo devuelto también es positivo.
 solucion: $\sen\tfrac{5\pi}{6} = \tfrac{1}{2}$ y el arcoseno devuelve el ángulo de $\left[-\tfrac{\pi}{2}, \tfrac{\pi}{2}\right]$ con ese seno: $\tfrac{\pi}{6}$.
 :::
 

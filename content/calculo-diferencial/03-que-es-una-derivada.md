@@ -82,8 +82,8 @@ solucion: $\dfrac{(2+h)^3 - 8}{h} = 12 + 6h + h^2 \to 12$ cuando $h \to 0$.
 
 :::ejercicio
 Si $f'(a) < 0$, ¿qué podemos decir de la gráfica de $f$ cerca de $a$?
-- [ ] Que $f(a)$ es negativo.
+- [ ] Que $f(a)$ es negativo. :: El signo de $f'(a)$ habla de la pendiente, no del valor de $f$: la función puede ser positiva y estar bajando.
 - [x] Que la función decrece cerca de $a$.
-- [ ] Que en $a$ hay un mínimo.
+- [ ] Que en $a$ hay un mínimo. :: En un mínimo la derivada vale $0$ (o no existe); si $f'(a) < 0$, la función todavía está bajando.
 solucion: El signo de la derivada describe la **dirección** del cambio, no el signo del valor $f(a)$. Una pendiente negativa indica que la gráfica baja al avanzar hacia la derecha.
 :::

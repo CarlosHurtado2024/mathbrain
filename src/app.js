@@ -6,6 +6,8 @@
   const marketing = window.ZUKA_MARKETING;
   // Motor de bloques (src/lesson-engine.js) y fuente del contenido (src/content-source.js).
   const engine = window.ZUKA_ENGINE;
+  // Sistema de ejercicios (src/exercises.js): validación, retroalimentación, pistas y registro de cada intento.
+  const exercises = window.ZUKA_EXERCISES;
   const contentSource = window.ZUKA_CONTENT || { blocks: lesson => engine.playable(engine.fromLesson(lesson)), refreshLesson: async () => null };
   const select = (selector, root = document) => root.querySelector(selector);
   const selectAll = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -474,7 +476,7 @@
     const exam = type === 'parcial' ? trainingExams(course)[index] : null;
     const unit = type === 'unidad' ? courseModules(course)[index] : null;
     const module = unit || (exam && { index: `parcial-${number}`, name: `${exam.title} · ${course.title}`, kicker: course.title });
-    const steps = unit ? reviewSteps(unit) : exam?.exercises.map(({ step }) => ({ type: 'exercise', html: step.html.replace(/^(?:<h2>[\s\S]*?<\/h2>)+/, '') }));
+    const steps = unit ? reviewSteps(unit) : exam?.exercises.map(({ step }) => ({ type: 'exercise', html: step.html.replace(/^(?:<h2>[\s\S]*?<\/h2>)+/, ''), data: step.data }));
     if (!module || !steps?.length) return false;
     const title = unit ? `Simulacro: ${unit.name}` : `${exam.title} · ${course.title}`;
     document.title = `${title} | Zuka`;
@@ -566,6 +568,7 @@
 
   // Comprueba la respuesta de un ejercicio de lección y escribe la retroalimentación. Devuelve true, false o null (respuesta no válida).
   function checkExercise(form) {
+    if (exercises?.has(form)) return exercises.check(form).result;
     const feedback = select('.answer-feedback', form);
     let result;
     if (form.dataset.kind === 'choice') {
@@ -589,6 +592,7 @@
 
   function bindLessonExercises(resource) {
     const forms = selectAll('.lesson-exercise');
+    forms.forEach(form => exercises?.mount(form));
     forms.forEach(form => form.addEventListener('submit', event => {
       event.preventDefault();
       const result = checkExercise(form);
@@ -831,7 +835,7 @@
   // Repaso del nivel: un reto de cada lección del módulo, para comprobar lo aprendido antes de seguir.
   function reviewSteps(module) {
     return module.lessons.map(({ lesson }) => (lesson.steps || []).find(step => engine.graded(engine.normalize(step)))).filter(Boolean).slice(0, 8)
-      .map(step => ({ type: 'exercise', html: step.html.replace(/^(?:<h2>[\s\S]*?<\/h2>)+/, '') }));
+      .map(step => ({ type: 'exercise', html: step.html.replace(/^(?:<h2>[\s\S]*?<\/h2>)+/, ''), data: step.data }));
   }
 
   function renderReview(course, index) {
@@ -858,8 +862,8 @@
     // El motor elige el componente según el tipo de bloque; el reproductor solo pone el marco.
     const label = player.training && step.type === 'intro' ? '' : engine.label(step);
     const variant = step.data?.variant ? ` is-${escape(step.data.variant)}` : '';
-    select('#player-stage').innerHTML = `<article class="player-card reader-body lesson-content step-${step.type}${variant}" id="player-card" tabindex="-1">${label ? `<p class="player-step-label">${label}</p>` : ''}${engine.render(step, { title: player.title })}</article>`;
-    engine.mount(step, select('#player-card'), { title: player.title });
+    select('#player-stage').innerHTML = `<article class="player-card reader-body lesson-content step-${step.type}${variant}" id="player-card" tabindex="-1">${label ? `<p class="player-step-label">${label}</p>` : ''}${engine.render(step, stepContext())}</article>`;
+    engine.mount(step, select('#player-card'), stepContext());
     const form = document.querySelector('#player-stage .lesson-exercise');
     form?.addEventListener('submit', event => {
       event.preventDefault();
@@ -868,6 +872,8 @@
     });
     renderPlayerBar();
   }
+
+  const stepContext = () => ({ title: player.title, lessonId: player.resource?.id || `${player.kind}-${player.course?.id || ''}`, index: player.index });
 
   function answerStep(result) {
     player.retryReady = false;
@@ -893,7 +899,8 @@
   function revealStep() {
     const form = document.querySelector('#player-stage .lesson-exercise');
     if (player.results[player.index] !== 'correct') player.results[player.index] = 'revealed';
-    if (form) {
+    if (form && exercises?.has(form)) exercises.reveal(form);
+    else if (form) {
       form.dataset.revealed = 'true';
       const solution = select('.lesson-solution', form);
       if (solution) solution.open = true;
@@ -911,7 +918,8 @@
     const result = player.results[player.index];
     const last = player.index === player.steps.length - 1;
     const graded = engine.graded(step);
-    const solution = graded && /lesson-solution/.test(step.html);
+    const solution = graded && engine.hasSolution(step);
+    const structured = Boolean(step.data?.exercise);
     const back = player.index > 0 ? `<button class="player-back" type="button" data-player-back="1" aria-label="Paso anterior">${icon('left')}</button>` : '';
     const next = `<button class="button button-primary player-continue" type="button" data-player-next="1">${last ? 'Terminar' : 'Continuar'}</button>`;
     const reveal = player.revealArmed
@@ -933,7 +941,7 @@
         verdict = '<strong>Así se resuelve.</strong>';
       } else if (result === 'retry' && !player.retryReady) {
         state = 'is-retry'; mood = 'animo';
-        verdict = `<strong>Casi.</strong>${armedNote || '<span>Lee la pista y vuelve a intentarlo.</span>'}`;
+        verdict = `<strong>Casi.</strong>${armedNote || (structured ? '<span>Lee por qué en la tarjeta y vuelve a intentarlo.</span>' : '<span>Lee la pista y vuelve a intentarlo.</span>')}`;
         extra = reveal;
         action = '<button class="button player-check" type="button" data-player-retry="1">Intentar de nuevo</button>';
       } else {
@@ -1151,7 +1159,17 @@
   }
 
   // Perfil del estudiante (#perfil). Todo se calcula con los datos guardados en este dispositivo (y unidos con la cuenta, si hay sesión).
-  const storageKeys = ['mathbrain-progress', 'mathbrain-stats', 'mathbrain-saved', 'mathbrain-recent', 'mathbrain-profile', 'mathbrain-theme', 'zuka-lecciones-en-curso'];
+  const storageKeys = ['mathbrain-progress', 'mathbrain-stats', 'mathbrain-saved', 'mathbrain-recent', 'mathbrain-profile', 'mathbrain-theme', 'zuka-lecciones-en-curso', 'zuka-desempeno'];
+
+  // Registro de desempeño (los últimos 300 intentos): ejercicio, tipo, intento, acierto, pistas y tiempo.
+  const PERFORMANCE_KEY = 'zuka-desempeno';
+  exercises?.onAttempt(entry => {
+    let log = [];
+    try { log = JSON.parse(localStorage.getItem(PERFORMANCE_KEY) || '[]'); } catch { /* Se empieza de nuevo. */ }
+    log = [...(Array.isArray(log) ? log : []), entry].slice(-300);
+    try { localStorage.setItem(PERFORMANCE_KEY, JSON.stringify(log)); } catch { /* Sin espacio, el intento solo viaja a la nube. */ }
+    cloudRecord('attempt', entry);
+  });
 
   function loadProfile() {
     try {
@@ -1586,14 +1604,16 @@
     if (event.target.closest('[data-player-retry]')) {
       // Intentar de nuevo: se limpia la respuesta y vuelve «Comprobar»; la pista sigue abierta.
       const form = document.querySelector('#player-stage .lesson-exercise');
-      form?.querySelectorAll('input[type="radio"]').forEach(input => { input.checked = false; });
-      const text = form?.querySelector('input[type="text"], input:not([type])');
+      const structured = exercises?.has(form);
+      if (structured) exercises.retry(form);
+      else form?.querySelectorAll('input[type="radio"]').forEach(input => { input.checked = false; });
+      const text = structured ? null : form?.querySelector('input[type="text"], input:not([type])');
       if (text) text.value = '';
       if (form) form.dataset.state = '';
       player.retryReady = true;
       player.revealArmed = false;
       renderPlayerBar();
-      (text || form?.querySelector('input'))?.focus();
+      if (!structured) (text || form?.querySelector('input'))?.focus();
       return;
     }
     if (event.target.closest('[data-player-why]')) {

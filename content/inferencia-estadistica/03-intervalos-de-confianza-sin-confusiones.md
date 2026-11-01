@@ -40,7 +40,7 @@ solucion: $80 + 1{,}96 \cdot 1 = 81{,}96$. El intervalo va de $78{,}04$ a $81{,}
 :::ejercicio
 ¿Cuál es la interpretación correcta de «intervalo de confianza del $95\,\%$»?
 - [x] Si repitiéramos el muestreo muchas veces, cerca del $95\,\%$ de los intervalos construidos así contendrían el parámetro.
-- [ ] Hay un $95\,\%$ de probabilidad de que el parámetro esté en este intervalo ya calculado.
-- [ ] El $95\,\%$ de los datos está dentro del intervalo.
+- [ ] Hay un $95\,\%$ de probabilidad de que el parámetro esté en este intervalo ya calculado. :: El parámetro es fijo: este intervalo lo contiene o no. El $95\,\%$ describe el método al repetirse.
+- [ ] El $95\,\%$ de los datos está dentro del intervalo. :: El intervalo estima un parámetro, como la media; no describe dónde están los datos individuales.
 solucion: El $95\,\%$ describe el procedimiento, no un intervalo concreto: cada intervalo calculado contiene el parámetro o no lo contiene.
 :::

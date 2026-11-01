@@ -38,8 +38,8 @@ solucion: $d = \dfrac{6}{12} = 0{,}5$: una diferencia de media desviación está
 
 :::ejercicio
 Un estudio observacional encuentra que quienes desayunan obtienen mejores notas. ¿Qué podemos concluir?
-- [ ] Que desayunar causa mejores notas.
+- [ ] Que desayunar causa mejores notas. :: Un estudio observacional muestra asociación; la causa podría ser otro factor, como los hábitos del hogar.
 - [x] Que hay una asociación; otros factores podrían explicarla.
-- [ ] Nada, porque las asociaciones no sirven.
+- [ ] Nada, porque las asociaciones no sirven. :: Las asociaciones sí informan, aunque por sí solas no prueban una causa.
 solucion: Una asociación observada no establece una causa: puede haber factores comunes, como los hábitos familiares.
 :::

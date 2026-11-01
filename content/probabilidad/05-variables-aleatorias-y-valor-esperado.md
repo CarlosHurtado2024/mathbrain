@@ -39,7 +39,7 @@ solucion: $2 - 1{,}6 = 0{,}4$ puntos por partida, en promedio.
 :::ejercicio
 El valor esperado de un dado es $3{,}5$. ¿Qué significa?
 - [x] Es el promedio que se aproxima al repetir muchos lanzamientos.
-- [ ] Es el resultado más probable.
-- [ ] Es el valor que saldrá en el próximo lanzamiento.
+- [ ] Es el resultado más probable. :: En un dado justo todos los resultados son igual de probables, y $3{,}5$ ni siquiera puede salir.
+- [ ] Es el valor que saldrá en el próximo lanzamiento. :: Ningún lanzamiento da $3{,}5$: es un promedio a largo plazo, no una predicción.
 solucion: El valor esperado es un promedio teórico a largo plazo; ninguna cara muestra $3{,}5$.
 :::

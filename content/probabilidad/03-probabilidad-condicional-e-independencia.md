@@ -39,7 +39,7 @@ solucion: $0{,}5 \cdot 0{,}3 = 0{,}15$.
 :::ejercicio
 $A$ y $B$ son incompatibles y ambos tienen probabilidad positiva. ¿Son independientes?
 - [x] No: si ocurre $B$, $A$ ya no puede ocurrir.
-- [ ] Sí, siempre.
-- [ ] Solo si $P(A) = P(B)$.
+- [ ] Sí, siempre. :: Si ocurre $B$, $A$ queda descartado: $P(A \mid B) = 0 \ne P(A)$.
+- [ ] Solo si $P(A) = P(B)$. :: Que tengan la misma probabilidad no las hace independientes: si una ocurre, la otra no puede ocurrir.
 solucion: Si son incompatibles, $P(A \mid B) = 0 \ne P(A)$: saber que ocurrió $B$ cambia la probabilidad de $A$.
 :::

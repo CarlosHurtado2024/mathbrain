@@ -59,7 +59,15 @@
   register('concept', { label: '', variants: { key: 'Idea clave', note: 'Atención' } });
   register('formula', { label: 'Fórmula' });
   register('worked_example', { label: 'Ejemplo' });
-  register('exercise', { label: 'Tu turno', graded: true });
+  // Ejercicio: si trae una especificación (data.exercise), lo dibuja el sistema de ejercicios (src/exercises.js);
+  // los ejercicios antiguos llegan ya como HTML.
+  const exerciseKey = (block, context) => block.data.exercise?.id || `${context.lessonId || 'leccion'}-bloque-${context.index ?? 0}`;
+  register('exercise', {
+    label: 'Tu turno',
+    graded: true,
+    render: (block, context) => block.data.exercise && window.ZUKA_EXERCISES ? `${block.html}${window.ZUKA_EXERCISES.render(block.data.exercise, { key: exerciseKey(block, context), lessonId: context.lessonId })}` : block.html,
+    mount: element => { const form = element.querySelector('form[data-exercise]'); if (form) window.ZUKA_EXERCISES?.mount(form); }
+  });
   // Paso a paso: los pasos aparecen de uno en uno, para pensar el siguiente antes de verlo.
   register('step_by_step', {
     label: 'Paso a paso',
@@ -98,16 +106,21 @@
 
   // Solo se muestran los bloques que este motor sabe dibujar y que tienen algo que mostrar.
   function playable(blocks) {
-    return blocks.map(normalize).filter(block => registry.has(block.type) && (block.html || block.data.src || block.data.steps));
+    return blocks.map(normalize).filter(block => registry.has(block.type) && (block.html || block.data.src || block.data.steps || block.data.exercise));
   }
 
   function definition(block) { return registry.get(block.type) || registry.get('concept'); }
 
-  const graded = block => Boolean(definition(block).graded) || /class="lesson-exercise"/.test(block.html);
+  const graded = block => Boolean(definition(block).graded) || Boolean(block.data?.exercise) || /class="lesson-exercise"/.test(block.html);
+  // ¿El bloque trae una explicación de la solución? Habilita «¿Por qué?» al acertar.
+  const hasSolution = block => /lesson-solution/.test(block.html) || Boolean(block.data?.exercise?.solution);
   const label = block => definition(block).variants?.[block.data.variant] || definition(block).label;
   const render = (block, context = {}) => definition(block).render(block, context);
   const immersive = block => Boolean(definition(block).immersive?.(block));
   const mount = (block, element, context = {}) => { definition(block).mount?.(element, block, context); };
 
-  window.ZUKA_ENGINE = { TYPES, register, normalize, fromLesson, playable, graded, label, render, immersive, mount, videoSource, videoHtml, has: type => registry.has(type) };
+  // HTML de la lectura completa (una página): los bloques con componente propio se dibujan igual que en la lección.
+  const reading = (step, context = {}) => { const block = normalize(step); return block.data.exercise ? render(block, context) : block.html; };
+
+  window.ZUKA_ENGINE = { TYPES, register, normalize, fromLesson, playable, graded, hasSolution, label, render, reading, immersive, mount, videoSource, videoHtml, has: type => registry.has(type) };
 })();

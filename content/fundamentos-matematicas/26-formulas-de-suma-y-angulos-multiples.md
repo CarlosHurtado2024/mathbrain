@@ -57,7 +57,7 @@ solucion: $\tan 15^\circ = \dfrac{1 - \frac{\sqrt{3}}{3}}{1 + \frac{\sqrt{3}}{3}
 :::ejercicio
 ¿Cómo se escribe $\sen 5x\cos 3x$ como suma?
 - [x] $\tfrac{1}{2}(\sen 8x + \sen 2x)$
-- [ ] $\sen 8x + \sen 2x$
-- [ ] $\tfrac{1}{2}(\cos 8x + \cos 2x)$
+- [ ] $\sen 8x + \sen 2x$ :: Falta el factor $\frac{1}{2}$: $\sen A \cos B = \frac{1}{2}[\sen(A + B) + \sen(A - B)]$.
+- [ ] $\tfrac{1}{2}(\cos 8x + \cos 2x)$ :: Esa fórmula corresponde a $\cos A \cos B$; un producto de seno por coseno da senos.
 solucion: Con $u = 5x$ y $v = 3x$: $\sen u\cos v = \tfrac{1}{2}[\sen(u + v) + \sen(u - v)] = \tfrac{1}{2}(\sen 8x + \sen 2x)$.
 :::

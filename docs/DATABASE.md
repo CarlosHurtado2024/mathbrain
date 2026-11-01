@@ -92,9 +92,10 @@ Esquema: [`supabase/migrations/`](../supabase/migrations/) (aplicado en el proye
 | `study_days` | `user_id`, `day` | `days` de `mathbrain-stats` (racha y semana) |
 | `unit_reviews` | `user_id`, `review_key`, `passed_at` | `reviews` de `mathbrain-stats` |
 | `saved_resources` | `user_id`, `resource_id`, `saved_at` | `mathbrain-saved` |
+| `exercise_attempts` | `user_id`, `lesson_id`, `exercise_key`, `kind`, `attempt`, `correct`, `revealed`, `hints_used`, `duration_ms`, `response` (resumen de hasta 300 caracteres), `created_at` | `zuka-desempeno` (los últimos 300 intentos) |
 | `lesson_sessions` | `user_id`, `lesson_id`, `block_index`, `block_count`, `state` (respuestas, XP y aciertos a la primera de esa pasada), `updated_at` | `zuka-lecciones-en-curso` |
 
-Las tablas de progreso usan la clave primaria `(user_id, …)`, así una lección o un día no se repiten.
+El registro de desempeño solo admite leer y añadir filas propias; los intentos sin conexión esperan en `zuka-sync-pending` y se envían por lotes. Las tablas de progreso usan la clave primaria `(user_id, …)`, así una lección o un día no se repiten.
 
 **Seguridad.** Todas las tablas tienen Row Level Security: cada persona solo lee y cambia sus filas (`auth.uid() = user_id`). Los visitantes sin sesión no tienen acceso. Los XP no se escriben directamente: cambian con funciones.
 

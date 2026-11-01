@@ -38,9 +38,9 @@ $x^4 + 4$ no parece factorizable, pero al completar el cuadrado aparece una dife
 
 :::ejercicio
 ¿Cuál es la factorización de $6x^2 + 7x - 20$?
-- [ ] $(6x - 5)(x + 4)$
+- [ ] $(6x - 5)(x + 4)$ :: Al multiplicar da $6x^2 + 19x - 20$: el término central no coincide.
 - [x] $(2x + 5)(3x - 4)$
-- [ ] $(3x + 4)(2x - 5)$
+- [ ] $(3x + 4)(2x - 5)$ :: Al multiplicar da $6x^2 - 7x - 20$: el término central tiene el signo contrario.
 solucion: $(2x + 5)(3x - 4) = 6x^2 - 8x + 15x - 20 = 6x^2 + 7x - 20$.
 :::
 
@@ -56,4 +56,40 @@ Halla el coeficiente del término en $x^4$ al desarrollar $(2x - 1)^6$.
 respuesta: 240
 pista: El término es $\binom{6}{2}(2x)^4(-1)^2$.
 solucion: $\binom{6}{2} \cdot 2^4 \cdot 1 = 15 \cdot 16 = 240$.
+:::
+
+:::interactivo
+{
+  "kind": "equation",
+  "statement": "Completa el desarrollo del binomio al cuadrado.",
+  "template": "$(x + 5)^2 = x^2 +$ {{0}} $x +$ {{1}}",
+  "blanks": [
+    {
+      "answer": "10",
+      "label": "Coeficiente de x",
+      "why": "El término central es el doble producto: $2 \\cdot x \\cdot 5 = 10x$.",
+      "mistakes": [
+        {
+          "answer": "5",
+          "why": "Te faltó el doble: el término central es $2 \\cdot 5 \\cdot x$."
+        }
+      ]
+    },
+    {
+      "answer": "25",
+      "label": "Término independiente",
+      "why": "El último término es el cuadrado del segundo: $5^2 = 25$.",
+      "mistakes": [
+        {
+          "answer": "10",
+          "why": "$5^2$ es $5 \\cdot 5 = 25$, no $5 \\cdot 2$."
+        }
+      ]
+    }
+  ],
+  "hints": [
+    "Usa $(a + b)^2 = a^2 + 2ab + b^2$ con $a = x$ y $b = 5$."
+  ],
+  "solution": "$(x + 5)^2 = x^2 + 2 \\cdot 5 \\cdot x + 5^2 = x^2 + 10x + 25$."
+}
 :::

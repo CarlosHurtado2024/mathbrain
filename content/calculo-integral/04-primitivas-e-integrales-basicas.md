@@ -39,7 +39,7 @@ solucion: $(2 + 2) - 0 = 4$.
 :::ejercicio
 Dos primitivas de la misma función en un intervalo…
 - [x] difieren en una constante.
-- [ ] son siempre iguales.
-- [ ] difieren en un múltiplo de $x$.
+- [ ] son siempre iguales. :: $x^2$ y $x^2 + 5$ tienen la misma derivada $2x$ y no son iguales: pueden diferir en una constante.
+- [ ] difieren en un múltiplo de $x$. :: Si dos funciones difieren en $kx$, sus derivadas difieren en $k$: ya no serían primitivas de la misma función.
 solucion: Si $F' = G' = f$, entonces $(F - G)' = 0$ y $F - G$ es constante.
 :::

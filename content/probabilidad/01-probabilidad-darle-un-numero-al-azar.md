@@ -39,8 +39,43 @@ solucion: Solo $CC$ es favorable entre $4$ resultados equiprobables: $\dfrac{1}{
 
 :::ejercicio
 ¿Cuál de estos números **no** puede ser una probabilidad?
-- [ ] $0$
-- [ ] $0{,}75$
+- [ ] $0$ :: $0$ sí es una probabilidad: la de un evento imposible.
+- [ ] $0{,}75$ :: $0{,}75$ está entre $0$ y $1$, así que puede ser una probabilidad.
 - [x] $1{,}2$
 solucion: Toda probabilidad está entre $0$ y $1$.
+:::
+
+:::interactivo
+{
+  "kind": "simulation",
+  "statement": "Se lanzan dos dados. Estima la probabilidad de que la suma sea $7$ y compárala con una simulación.",
+  "model": {
+    "kind": "dice",
+    "count": 2,
+    "event": {
+      "op": "=",
+      "value": 7
+    }
+  },
+  "tolerance": 0.005,
+  "mistakes": [
+    {
+      "answer": "1/11",
+      "why": "Hay $11$ sumas posibles (de $2$ a $12$), pero no son igual de probables: el $7$ se forma de más maneras que el $2$."
+    },
+    {
+      "answer": "1/36",
+      "why": "Contaste una sola forma de sumar $7$. Hay seis: $(1,6), (2,5), (3,4), (4,3), (5,2)$ y $(6,1)$."
+    },
+    {
+      "answer": "1/12",
+      "why": "Hay seis parejas que suman $7$, no tres: $(3,4)$ y $(4,3)$ son resultados distintos."
+    }
+  ],
+  "hints": [
+    "Hay $6 \\cdot 6 = 36$ resultados igual de probables.",
+    "Cuenta las parejas ordenadas que suman $7$."
+  ],
+  "solution": "De los $36$ resultados, seis suman $7$: $P = \\frac{6}{36} = \\frac{1}{6} \\approx 0{,}167$. Con muchos lanzamientos, la frecuencia se acerca a ese valor."
+}
 :::

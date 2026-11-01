@@ -39,7 +39,7 @@ solucion: $3 \cdot 2 + 1 = 7$.
 :::ejercicio
 Cerca de $x = a$, una función se acerca a $1$ por la izquierda y a $4$ por la derecha. ¿Qué podemos decir?
 - [x] El límite bilateral en $a$ no existe.
-- [ ] El límite vale $2{,}5$, el promedio.
-- [ ] El límite vale $4$.
+- [ ] El límite vale $2{,}5$, el promedio. :: Un límite no promedia los lados: si por la izquierda y por la derecha se acerca a valores distintos, no existe.
+- [ ] El límite vale $4$. :: Ese es solo el límite por la derecha. Para que exista el límite bilateral, ambos lados deben coincidir.
 solucion: Para que exista el límite bilateral, los dos caminos deben llevar al mismo valor. Aquí llevan a valores distintos.
 :::

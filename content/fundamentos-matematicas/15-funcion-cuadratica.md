@@ -55,3 +55,72 @@ respuesta: 225
 pista: Si un lado mide $x$, el otro mide $30 - x$ y el área es $A(x) = x(30 - x)$.
 solucion: El vértice de $A(x) = -x^2 + 30x$ está en $x = 15$: un cuadrado de $15 \times 15$, con área $225$ m².
 :::
+
+:::interactivo
+{
+  "kind": "parameters",
+  "statement": "Mueve los deslizadores de $y = a(x - h)^2 + k$ hasta que la parábola pase por los tres puntos marcados.",
+  "expression": "a*(x - h)^2 + k",
+  "domain": {
+    "x": [
+      -4,
+      5
+    ],
+    "y": [
+      -4,
+      8
+    ]
+  },
+  "params": [
+    {
+      "name": "a",
+      "min": -3,
+      "max": 3,
+      "step": 0.5,
+      "value": 1,
+      "target": 2,
+      "high": "La parábola está demasiado cerrada: baja $a$.",
+      "low": "La parábola está demasiado abierta: sube $a$."
+    },
+    {
+      "name": "h",
+      "min": -3,
+      "max": 3,
+      "step": 1,
+      "value": 0,
+      "target": 1,
+      "high": "El vértice quedó muy a la derecha.",
+      "low": "El vértice quedó muy a la izquierda."
+    },
+    {
+      "name": "k",
+      "min": -4,
+      "max": 4,
+      "step": 1,
+      "value": 0,
+      "target": -2,
+      "high": "El vértice quedó muy arriba.",
+      "low": "El vértice quedó muy abajo."
+    }
+  ],
+  "points": [
+    [
+      1,
+      -2
+    ],
+    [
+      3,
+      6
+    ],
+    [
+      -1,
+      6
+    ]
+  ],
+  "hints": [
+    "El punto más bajo, $(1, -2)$, es el vértice: eso fija $h$ y $k$.",
+    "Con el vértice en su sitio, ajusta $a$ para que pase por $(3, 6)$: $a \\cdot 2^2 - 2 = 6$."
+  ],
+  "solution": "El vértice es $(h, k) = (1, -2)$ y $a(3 - 1)^2 - 2 = 6$ da $a = 2$: $y = 2(x - 1)^2 - 2$."
+}
+:::

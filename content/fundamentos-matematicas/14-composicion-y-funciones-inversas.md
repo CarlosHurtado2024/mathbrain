@@ -47,8 +47,8 @@ solucion: $f^{-1}(7) = \dfrac{10}{5} = 2$. Comprobación: $f(2) = \dfrac{7}{1} =
 
 :::ejercicio
 ¿Qué restricción hace que $f(x) = (x - 2)^2$ sea uno a uno?
-- [ ] $x \ge 0$
+- [ ] $x \ge 0$ :: Con $x \ge 0$, los valores $1$ y $3$ dan el mismo resultado: $f(1) = f(3) = 1$.
 - [x] $x \ge 2$
-- [ ] $x \le 0$
+- [ ] $x \le 0$ :: Con $x \le 0$ la función es uno a uno, pero deja fuera el vértice; la restricción natural empieza en $x = 2$.
 solucion: La parábola tiene su vértice en $x = 2$. A la derecha del vértice es creciente, así que restringida a $x \ge 2$ es uno a uno, con inversa $f^{-1}(x) = 2 + \sqrt{x}$.
 :::

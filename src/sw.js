@@ -5,7 +5,7 @@ const CACHE_NAME = 'mathbrain-shell-dev';
 const APP_ROOT = new URL('./', self.location.href);
 const SHELL_FILES = [
   './', './index.html', './styles.css', './space.css', './themes.css', './explore.css', './fresh.css', './zuka.css', './marketing.css', './identity.css', './app-ui.css', './theme.js',
-  './courses.js', './content.js', './lesson-engine.js', './content-source.js', './library.js', './mascot.js', './config.js', './vendor/supabase/supabase.js', './vendor/qrcode/qrcodegen.js', './cloud.js', './network-hero.js', './landing.js', './app.js', './install.js',
+  './courses.js', './content.js', './exercises.js', './lesson-engine.js', './content-source.js', './library.js', './mascot.js', './config.js', './vendor/supabase/supabase.js', './vendor/qrcode/qrcodegen.js', './cloud.js', './network-hero.js', './landing.js', './app.js', './install.js',
   './manifest.webmanifest', './assets/mark.svg',
   './assets/fonts/manrope-latin.woff2', './assets/fonts/OFL-Manrope.txt',
   './assets/autor-carlos.jpeg', './assets/icons/icon-192.png',

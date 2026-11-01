@@ -177,6 +177,7 @@
         writeLocal(merged);
         await pushMerged(merged, remote);
         await syncSessions(remote, merged.progress);
+        await flushAttempts();
         pending.full = false;
         savePending();
         state.lastSync = Date.now();
@@ -211,7 +212,34 @@
   }
 
   // La app avisa de cada cambio. Sin sesión no hace nada; sin conexión, queda para la próxima sincronización.
+  // Registro de desempeño: cada intento espera en una cola (también sin conexión) y se envía por lotes.
+  const attemptRow = entry => ({ user_id: state.user.id, lesson_id: String(entry.lesson || '').slice(0, 80), exercise_key: String(entry.exercise || '').slice(0, 120), kind: entry.kind, attempt: Math.min(entry.attempt || 0, 999), correct: Boolean(entry.correct), revealed: Boolean(entry.revealed), hints_used: Math.min(entry.hints || 0, 99), duration_ms: Math.min(Math.max(0, Math.round(entry.ms || 0)), 86400000), response: String(entry.response || '').slice(0, 300), created_at: entry.at });
+  let flushing = null;
+  function flushAttempts() {
+    if (!client || !state.user || !pending.attempts?.length) return Promise.resolve();
+    if (flushing) return flushing;
+    flushing = (async () => {
+      const batch = pending.attempts.slice(0, 100);
+      try {
+        fail(await client.from('exercise_attempts').insert(batch.map(attemptRow)));
+        pending.attempts = pending.attempts.slice(batch.length);
+        savePending();
+      } finally {
+        flushing = null;
+      }
+      if (pending.attempts.length) await flushAttempts();
+    })();
+    return flushing;
+  }
+
   function record(kind, data = {}) {
+    if (kind === 'attempt') {
+      if (!client || !state.user) return Promise.resolve();
+      pending.attempts = [...(pending.attempts || []), data].slice(-500);
+      savePending();
+      if (pending.full || navigator.onLine === false) return Promise.resolve();
+      return flushAttempts().catch(error => setStatus(navigator.onLine === false ? 'offline' : 'error', describe(error)));
+    }
     if (!client || !state.user) return Promise.resolve();
     if (kind === 'xp') { pending.xp += data.amount; savePending(); }
     if (pending.full || navigator.onLine === false) {

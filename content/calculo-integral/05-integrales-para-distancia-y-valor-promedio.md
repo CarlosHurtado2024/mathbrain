@@ -38,8 +38,8 @@ solucion: $\displaystyle\int_0^3 x^2\,dx = 9$, y $\dfrac{9}{3} = 3$.
 
 :::ejercicio
 Si la velocidad de un objeto cambia de signo durante el recorrido, entonces…
-- [ ] la distancia recorrida es igual al desplazamiento.
+- [ ] la distancia recorrida es igual al desplazamiento. :: Al ir y volver, el desplazamiento descuenta el regreso; la distancia lo suma.
 - [x] la distancia recorrida es mayor que el valor absoluto del desplazamiento.
-- [ ] el desplazamiento siempre es cero.
+- [ ] el desplazamiento siempre es cero. :: Solo sería cero si el objeto vuelve exactamente al punto de partida.
 solucion: Al cambiar de sentido, parte del recorrido se compensa en el desplazamiento, pero se suma en la distancia.
 :::

@@ -38,8 +38,8 @@ solucion: $\dfrac{12}{4} = 3$.
 
 :::ejercicio
 ¿Qué hay que hacer con el tamaño de la muestra para reducir el error estándar a la mitad?
-- [ ] Duplicarlo.
+- [ ] Duplicarlo. :: El error estándar depende de $\sqrt{n}$: duplicar $n$ lo divide entre $\sqrt{2}$, no entre $2$.
 - [x] Multiplicarlo por $4$.
-- [ ] Reducirlo a la mitad.
+- [ ] Reducirlo a la mitad. :: Con menos datos el error estándar aumenta, no disminuye.
 solucion: Como $EE = \sigma/\sqrt{n}$, multiplicar $n$ por $4$ multiplica $\sqrt{n}$ por $2$ y divide el error estándar entre $2$.
 :::

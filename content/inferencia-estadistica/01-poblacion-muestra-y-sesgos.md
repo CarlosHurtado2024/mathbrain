@@ -32,15 +32,15 @@ solucion: $\dfrac{60}{1200} = 0{,}05$, es decir, el $5\,\%$.
 :::ejercicio
 Para estimar la opinión de todo un país, se encuesta solo a los seguidores de una cuenta en redes sociales. ¿Cuál es el problema principal?
 - [x] Un sesgo de selección: esos seguidores no representan a toda la población.
-- [ ] La muestra es demasiado grande.
-- [ ] Ninguno, si responden muchas personas.
+- [ ] La muestra es demasiado grande. :: Una muestra grande no es el problema; lo es que represente a un grupo particular.
+- [ ] Ninguno, si responden muchas personas. :: Muchas respuestas de un grupo no representativo repiten el mismo sesgo.
 solucion: La forma de elegir los datos deja fuera a gran parte de la población; muchas respuestas no corrigen ese sesgo.
 :::
 
 :::ejercicio
 Si una muestra está sesgada, aumentar su tamaño…
-- [ ] elimina el sesgo.
+- [ ] elimina el sesgo. :: Más datos del mismo grupo sesgado reproducen el sesgo con más precisión.
 - [x] no corrige el sesgo; solo reduce la variación aleatoria.
-- [ ] convierte la muestra en aleatoria.
+- [ ] convierte la muestra en aleatoria. :: Lo aleatorio es el método de selección, no el tamaño de la muestra.
 solucion: El sesgo viene de cómo se seleccionan los datos, no de cuántos son.
 :::

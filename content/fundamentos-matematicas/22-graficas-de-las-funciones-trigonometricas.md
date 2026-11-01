@@ -48,8 +48,8 @@ solucion: $d = \tfrac{5 + (-1)}{2} = 2$. Además, $a = 3$ y $b = \tfrac{2\pi}{8}
 
 :::ejercicio
 ¿Qué periodo tiene $y = \tan\left(x - \tfrac{\pi}{4}\right)$?
-- [ ] $2\pi$
+- [ ] $2\pi$ :: $2\pi$ es el periodo del seno y del coseno; la tangente se repite cada $\pi$.
 - [x] $\pi$
-- [ ] $\tfrac{\pi}{4}$
+- [ ] $\tfrac{\pi}{4}$ :: Un desplazamiento horizontal mueve la gráfica, pero no cambia su periodo.
 solucion: La tangente tiene periodo $\pi$, y un desfase no cambia el periodo. Sus asíntotas se trasladan a $x = \tfrac{3\pi}{4} + k\pi$.
 :::

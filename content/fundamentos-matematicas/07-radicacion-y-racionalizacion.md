@@ -53,8 +53,8 @@ solucion: $\dfrac{6(\sqrt{5} + \sqrt{2})}{5 - 2} = 2(\sqrt{5} + \sqrt{2})$.
 
 :::ejercicio
 ¿Para qué valores de $x$ se cumple $\sqrt{(x - 3)^2} = x - 3$?
-- [ ] Para todo número real
+- [ ] Para todo número real :: $\sqrt{(x - 3)^2} = |x - 3|$. Si $x < 3$, eso vale $3 - x$, no $x - 3$.
 - [x] Para $x \ge 3$
-- [ ] Solo para $x = 3$
+- [ ] Solo para $x = 3$ :: También funciona para cualquier $x > 3$, porque entonces $x - 3$ ya es positivo.
 solucion: $\sqrt{(x - 3)^2} = |x - 3|$, que es igual a $x - 3$ exactamente cuando $x - 3 \ge 0$.
 :::

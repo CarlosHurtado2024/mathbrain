@@ -52,7 +52,31 @@ solucion: $y = \tfrac{2}{3}x - 2$ tiene pendiente $\tfrac{2}{3}$. La perpendicul
 :::ejercicio
 ¿Cuántas soluciones tiene el sistema $y = 2x + 1$, $y = 2x - 4$?
 - [x] Ninguna
-- [ ] Una
-- [ ] Infinitas
+- [ ] Una :: Las dos rectas tienen la misma pendiente $2$ y distinta intersección: son paralelas y nunca se cruzan.
+- [ ] Infinitas :: Habría infinitas si las ecuaciones fueran la misma recta; aquí la intersección con el eje $y$ es distinta.
 solucion: Las rectas tienen la misma pendiente y distinto intercepto: son paralelas y distintas, así que nunca se cruzan.
+:::
+
+:::interactivo
+{
+  "kind": "graph",
+  "statement": "Construye la recta $y = 2x - 1$: marca dos puntos que estén sobre ella.",
+  "function": "2x - 1",
+  "points": 2,
+  "domain": {
+    "x": [
+      -4,
+      4
+    ],
+    "y": [
+      -5,
+      5
+    ]
+  },
+  "hints": [
+    "Elige un valor de $x$, por ejemplo $x = 0$, y calcula $y$.",
+    "Con $x = 0$ se obtiene $y = -1$; con $x = 1$, $y = 1$."
+  ],
+  "solution": "Cualquier punto con $y = 2x - 1$ sirve: $(0, -1)$, $(1, 1)$, $(2, 3)$… La recta corta el eje $y$ en $-1$ y sube $2$ unidades por cada unidad a la derecha."
+}
 :::

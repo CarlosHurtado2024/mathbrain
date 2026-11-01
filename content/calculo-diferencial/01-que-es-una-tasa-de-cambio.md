@@ -38,8 +38,8 @@ solucion: $\dfrac{150}{2{,}5} = 60$ km/h, aunque en algunos momentos haya ido m�
 
 :::ejercicio
 En una gráfica, la tasa media de cambio entre dos puntos es la pendiente de…
-- [ ] la recta tangente en el primer punto.
+- [ ] la recta tangente en el primer punto. :: La tangente da la tasa instantánea en un solo punto; la tasa media usa los dos puntos.
 - [x] la recta secante que une los dos puntos.
-- [ ] el eje horizontal.
+- [ ] el eje horizontal. :: El eje horizontal tiene pendiente $0$; la tasa media depende de cómo cambia $f$ entre los dos puntos.
 solucion: La tasa media compara el cambio vertical con el horizontal entre los dos puntos: es la pendiente de la **secante**.
 :::

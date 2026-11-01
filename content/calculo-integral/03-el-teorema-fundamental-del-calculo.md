@@ -37,7 +37,7 @@ solucion: $2^3 - 0^3 = 8$.
 :::ejercicio
 Para usar $\displaystyle\int_a^b f(x)\,dx = F(b) - F(a)$, ¿qué debe ser $F$?
 - [x] Una primitiva de $f$, es decir, $F' = f$.
-- [ ] La derivada de $f$.
-- [ ] Cualquier función que pase por $(a, 0)$.
+- [ ] La derivada de $f$. :: Es al revés: $F$ debe cumplir $F' = f$, es decir, $F$ es una primitiva, no la derivada.
+- [ ] Cualquier función que pase por $(a, 0)$. :: Pasar por un punto no basta: $F$ tiene que ser una primitiva de $f$ para que $F(b) - F(a)$ mida la acumulación.
 solucion: El teorema fundamental pide una primitiva: una función cuya derivada sea $f$.
 :::

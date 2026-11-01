@@ -39,7 +39,7 @@ solucion: $1 \cdot (0 + 1) = 1$, que subestima el área exacta $2$.
 :::ejercicio
 ¿Cómo se mejora, en general, una suma de Riemann de una función continua?
 - [x] Aumentando el número de rectángulos.
-- [ ] Usando siempre un solo rectángulo más alto.
-- [ ] Eligiendo rectángulos de anchos aleatorios grandes.
+- [ ] Usando siempre un solo rectángulo más alto. :: Un solo rectángulo ignora cómo cambia la función en el intervalo; la aproximación empeora.
+- [ ] Eligiendo rectángulos de anchos aleatorios grandes. :: Lo que mejora la aproximación es que los anchos se hagan pequeños, no grandes ni aleatorios.
 solucion: Al hacer más fina la partición, las sumas se acercan a la integral.
 :::

@@ -39,7 +39,7 @@ solucion: $5 \cdot 4 \cdot 3 = 60$.
 :::ejercicio
 Quieres formar un comité de $3$ personas entre $10$, sin cargos. ¿Qué cuentas?
 - [x] Combinaciones
-- [ ] Permutaciones
-- [ ] Variaciones con repetición
+- [ ] Permutaciones :: En un comité sin cargos el orden no importa; las permutaciones cuentan ordenaciones distintas.
+- [ ] Variaciones con repetición :: Una misma persona no puede ocupar dos puestos y el orden no importa.
 solucion: El orden no importa y no se repiten personas: son combinaciones, $C(10,3) = 120$.
 :::

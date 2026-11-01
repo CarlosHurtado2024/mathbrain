@@ -52,8 +52,8 @@ solucion: $6\cis\tfrac{7\pi}{4} = 3\sqrt{2} - 3\sqrt{2}\,i \approx 4{,}24 - 4{,}
 
 :::ejercicio
 ¿Qué efecto tiene multiplicar un número complejo por $i$?
-- [ ] Lo refleja respecto al eje real
+- [ ] Lo refleja respecto al eje real :: Reflejar respecto al eje real es conjugar; multiplicar por $i$ gira el punto $90^\circ$.
 - [x] Lo rota $90^\circ$ en sentido antihorario
-- [ ] Duplica su módulo
+- [ ] Duplica su módulo :: $|i| = 1$, así que multiplicar por $i$ conserva el módulo.
 solucion: $i = 1\cis 90^\circ$: el módulo no cambia y el argumento aumenta $90^\circ$. Multiplicar por $2i$ además duplica el módulo.
 :::

@@ -56,6 +56,34 @@ solucion: Una pendiente negativa indica que la gráfica baja.
 - **Ejercicios:** `respuesta:` comprueba un número, una fracción (`8/3`) o un porcentaje, y `tolerancia: 0,01` acepta aproximaciones. Si la respuesta se escribe con `%` (por ejemplo `40%`), se acepta tanto `40 %` como `0,4`. Para cantidades grandes, pide la respuesta en miles o millones: `600.000` se leería como decimal. Con opciones `- [ ]` y una sola `- [x]`, el ejercicio es de opción múltiple. `pista:` y `solucion:` son opcionales y admiten LaTeX.
 - **Video:** pega el enlace en `video:`. Se admiten YouTube (también «No listado» y Shorts), Vimeo público y archivos `.mp4` o `.webm` en `src/assets/videos/`. Se recomienda YouTube «No listado»: es gratis y la calidad se adapta a la conexión. El video debe permitir la inserción. Si el campo está vacío, la lección muestra su ilustración. El video aparece como primer paso de la lección, con subtítulos en español activados (si el video los tiene en YouTube). Con `formato: vertical` se muestra en 9:16, ideal para shorts y clases cortas: en el celular (y en tabletas en vertical) el video ocupa toda la pantalla al entrar a la lección, con solo el botón de cerrar, el avance y «Continuar»; en el computador aparece en un marco 9:16 dentro de la tarjeta; sin ese campo (o con `formato: horizontal`) se muestra en 16:9. Los enlaces de YouTube Shorts se muestran en vertical automáticamente. Para que el video sea parte de la lección y no un video suelto, pon justo después un `:::ejercicio` sobre lo que explica.
 
+### Retroalimentación: explicar por qué
+
+Cada ejercicio debe explicar por qué una respuesta no es correcta, no solo decir «incorrecto».
+
+- **Opción múltiple:** después de cada opción incorrecta escribe `::` y la razón: `- [ ] $2\pi$ :: $2\pi$ es el periodo del seno; la tangente se repite cada $\pi$.`
+- **Respuesta numérica:** añade los errores frecuentes con `error: valor :: explicación` (uno por línea). Si la respuesta no coincide con ninguno, Zuka diagnostica sola los patrones típicos: signo contrario, porcentaje y decimal mezclados, fracción invertida, una cifra decimal corrida, el doble o la mitad, y un redondeo cercano.
+- **Pistas progresivas:** escribe varias líneas `pista:`. Se abren de una en una tras cada error o cuando la persona las pide.
+
+### Ejercicios interactivos (`:::interactivo`)
+
+Para los otros tipos de ejercicio, escribe su especificación en JSON dentro de `:::interactivo`. Los textos admiten Markdown y LaTeX (recuerda duplicar las barras en JSON: `"$\\frac{1}{2}$"`). La compilación valida cada ejercicio con el mismo sistema que lo corrige en la app y se detiene si falta algo.
+
+| `kind` | Tipo | Campos propios |
+| --- | --- | --- |
+| `symbolic` | Respuesta simbólica | `answer` (expresión), `variables`, `validation: "constant"` para primitivas, `mistakes` |
+| `equation` | Completar ecuaciones | `template` con `{{0}}`, `{{1}}`…, `blanks` (`answer`, `symbolic`, `why`, `mistakes`) |
+| `order` | Ordenar pasos | `steps` en el orden correcto (`text`, `why`) |
+| `classify` | Arrastrar y soltar | `categories` (`id`, `label`) e `items` (`text`, `category`, `why`) |
+| `graph` | Construir gráficas | `function`, `points` (cuántos marcar), `domain` |
+| `parameters` | Manipular parámetros | `expression`, `params` (`name`, `min`, `max`, `step`, `value`, `target`, `low`, `high`), `points` |
+| `proof` | Demostraciones | `reasons` (`id`, `label`) y `steps` (`text`, `reason`, `why`) |
+| `simulation` | Simulación probabilística | `model` (`kind`: coins o dice, `count`, `event`: `op` y `value`), `tolerance`, `mistakes` |
+| `error` | Identificar errores | `lines`, `wrong` (índice desde 0), `lineWhy` |
+| `context` | Problema contextualizado | `context` y `ask` (otro ejercicio completo) |
+| `choice`, `numeric` | Opción múltiple y numérica | Igual que `:::ejercicio`: `options`, `answer`, `tolerance`, `mistakes` |
+
+Todos aceptan `statement`, `visual` (`html` o `src` y `alt`, con `caption`), `hints` y `solution`. Hay un ejemplo de cada tipo en las lecciones 1.1, 1.3, 2.1, 2.4, 2.6, 3.1, 3.4 y 4.7 de Fundamentos, en Reglas de derivación y en la primera lección de Probabilidad.
+
 ### Cómo se divide en pasos
 
 Cada subtítulo `##`, cada bloque `:::idea`, `:::ejemplo` y `:::nota`, y cada `:::ejercicio` forman un paso. Un subtítulo que queda solo, como `## Practica`, se une al paso siguiente. Para lecciones más interactivas, intercala ejercicios entre las explicaciones en lugar de dejarlos todos al final. Un ejercicio de opción múltiple con exactamente dos opciones (por ejemplo `Verdadero` y `Falso`) se muestra como dos botones lado a lado. Al acertar se abre la `solucion` (la explicación de por qué) y tras un error, la `pista`: escríbelas para enseñar, no solo para dar el resultado. Cada lección debe tener al menos dos ejercicios.

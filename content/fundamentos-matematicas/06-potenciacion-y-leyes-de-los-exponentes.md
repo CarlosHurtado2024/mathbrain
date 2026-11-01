@@ -55,3 +55,28 @@ respuesta: 5
 pista: Simplifica primero: multiplica numerador y denominador por $ab$.
 solucion: $\dfrac{a^{-1} + b^{-1}}{(ab)^{-1}} = \dfrac{1/a + 1/b}{1/(ab)} = b + a = 5$.
 :::
+
+:::interactivo
+{
+  "kind": "error",
+  "statement": "Ana simplificó $(2x^3)^2$ así. ¿En qué línea está su primer error?",
+  "lines": [
+    "$(2x^3)^2$",
+    "$= 2^2 \\cdot (x^3)^2$",
+    "$= 4 \\cdot x^{3+2}$",
+    "$= 4x^5$"
+  ],
+  "wrong": 2,
+  "lineWhy": [
+    "Esta línea es el punto de partida.",
+    "Esta línea es correcta: la potencia de un producto reparte el exponente a cada factor.",
+    null,
+    "Esta línea copia bien el resultado anterior, pero ese resultado ya traía el error."
+  ],
+  "hints": [
+    "Revisa qué ley se usa en cada paso.",
+    "En $(x^3)^2$ los exponentes se multiplican, no se suman."
+  ],
+  "solution": "En la línea 3 sumó los exponentes. En una potencia de una potencia se multiplican: $(x^3)^2 = x^{3 \\cdot 2} = x^6$. Lo correcto es $(2x^3)^2 = 4x^6$."
+}
+:::

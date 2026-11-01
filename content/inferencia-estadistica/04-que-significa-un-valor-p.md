@@ -32,16 +32,16 @@ solucion: $P(|Z| \ge 1{,}96) \approx 2 \cdot 0{,}025 = 0{,}05$.
 
 :::ejercicio
 Un estudio informa un valor p de $0{,}03$. ¿Qué significa?
-- [ ] Hay un $3\,\%$ de probabilidad de que la hipótesis nula sea cierta.
+- [ ] Hay un $3\,\%$ de probabilidad de que la hipótesis nula sea cierta. :: El valor p se calcula suponiendo que la hipótesis nula es cierta; no es la probabilidad de que lo sea.
 - [x] Si la hipótesis nula fuera cierta, resultados al menos tan extremos aparecerían cerca del $3\,\%$ de las veces.
-- [ ] Hay un $97\,\%$ de probabilidad de que el efecto sea real.
+- [ ] Hay un $97\,\%$ de probabilidad de que el efecto sea real. :: Restar de $1$ no da la probabilidad de que el efecto exista: el valor p no mide eso.
 solucion: El valor p se calcula suponiendo que la hipótesis nula es cierta; no es la probabilidad de la hipótesis.
 :::
 
 :::ejercicio
 Un valor p muy pequeño garantiza que…
-- [ ] el efecto es grande e importante.
-- [ ] el estudio no tiene errores de diseño.
+- [ ] el efecto es grande e importante. :: Con muestras grandes, efectos diminutos dan valores p pequeños. El tamaño del efecto se mide aparte.
+- [ ] el estudio no tiene errores de diseño. :: El valor p no corrige un sesgo ni un mal diseño: solo resume los datos que se obtuvieron.
 - [x] ninguna de las anteriores: solo indica que los datos serían raros bajo la hipótesis nula.
 solucion: Con muestras grandes, efectos diminutos dan valores p pequeños; y el valor p no corrige un mal diseño.
 :::

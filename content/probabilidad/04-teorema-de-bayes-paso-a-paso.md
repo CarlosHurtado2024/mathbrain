@@ -41,7 +41,7 @@ solucion: Positivos: $9$ enfermos y $49{,}5$ sanos. $P = \dfrac{9}{9 + 49{,}5} \
 :::ejercicio
 ¿Por qué en el ejemplo anterior un positivo deja una probabilidad tan baja de estar enfermo?
 - [x] Porque la enfermedad es rara y los falsos positivos de los muchos sanos superan a los verdaderos positivos.
-- [ ] Porque la prueba falla la mayoría de las veces.
-- [ ] Porque el teorema de Bayes no se aplica a pruebas médicas.
+- [ ] Porque la prueba falla la mayoría de las veces. :: La prueba acierta casi siempre; lo que pesa es que hay muchos más sanos que enfermos.
+- [ ] Porque el teorema de Bayes no se aplica a pruebas médicas. :: Bayes se aplica justamente a pruebas médicas: combina la prevalencia con la precisión.
 solucion: La probabilidad previa importa: con una causa poco frecuente, la mayoría de los positivos vienen del grupo grande de sanos.
 :::

@@ -5,6 +5,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const katex = require('../vendor/katex/katex.min.js');
+// El mismo sistema de ejercicios del navegador valida cada ejercicio al compilar.
+const exerciseContext = vm.createContext({});
+vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'src', 'exercises.js'), 'utf8'), exerciseContext);
+const exerciseSystem = exerciseContext.ZUKA_EXERCISES;
 
 const root = path.resolve(__dirname, '..');
 const contentDirectory = path.join(root, 'content');
@@ -149,38 +153,77 @@ function blocks(lines, file, firstLine) {
   return html.join('');
 }
 
+// :::ejercicio → especificación de ejercicio (src/exercises.js) de opción múltiple o respuesta numérica.
+// Campos: respuesta, tolerancia, pista (una o varias, progresivas), solucion y error: valor :: explicación
+// (errores frecuentes). Las opciones se escriben - [ ] texto o - [x] texto, con «:: por qué» opcional.
 function exercise(lines, file, firstLine, id, number) {
   const fields = {};
+  const hints = [];
+  const mistakes = [];
   const statement = [];
   const options = [];
+  const why = (text, line) => {
+    const [main, reason] = text.split(/\s+::\s+/);
+    return { html: inline(main, { file, line }), why: reason ? inline(reason, { file, line }) : undefined };
+  };
   lines.forEach((text, index) => {
-    const field = text.match(/^(respuesta|tolerancia|pista|solucion):\s*(.*)$/);
+    const line = firstLine + index;
+    const field = text.match(/^(respuesta|tolerancia|pista|solucion|error):\s*(.*)$/);
     const option = text.match(/^\s*-\s+\[( |x|X)\]\s+(.+)$/);
-    if (field) fields[field[1]] = { value: field[2].trim(), line: firstLine + index };
-    else if (option) options.push({ correct: option[1] !== ' ', text: option[2], line: firstLine + index });
-    else statement.push({ text, line: firstLine + index });
+    if (field?.[1] === 'pista') hints.push(inline(field[2].trim(), { file, line }));
+    else if (field?.[1] === 'error') {
+      const [answer, reason] = field[2].split(/\s+::\s+/);
+      if (!reason) throw new ContentError(file, line, 'Escribe el error frecuente como «error: valor :: explicación».');
+      if (parseAnswer(answer) === null) throw new ContentError(file, line, `El error «${answer}» no es un número, una fracción ni un porcentaje.`);
+      mistakes.push({ answer: answer.trim(), why: inline(reason.trim(), { file, line }) });
+    } else if (field) fields[field[1]] = { value: field[2].trim(), line };
+    else if (option) options.push({ correct: option[1] !== ' ', ...why(option[2], line) });
+    else statement.push({ text, line });
   });
   const statementHtml = blocks(statement.map(entry => entry.text), file, statement[0]?.line ?? firstLine);
   if (!statementHtml) throw new ContentError(file, firstLine, 'El ejercicio necesita un enunciado.');
-  const inputId = `${id}-ejercicio-${number}`;
-  let answerHtml;
-  let kind;
+  const spec = { id: `${id}-ejercicio-${number}`, statement: statementHtml, hints, ...(fields.solucion ? { solution: `<p>${inline(fields.solucion.value, { file, line: fields.solucion.line })}</p>` } : {}) };
   if (options.length) {
-    kind = 'choice';
     if (fields.respuesta) throw new ContentError(file, fields.respuesta.line, 'Un ejercicio de opción múltiple marca la respuesta con [x], no con «respuesta:».');
     if (options.filter(option => option.correct).length !== 1) throw new ContentError(file, firstLine, 'Marca exactamente una opción correcta con [x].');
-    answerHtml = `<fieldset class="lesson-choices"><legend class="sr-only">Elige una opción</legend>${options.map((option, index) => `<label><input type="radio" name="${inputId}" value="${index}"${option.correct ? ' data-correct' : ''}><span>${inline(option.text, { file, line: option.line })}</span></label>`).join('')}</fieldset>`;
+    Object.assign(spec, { kind: 'choice', options: options.map(({ correct, html, why: reason }) => ({ html, ...(correct ? { correct: true } : {}), ...(reason ? { why: reason } : {}) })) });
   } else {
-    kind = 'number';
     if (!fields.respuesta) throw new ContentError(file, firstLine, 'Falta «respuesta:» (un número, una fracción como 8/3 o un porcentaje) o las opciones - [x].');
     if (parseAnswer(fields.respuesta.value) === null) throw new ContentError(file, fields.respuesta.line, `La respuesta «${fields.respuesta.value}» no es un número, una fracción ni un porcentaje.`);
     if (fields.tolerancia && !(Number(fields.tolerancia.value.replace(',', '.')) >= 0)) throw new ContentError(file, fields.tolerancia.line, 'La tolerancia debe ser un número mayor o igual que 0.');
-    answerHtml = `<label class="lesson-answer-label" for="${inputId}">Tu respuesta</label><input id="${inputId}" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" maxlength="40" placeholder="Ej.: 3/4, 0,75 o 75 %">`;
+    Object.assign(spec, { kind: 'numeric', answer: fields.respuesta.value, ...(fields.tolerancia ? { tolerance: Number(fields.tolerancia.value.replace(',', '.')) } : {}), ...(mistakes.length ? { mistakes } : {}) });
   }
-  const answerData = kind === 'number' ? ` data-answer="${escapeHtml(fields.respuesta.value)}"${fields.tolerancia ? ` data-tolerance="${escapeHtml(fields.tolerancia.value.replace(',', '.'))}"` : ''}` : '';
-  const hint = fields.pista ? `<details class="lesson-hint"><summary>Ver una pista</summary><p>${inline(fields.pista.value, { file, line: fields.pista.line })}</p></details>` : '';
-  const solution = fields.solucion ? `<details class="lesson-solution"><summary>Ver solución</summary><p>${inline(fields.solucion.value, { file, line: fields.solucion.line })}</p></details>` : '';
-  return `<form class="lesson-exercise" data-kind="${kind}"${answerData} novalidate><p class="lesson-exercise-label">Práctica · Ejercicio ${number}</p><div class="lesson-exercise-statement">${statementHtml}</div><div class="answer-row">${answerHtml}<button class="button button-secondary" type="submit">Comprobar</button></div><p class="answer-feedback" role="status" aria-live="polite"></p>${hint}${solution}</form>`;
+  return spec;
+}
+
+// :::interactivo → cualquiera de los 12 tipos de ejercicio, escrito en JSON. Los textos admiten Markdown y
+// LaTeX: statement, context y solution como párrafos; why, hints, lines, labels, template, caption y los
+// campos text (que pasan a html) en una línea. Las respuestas y expresiones se dejan tal cual.
+const BLOCK_FIELDS = new Set(['statement', 'context', 'solution']);
+const INLINE_FIELDS = new Set(['why', 'label', 'template', 'caption', 'low', 'high', 'correct']);
+const INLINE_LISTS = new Set(['hints', 'lines', 'lineWhy']);
+
+function compileTexts(value, where, key = '') {
+  if (Array.isArray(value)) return value.map(item => INLINE_LISTS.has(key) && typeof item === 'string' ? inline(item, where) : compileTexts(item, where));
+  if (!value || typeof value !== 'object') return value;
+  const result = {};
+  for (const [name, item] of Object.entries(value)) {
+    if (name === 'text' && typeof item === 'string') result.html = inline(item, where);
+    else if (BLOCK_FIELDS.has(name) && typeof item === 'string') result[name] = blocks(item.split('\n'), where.file, where.line);
+    else if (INLINE_FIELDS.has(name) && typeof item === 'string') result[name] = inline(item, where);
+    else if (name === 'visual' && item && typeof item === 'object') result[name] = { ...item, ...(item.caption ? { caption: inline(item.caption, where) } : {}) };
+    else result[name] = compileTexts(item, where, name);
+  }
+  return result;
+}
+
+function interactive(lines, file, firstLine, id, number) {
+  let raw;
+  try { raw = JSON.parse(lines.join('\n')); } catch (error) { throw new ContentError(file, firstLine, `El bloque :::interactivo no es JSON válido: ${error.message}`); }
+  const spec = { id: `${id}-ejercicio-${number}`, ...compileTexts(raw, { file, line: firstLine }) };
+  const errors = exerciseSystem.validate(spec);
+  if (errors.length) throw new ContentError(file, firstLine, `Ejercicio ${spec.kind || ''}: ${errors.join(' ')}`);
+  return spec;
 }
 
 function compileLesson(source, file, id) {
@@ -201,6 +244,7 @@ function compileLesson(source, file, id) {
   if (data.video && !/^(https:\/\/|assets\/videos\/)/.test(data.video)) throw new ContentError(file, 1, 'El video debe ser un enlace https:// (YouTube, Vimeo) o un archivo en assets/videos/.');
 
   const html = [];
+  const specs = [];
   let key = '';
   let exercises = 0;
   let pending = [];
@@ -220,14 +264,15 @@ function compileLesson(source, file, id) {
     const inner = [];
     while (++index < lines.length && lines[index].trim() !== ':::') inner.push(lines[index]);
     if (index >= lines.length) throw new ContentError(file, start, `El bloque :::${type} no tiene cierre :::.`);
-    if (type === 'ejercicio') {
+    if (type === 'ejercicio' || type === 'interactivo') {
       exercises += 1;
-      html.push(exercise(inner, file, start + 1, id, exercises));
+      specs.push((type === 'ejercicio' ? exercise : interactive)(inner, file, start + 1, id, exercises));
+      html.push(`<!--ejercicio:${specs.length - 1}-->`);
     } else if (blockTitles[type]) {
       if (type === 'idea') key = key || plain(inner.join(' '));
       html.push(`<div class="${type === 'idea' ? 'key-concept' : type === 'ejemplo' ? 'example-box' : 'lesson-note'}"><h3>${blockTitles[type]}</h3>${blocks(inner, file, start + 1)}</div>`);
     } else {
-      throw new ContentError(file, start, `Bloque :::${type} desconocido. Usa :::idea, :::ejemplo, :::nota o :::ejercicio.`);
+      throw new ContentError(file, start, `Bloque :::${type} desconocido. Usa :::idea, :::ejemplo, :::nota, :::ejercicio o :::interactivo.`);
     }
     pendingLine = index + 2;
   }
@@ -237,18 +282,19 @@ function compileLesson(source, file, id) {
   const words = lines.slice(end + 1).join('\n').replace(/\$\$[\s\S]*?\$\$/g, ' f f f f ').replace(/\$[^$\n]*\$/g, ' f ').split(/\s+/).filter(word => /[\p{L}\p{N}]/u.test(word)).length;
   const minutes = Math.max(2, Math.round(words / 120));
   const fullHtml = html.join('');
-  return { id, title: data.titulo, description: data.descripcion, video: data.video || null, ...(data.formato === 'vertical' ? { videoFormat: 'vertical' } : {}), tags: data.etiquetas || '', unit: data.unidad || null, module: data.modulo || null, key, exercises, minutes, html: fullHtml, steps: splitSteps(fullHtml) };
+  return { id, title: data.titulo, description: data.descripcion, video: data.video || null, ...(data.formato === 'vertical' ? { videoFormat: 'vertical' } : {}), tags: data.etiquetas || '', unit: data.unidad || null, module: data.modulo || null, key, exercises, minutes, html: fullHtml, steps: splitSteps(fullHtml, specs) };
 }
 
 // Divide la lección en pasos cortos para recorrerla una idea a la vez: cada subtítulo ##, cada bloque
 // :::idea, :::ejemplo y :::nota, y cada ejercicio forman su propio paso. Un subtítulo que queda solo
-// (como «## Practica») se une al paso siguiente.
-function splitSteps(html) {
+// (como «## Practica») se une al paso siguiente. Un ejercicio es un paso con su especificación en data.exercise.
+function splitSteps(html, specs = []) {
   const steps = [];
   let heading = '';
-  const push = (type, part) => { steps.push({ type, html: heading + part }); heading = ''; };
-  for (const piece of html.split(/(<form class="lesson-exercise"[\s\S]*?<\/form>)/).filter(Boolean)) {
-    if (piece.startsWith('<form class="lesson-exercise"')) { push('exercise', piece); continue; }
+  const push = (type, part, data) => { steps.push({ type, html: heading + part, ...(data ? { data } : {}) }); heading = ''; };
+  for (const piece of html.split(/(<!--ejercicio:\d+-->)/).filter(Boolean)) {
+    const marker = piece.match(/^<!--ejercicio:(\d+)-->$/);
+    if (marker) { push('exercise', '', { exercise: specs[Number(marker[1])] }); continue; }
     for (const part of piece.split(/(?=<h2>)|(?=<div class="(?:key-concept|example-box|lesson-note)">)/).filter(section => section.trim())) {
       if (/^<h2>[\s\S]*?<\/h2>$/.test(part.trim())) heading += part;
       else push(part.startsWith('<div class="key-concept">') ? 'idea' : part.startsWith('<div class="example-box">') ? 'example' : part.startsWith('<div class="lesson-note">') ? 'note' : 'concept', part);

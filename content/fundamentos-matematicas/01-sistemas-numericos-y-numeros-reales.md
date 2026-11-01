@@ -46,9 +46,9 @@ Un intervalo como $[-2, 5)$ incluye el $-2$ y excluye el $5$. En la recta se dib
 
 :::ejercicio
 ¿A qué conjuntos pertenece $\sqrt{49}$?
-- [ ] Solo a $\mathbb{Q}$
+- [ ] Solo a $\mathbb{Q}$ :: $\sqrt{49} = 7$ es un número natural, así que también es entero, racional y real.
 - [x] A $\mathbb{N}$, $\mathbb{Z}$, $\mathbb{Q}$ y $\mathbb{R}$
-- [ ] A los irracionales $\mathbb{I}$
+- [ ] A los irracionales $\mathbb{I}$ :: Simplifica primero: $\sqrt{49} = 7$, que no es irracional.
 solucion: $\sqrt{49} = 7$ es natural y, por las inclusiones $\mathbb{N} \subset \mathbb{Z} \subset \mathbb{Q} \subset \mathbb{R}$, pertenece a todos ellos.
 :::
 
@@ -65,4 +65,57 @@ Calcula $|5 - \pi| - |\pi - 5|$.
 respuesta: 0
 pista: Dos números opuestos tienen el mismo valor absoluto.
 solucion: $|\pi - 5| = |-(5 - \pi)| = |5 - \pi|$, así que la diferencia es $0$.
+:::
+
+:::interactivo
+{
+  "kind": "classify",
+  "statement": "Clasifica cada número: ¿es **racional** (se escribe como fracción de enteros) o **irracional**?",
+  "categories": [
+    {
+      "id": "racional",
+      "label": "Racional"
+    },
+    {
+      "id": "irracional",
+      "label": "Irracional"
+    }
+  ],
+  "items": [
+    {
+      "text": "$\\frac{3}{4}$",
+      "category": "racional"
+    },
+    {
+      "text": "$\\sqrt{2}$",
+      "category": "irracional",
+      "why": "$\\sqrt{2}$ no se puede escribir como cociente de enteros: su expansión decimal no termina ni se repite."
+    },
+    {
+      "text": "$\\pi$",
+      "category": "irracional",
+      "why": "$\\pi$ es irracional: $3{,}14$ es solo una aproximación, no su valor exacto."
+    },
+    {
+      "text": "$0{,}\\overline{3}$",
+      "category": "racional",
+      "why": "Un decimal periódico sí es racional: $0{,}\\overline{3} = \\frac{1}{3}$."
+    },
+    {
+      "text": "$-7$",
+      "category": "racional",
+      "why": "Todo entero es racional: $-7 = \\frac{-7}{1}$."
+    },
+    {
+      "text": "$\\sqrt{9}$",
+      "category": "racional",
+      "why": "Cuidado con la raíz: $\\sqrt{9} = 3$, que es un entero y, por tanto, racional."
+    }
+  ],
+  "hints": [
+    "Pregúntate si el número se puede escribir como $\\frac{p}{q}$ con $p$ y $q$ enteros.",
+    "Un decimal que se repite siempre es una fracción; uno que no termina ni se repite, no."
+  ],
+  "solution": "Racionales: $\\frac{3}{4}$, $0{,}\\overline{3} = \\frac{1}{3}$, $-7$ y $\\sqrt{9} = 3$. Irracionales: $\\sqrt{2}$ y $\\pi$."
+}
 :::

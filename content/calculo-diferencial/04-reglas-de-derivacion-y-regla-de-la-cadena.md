@@ -39,7 +39,38 @@ solucion: $f'(x) = 3(2x + 1)^2 \cdot 2$. En $x = 0$: $3 \cdot 1 \cdot 2 = 6$.
 :::ejercicio
 ¿Cuál es la regla del producto?
 - [x] $(uv)' = u'v + uv'$
-- [ ] $(uv)' = u'v'$
-- [ ] $(uv)' = u'v - uv'$
+- [ ] $(uv)' = u'v'$ :: La derivada de un producto no es el producto de las derivadas. Prueba con $u = v = x$: $(x^2)' = 2x$, no $1$.
+- [ ] $(uv)' = u'v - uv'$ :: Ese signo menos aparece en la regla del cociente; en la del producto los dos términos se suman.
 solucion: La derivada de un producto no es el producto de las derivadas: $(uv)' = u'v + uv'$.
+:::
+
+:::interactivo
+{
+  "kind": "symbolic",
+  "statement": "Deriva $f(x) = x^3 - 4x^2 + 2x - 7$.",
+  "answer": "3x^2 - 8x + 2",
+  "variables": [
+    "x"
+  ],
+  "label": "$f'(x) =$",
+  "mistakes": [
+    {
+      "answer": "3x^2 - 8x + 2x - 7",
+      "why": "La derivada de una constante es $0$, y la de $2x$ es $2$."
+    },
+    {
+      "answer": "3x^2 - 8x + 2 - 7",
+      "why": "La derivada de la constante $-7$ es $0$: desaparece."
+    },
+    {
+      "answer": "3x^2 - 4x + 2",
+      "why": "Al derivar $4x^2$, el exponente baja multiplicando: $4 \\cdot 2x = 8x$."
+    }
+  ],
+  "hints": [
+    "Deriva término a término con la regla de la potencia: $(x^n)' = n x^{n-1}$.",
+    "Las constantes se derivan a $0$."
+  ],
+  "solution": "$f'(x) = 3x^2 - 8x + 2$. Cada término $ax^n$ pasa a $a n x^{n-1}$ y la constante desaparece."
+}
 :::

@@ -48,8 +48,8 @@ solucion: Las soluciones son $x = 6$ y $x = -1$.
 :::ejercicio
 ¿Cuál es el conjunto solución de $x^2 - x - 6 < 0$?
 - [x] $(-2, 3)$
-- [ ] $(-\infty, -2) \cup (3, \infty)$
-- [ ] $(-3, 2)$
+- [ ] $(-\infty, -2) \cup (3, \infty)$ :: Esos son los valores donde $(x - 3)(x + 2)$ es positivo; la desigualdad pide negativo.
+- [ ] $(-3, 2)$ :: Las raíces son $-2$ y $3$: revisa los signos al factorizar $x^2 - x - 6$.
 solucion: $x^2 - x - 6 = (x - 3)(x + 2)$ es negativo entre sus raíces $-2$ y $3$.
 :::
 
@@ -58,4 +58,37 @@ El producto de dos números impares consecutivos positivos es $143$. ¿Cuál es 
 respuesta: 11
 pista: Llámalos $n$ y $n + 2$: $n(n + 2) = 143$.
 solucion: $n^2 + 2n - 143 = (n - 11)(n + 13) = 0$. La solución positiva es $n = 11$: los números son $11$ y $13$.
+:::
+
+:::interactivo
+{
+  "kind": "order",
+  "statement": "Ordena los pasos para resolver $3(x - 2) + 4 = 19$.",
+  "steps": [
+    {
+      "text": "Aplica la distributiva: $3x - 6 + 4 = 19$",
+      "why": "Primero se quita el paréntesis: así quedan a la vista todos los términos."
+    },
+    {
+      "text": "Agrupa las constantes: $3x - 2 = 19$",
+      "why": "Antes de despejar conviene reunir los números del mismo lado."
+    },
+    {
+      "text": "Suma $2$ a ambos lados: $3x = 21$",
+      "why": "Se deshace primero la resta y después la multiplicación: el orden inverso de las operaciones."
+    },
+    {
+      "text": "Divide entre $3$: $x = 7$",
+      "why": "La división va al final, cuando $x$ ya está sola con su coeficiente."
+    },
+    {
+      "text": "Comprueba: $3(7 - 2) + 4 = 19$",
+      "why": "La comprobación se hace con la solución ya encontrada."
+    }
+  ],
+  "hints": [
+    "Piensa en deshacer las operaciones en el orden inverso en que afectan a $x$."
+  ],
+  "solution": "Distributiva, agrupar constantes, sumar $2$, dividir entre $3$ y comprobar: $x = 7$."
+}
 :::

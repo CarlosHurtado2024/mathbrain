@@ -134,7 +134,7 @@ function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = regi
     setTimeout(callback) { timers.set(++timerId, callback); return timerId; },
     clearTimeout(id) { timers.delete(id); }
   });
-  for (const filename of ['courses.js', 'content.js', 'lesson-engine.js', 'content-source.js', 'library.js', 'mascot.js', 'landing.js']) vm.runInContext(fs.readFileSync(path.join(directory, filename), 'utf8'), context);
+  for (const filename of ['courses.js', 'content.js', 'exercises.js', 'lesson-engine.js', 'content-source.js', 'library.js', 'mascot.js', 'landing.js']) vm.runInContext(fs.readFileSync(path.join(directory, filename), 'utf8'), context);
   prepareLibrary(window.MATHBRAIN_LIBRARY, window.MATHBRAIN_COURSES);
   vm.runInContext(source, context);
   return {
@@ -449,7 +449,7 @@ test('La vista de lectura conserva el temario, la posición y la navegación ent
   const html = app.node('#detail-view').innerHTML;
   assert.match(html, /UNIDAD 2 · LECCIÓN 2\.1/);
   assert.match(html, /class="outline-item is-current" href="#contenido\/fundamentos-matematicas-6" aria-current="page"/);
-  assert.match(html, /Práctica · 3 ejercicios/);
+  assert.match(html, /Práctica · 4 ejercicios/);
   assert.match(html, /href="#contenido\/fundamentos-matematicas-7" data-complete-on-leave="fundamentos-matematicas-6"/);
   assert.match(html, /data-complete="fundamentos-matematicas-6" aria-pressed="false"/);
 });

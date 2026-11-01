@@ -53,8 +53,8 @@ solucion: $\dfrac{(5 + i)(2 + 3i)}{4 + 9} = \dfrac{10 + 17i + 3i^2}{13} = \dfrac
 
 :::ejercicio
 ¿Cuáles son las soluciones de $x^2 - 4x + 13 = 0$?
-- [ ] $x = 2 \pm 3$
+- [ ] $x = 2 \pm 3$ :: El discriminante es $16 - 52 = -36 < 0$: la raíz da $6i$, así que las soluciones no son reales.
 - [x] $x = 2 \pm 3i$
-- [ ] $x = -2 \pm 3i$
+- [ ] $x = -2 \pm 3i$ :: La parte real es $-\frac{b}{2a} = \frac{4}{2} = 2$, no $-2$.
 solucion: $x = \dfrac{4 \pm \sqrt{16 - 52}}{2} = \dfrac{4 \pm \sqrt{-36}}{2} = \dfrac{4 \pm 6i}{2} = 2 \pm 3i$.
 :::

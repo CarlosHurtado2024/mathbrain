@@ -57,3 +57,36 @@ respuesta: 2,36
 pista: $M = C(1 + rt)$ con $r = 0{,}015$ y $t = 12$.
 solucion: $M = 2\,000\,000\,(1 + 0{,}015 \cdot 12) = 2\,000\,000 \cdot 1{,}18 = 2\,360\,000$. Con interés compuesto serían unos $2\,391\,236$.
 :::
+
+:::interactivo
+{
+  "kind": "context",
+  "context": "Una tienda sube el precio de un audífono de \\$50.000 un $20\\ \\%$ en diciembre. En enero lo rebaja un $20\\ \\%$ sobre el precio de diciembre.",
+  "ask": {
+    "kind": "numeric",
+    "statement": "¿Cuál es el precio en enero, en miles de pesos?",
+    "answer": "48",
+    "label": "Precio en miles de pesos",
+    "unit": "mil",
+    "mistakes": [
+      {
+        "answer": "50",
+        "why": "Subir y bajar el mismo porcentaje no se cancela: el $20\\ \\%$ de enero se calcula sobre un precio mayor."
+      },
+      {
+        "answer": "60",
+        "why": "Ese es el precio de diciembre. Falta aplicar la rebaja de enero."
+      },
+      {
+        "answer": "40",
+        "why": "Aplicaste la rebaja sobre el precio original. En enero se descuenta sobre el precio de diciembre."
+      }
+    ]
+  },
+  "hints": [
+    "Calcula primero el precio de diciembre: $50 \\cdot 1{,}2$.",
+    "Rebajar un $20\\ \\%$ es multiplicar por $0{,}8$."
+  ],
+  "solution": "$50 \\cdot 1{,}2 = 60$ y $60 \\cdot 0{,}8 = 48$: el precio final es \\$48.000. Las variaciones sucesivas se multiplican: $1{,}2 \\cdot 0{,}8 = 0{,}96$, es decir, una baja del $4\\ \\%$."
+}
+:::
