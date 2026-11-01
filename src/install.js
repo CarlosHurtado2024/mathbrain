@@ -81,8 +81,7 @@
   }
 
   function showPhoneDownload() {
-    const address = new URL('./', window.location.href);
-    address.hash = 'descargar';
+    const address = new URL('https://mathbrain-psi.vercel.app/#descargar');
     const link = document.getElementById('install-address');
     link.href = address.href;
     link.textContent = `${address.host}${address.pathname}`;
@@ -91,7 +90,7 @@
     document.getElementById('install-phone').hidden = false;
     document.getElementById('install-device').hidden = true;
     const note = document.getElementById('install-qr-note');
-    note.textContent = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(address.hostname) ? 'Esta es una vista local. Abre la dirección pública de Zuka para escanear el QR desde otro dispositivo.' : 'Funciona en Android, iPhone y tabletas. La instalación se completa desde el navegador del dispositivo.';
+    note.textContent = 'Funciona en Android, iPhone y tabletas. La instalación se completa desde el navegador del dispositivo.';
     const container = document.getElementById('install-qr');
     try {
       const qr = qrcodegen.QrCode.encodeText(address.href, qrcodegen.QrCode.Ecc.MEDIUM);

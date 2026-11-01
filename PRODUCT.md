@@ -18,6 +18,8 @@ Ayudar a comprender las materias, preparar evaluaciones y superar dificultades a
 
 La visita desde el navegador comienza en una portada con los servicios de cursos de ingeniería y ciencias, asesoría en trabajos y exámenes y tutorías. En computador se ofrece un QR para llevar la app al celular; en móviles y tabletas se ofrece la instalación del navegador. También se puede continuar en la web.
 
+La dirección pública de la app es https://mathbrain-psi.vercel.app/. Los QR de instalación siempre apuntan a esa dirección con `#descargar`, incluso al probar el código desde localhost o una vista previa de Vercel.
+
 La PWA instalada abre la bienvenida o el panel de aprendizaje. El menú principal contiene Inicio, Cursos, Entrenamiento, Tutorías y Perfil. Entrenamiento ofrece cuatro parciales de práctica por materia y simulacros por unidad, usando los ejercicios publicados.
 
 ## Capabilities and Constraints

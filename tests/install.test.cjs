@@ -79,9 +79,15 @@ function environment({ userAgent = 'Chrome Windows', platform = 'Win32', maxTouc
     clearTimeout(timer) { timers.delete(timer); }
   });
   vm.runInContext(qrSource, context);
+  const encodedQr = [];
+  const encodeText = context.qrcodegen.QrCode.encodeText;
+  context.qrcodegen.QrCode.encodeText = function (text, ...options) {
+    encodedQr.push(text);
+    return encodeText.call(this, text, ...options);
+  };
   vm.runInContext(source, context);
   return {
-    buttons, tryButton, document, dialog, elements, media, window, registration, worker, registerCalls, serviceWorkerContainer,
+    buttons, tryButton, document, dialog, elements, media, window, registration, worker, registerCalls, serviceWorkerContainer, encodedQr,
     get reloadCount() { return reloadCount; },
     offerPrompt({ outcome = 'dismissed', promptFails = false, promptPromise, choicePromise } = {}) {
       const event = {
@@ -100,7 +106,7 @@ function environment({ userAgent = 'Chrome Windows', platform = 'Win32', maxTouc
   };
 }
 
-test('Probar desde computador muestra un QR local con un enlace limpio y no consume la invitación de instalación', async () => {
+test('Probar desde computador muestra el QR público y no consume la invitación de instalación', async () => {
   const env = environment({ address: 'https://zuka.test/campus/?token=privado#perfil' });
   const invitation = env.offerPrompt();
   await env.tryButton.emit('click');
@@ -108,7 +114,8 @@ test('Probar desde computador muestra un QR local con un enlace limpio y no cons
   assert.equal(invitation.calls, 0);
   assert.equal(env.elements.get('install-phone').hidden, false);
   assert.equal(env.elements.get('install-device').hidden, true);
-  assert.equal(env.elements.get('install-address').href, 'https://zuka.test/campus/#descargar');
+  assert.equal(env.elements.get('install-address').href, 'https://mathbrain-psi.vercel.app/#descargar');
+  assert.deepEqual(env.encodedQr, ['https://mathbrain-psi.vercel.app/#descargar']);
   const svg = env.elements.get('install-qr').innerHTML;
   assert.match(svg, /viewBox="0 0 \d+ \d+"/);
   assert.match(svg, /shape-rendering="crispEdges"/);
@@ -141,10 +148,21 @@ test('El enlace del QR abre la guía para iPad y los botones nuevos funcionan de
   assert.equal(env.dialog.open, true);
 });
 
-test('El QR de una vista local informa que necesita la dirección publicada', async () => {
-  const env = environment({ address: 'http://localhost:4177/' });
-  await env.tryButton.emit('click');
-  assert.match(env.elements.get('install-qr-note').textContent, /dirección pública/);
+test('El QR siempre codifica producción, incluso desde localhost, subcarpetas o vistas previas protegidas', async () => {
+  for (const address of [
+    'http://localhost:4177/',
+    'http://127.0.0.1:4180/#perfil',
+    'https://mathbrain-git-preview-equipo.vercel.app/?token=privado#perfil',
+    'https://mathbrain-deployment-equipo.vercel.app/campus/?token=privado#descargar',
+    'https://mathbrain-psi.vercel.app/?campana=prueba#perfil'
+  ]) {
+    const env = environment({ address });
+    await env.tryButton.emit('click');
+    assert.equal(env.elements.get('install-address').href, 'https://mathbrain-psi.vercel.app/#descargar', address);
+    assert.deepEqual(env.encodedQr, ['https://mathbrain-psi.vercel.app/#descargar'], 'La matriz QR debe codificar el mismo destino público que el enlace');
+    assert.equal(env.elements.get('install-address').textContent, 'mathbrain-psi.vercel.app/');
+    assert.doesNotMatch(env.elements.get('install-qr-note').textContent, /vista local|dirección pública/);
+  }
 });
 
 test('Cerrar la descarga se respeta al cambiar tema; salir y volver permite abrirla de nuevo', async () => {
