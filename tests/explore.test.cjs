@@ -14,7 +14,7 @@ function registeredCloud() {
 
 const guestCloud = () => ({ ...registeredCloud(), state: { ...registeredCloud().state, user: null } });
 
-function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = registeredCloud(), config = { emailAccounts: true }, storage = {}) {
+function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = registeredCloud(), config = { emailAccounts: true }, storage = {}, standalone = false) {
   const target = extra => {
     const listeners = new Map();
     return Object.assign({
@@ -102,7 +102,7 @@ function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = regi
     location.hash = address;
     location.href = `http://localhost/${address}`;
   }]));
-  const window = target({ location, ZUKA_CLOUD: cloud, ZUKA_CONFIG: config, scrollTo() {}, matchMedia: () => ({ matches: false }) });
+  const window = target({ location, ZUKA_CLOUD: cloud, ZUKA_CONFIG: config, scrollTo() {}, matchMedia: query => ({ matches: query === '(display-mode: standalone)' && standalone }) });
   document = target({
     body: staticElements.find(node => node.tagName === 'BODY'),
     activeElement: { tagName: 'BODY' },
@@ -118,7 +118,8 @@ function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = regi
       if (!dataMatch) return [];
       return [...staticElements, ...[...dynamicElements.values()].flat()].filter(node => node.getAttribute(dataMatch[1]) !== null && (dataMatch[2] === undefined || node.getAttribute(dataMatch[1]) === dataMatch[2]));
     },
-    getElementById(id) { return elements.get(id) || null; }
+    getElementById(id) { return elements.get(id) || null; },
+    dispatchEvent(event) { this.emit(event.type, event); return true; }
   });
   const stored = new Map(Object.entries(storage));
   const session = new Map();
@@ -126,6 +127,7 @@ function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = regi
   let timerId = 0;
   const context = vm.createContext({
     window, document, history, location, URL, URLSearchParams, Intl,
+    CustomEvent: class CustomEvent { constructor(type, options = {}) { this.type = type; this.detail = options.detail; } },
     localStorage: { getItem: key => stored.get(key) ?? null, setItem: (key, value) => stored.set(key, value) },
     sessionStorage: { getItem: key => session.get(key) ?? null, setItem: (key, value) => session.set(key, value), removeItem: key => session.delete(key) },
     requestAnimationFrame: callback => callback(),
@@ -136,7 +138,7 @@ function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = regi
   prepareLibrary(window.MATHBRAIN_LIBRARY, window.MATHBRAIN_COURSES);
   vm.runInContext(source, context);
   return {
-    document, location, historyCalls, courseTotal, stored, session,
+    document, window, location, historyCalls, courseTotal, stored, session,
     emitCloud(reason = 'auth') { window.emit('zuka:cloud', { detail: { reason } }); },
     courses: window.MATHBRAIN_COURSES,
     library: window.MATHBRAIN_LIBRARY,
@@ -159,6 +161,7 @@ function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = regi
     change(node, value) {
       node.value = value;
       node.emit('change', { target: node });
+      document.emit('change', { target: node });
     }
   };
 }
@@ -307,14 +310,14 @@ test('Escribir desde cursos conserva esa vista en Atrás y reemplaza solo las pu
 });
 
 test('La navegación a Explorar enfoca el encabezado de cursos', () => {
-  const app = environment('#');
+  const app = environment('#inicio');
   app.navigate('#explorar');
   assert.equal(app.document.activeElement, app.node('#courses-title'));
   assertCourses(app, app.courses.length);
 });
 
 test('Inicio, detalle del curso y recursos siguen siendo accesibles', () => {
-  const app = environment('#');
+  const app = environment('#inicio');
   assert.equal(app.node('#home-view').hidden, false);
   assert.equal(app.node('#courses-view').hidden, true);
   const home = app.node('#today-panel').innerHTML;
@@ -432,7 +435,7 @@ test('El repaso del nivel reúne un reto por lección de cada nivel', () => {
 });
 
 test('Todas las lecciones de los cursos tienen al menos dos retos y cada nivel tiene repaso', () => {
-  for (const course of environment('#').courses) {
+  for (const course of environment('#inicio').courses) {
     const app = environment(`#curso/${course.id}`);
     const html = app.node('#detail-view').innerHTML;
     assert.equal((html.match(/Repaso de la unidad/g) || []).length, course.modules.length, course.id);
@@ -469,7 +472,7 @@ test('Completar lecciones actualiza el camino, el catálogo y el panel del inici
   assert.doesNotMatch(course, /class="zunit is-locked"/);
   app.navigate('#explorar');
   assert.match(app.node('#course-grid').innerHTML, /<span class="zcard-status">40 %<\/span>/);
-  app.navigate('#');
+  app.navigate('#inicio');
   assert.match(app.node('#today-panel').innerHTML, /<h2 id="slide-probabilidad">Probabilidad<\/h2><p class="spotlight-level">MÓDULO 2 · EN CURSO<\/p>[\s\S]*?Siguiente<\/small><strong>Probabilidad condicional e independencia<\/strong>[\s\S]*?>Continuar<\/a>/);
   app.navigate('#contenido/probabilidad-1?vista=lectura');
   app.click(app.all('[data-complete="probabilidad-1"]').at(-1));
@@ -516,7 +519,7 @@ test('El perfil resume el progreso, guarda el nombre y saluda con él en el inic
   app.document.emit('submit', { target: app.all('[data-profile-form]').at(-1) });
   assert.match(app.node('#detail-view').innerHTML, /<h1 id="detail-title" tabindex="-1">Hola, Ana &lt;b&gt;<\/h1>/);
   assert.match(app.node('#detail-view').innerHTML, /<option value="3" selected>/);
-  app.navigate('#');
+  app.navigate('#inicio');
   assert.match(app.node('#today-panel').innerHTML, /(?:Buenos días|Buenas tardes|Buenas noches), Ana &lt;b&gt;<\/h1>/);
   assert.match(app.node('#today-panel').innerHTML, /Meta semanal: 0 de 3 días/);
 });
@@ -582,7 +585,7 @@ test('El formulario valida el correo y la longitud de la contraseña antes de re
 });
 
 test('La bienvenida pide solo deslizar: crea un perfil por defecto y abre todo el contenido', () => {
-  const app = environment('#', undefined, guestCloud(), { emailAccounts: false });
+  const app = environment('#inicio', undefined, guestCloud(), { emailAccounts: false });
   const html = app.node('#today-panel').innerHTML;
   assert.match(html, /<h1 id="home-title" tabindex="-1">Aprende matemáticas a tu ritmo<\/h1>/);
   assert.match(html, /Sin registro: desliza y empieza\./);
@@ -595,7 +598,7 @@ test('La bienvenida pide solo deslizar: crea un perfil por defecto y abre todo e
   app.click(app.all('[data-slide-thumb]').at(-1));
   assert.ok(app.stored.get('zuka-ingreso'));
   assert.equal(JSON.parse(app.stored.get('mathbrain-profile')).name, 'Estudiante');
-  assert.equal(app.location.hash, '#');
+  assert.equal(app.location.hash, '#inicio');
   assert.equal(app.document.body.classList.contains('onboarding-mode'), false);
   assert.match(app.node('#today-panel').innerHTML, /class="button spotlight-start" href="#contenido\/fundamentos-matematicas-1">Empezar</);
   // El perfil por defecto se cambia en Perfil y no muestra registro por correo.
@@ -604,7 +607,7 @@ test('La bienvenida pide solo deslizar: crea un perfil por defecto y abre todo e
   assert.doesNotMatch(app.node('#detail-view').innerHTML, /data-auth-form|Tu cuenta/);
   // Las rutas antiguas de registro llevan al inicio una vez dentro.
   app.navigate('#registro');
-  assert.equal(app.location.hash, '#');
+  assert.equal(app.location.hash, '#inicio');
 });
 
 test('Una lección bloqueada lleva a la bienvenida y, tras deslizar, a esa lección', () => {
@@ -619,7 +622,7 @@ test('Una lección bloqueada lleva a la bienvenida y, tras deslizar, a esa lecci
 });
 
 test('Cancelar un deslizamiento completo no entra y permite volver a usar el botón', () => {
-  const app = environment('#', undefined, null, { emailAccounts: false });
+  const app = environment('#inicio', undefined, null, { emailAccounts: false });
   const thumb = app.all('[data-slide-thumb]').at(-1);
   thumb.emit('pointerdown', { pointerId: 1, button: 0, clientX: 20 });
   thumb.emit('pointermove', { pointerId: 1, clientX: 300 });
@@ -632,7 +635,7 @@ test('Cancelar un deslizamiento completo no entra y permite volver a usar el bot
 });
 
 test('Un deslizamiento incompleto no bloquea el acceso posterior con teclado', () => {
-  const app = environment('#', undefined, null, { emailAccounts: false });
+  const app = environment('#inicio', undefined, null, { emailAccounts: false });
   const thumb = app.all('[data-slide-thumb]').at(-1);
   thumb.emit('pointerdown', { pointerId: 1, button: 0, clientX: 20 });
   thumb.emit('pointermove', { pointerId: 1, clientX: 80 });
@@ -644,7 +647,7 @@ test('Un deslizamiento incompleto no bloquea el acceso posterior con teclado', (
 });
 
 test('Solo el puntero activo completa el gesto y la entrada se ejecuta una vez', () => {
-  const app = environment('#', undefined, null, { emailAccounts: false });
+  const app = environment('#inicio', undefined, null, { emailAccounts: false });
   const thumb = app.all('[data-slide-thumb]').at(-1);
   thumb.emit('pointerdown', { pointerId: 1, button: 0, clientX: 20 });
   thumb.emit('pointermove', { pointerId: 2, clientX: 300 });
@@ -661,7 +664,7 @@ test('Solo el puntero activo completa el gesto y la entrada se ejecuta una vez',
 });
 
 test('Visitar los programas cancela una entrada que todavía está animándose', () => {
-  const app = environment('#', undefined, null, { emailAccounts: false });
+  const app = environment('#inicio', undefined, null, { emailAccounts: false });
   const thumb = app.all('[data-slide-thumb]').at(-1);
   thumb.emit('pointerdown', { pointerId: 1, button: 0, clientX: 20 });
   thumb.emit('pointermove', { pointerId: 1, clientX: 300 });
@@ -675,7 +678,7 @@ test('Visitar los programas cancela una entrada que todavía está animándose',
 });
 
 test('El perfil local funciona sin Supabase y conserva el nombre y el progreso al volver', () => {
-  const app = environment('#', undefined, null, { emailAccounts: false }, {
+  const app = environment('#inicio', undefined, null, { emailAccounts: false }, {
     'mathbrain-profile': JSON.stringify({ name: 'Ana', goal: 3 }),
     'mathbrain-progress': JSON.stringify(['probabilidad-1'])
   });
@@ -683,7 +686,7 @@ test('El perfil local funciona sin Supabase y conserva el nombre y el progreso a
   assert.equal(JSON.parse(app.stored.get('mathbrain-profile')).name, 'Ana');
   assert.deepEqual(JSON.parse(app.stored.get('mathbrain-progress')), ['probabilidad-1']);
   app.navigate('#registro');
-  assert.equal(app.location.hash, '#');
+  assert.equal(app.location.hash, '#inicio');
   const reopened = environment('#contenido/probabilidad-2', undefined, null, { emailAccounts: false }, Object.fromEntries(app.stored));
   assert.match(reopened.node('#detail-view').innerHTML, /id="lesson-player"/);
   assert.equal(reopened.document.body.classList.contains('onboarding-mode'), false);
@@ -692,7 +695,7 @@ test('El perfil local funciona sin Supabase y conserva el nombre y el progreso a
 test('El modo local no espera ni utiliza una sesión de correo anterior', () => {
   const cloud = registeredCloud();
   cloud.state.ready = false;
-  const app = environment('#', undefined, cloud, { emailAccounts: false });
+  const app = environment('#inicio', undefined, cloud, { emailAccounts: false });
   assert.match(app.node('#today-panel').innerHTML, /data-slide-thumb="1"/);
   app.click(app.all('[data-slide-thumb]').at(-1));
   app.navigate('#perfil');
@@ -703,7 +706,7 @@ test('Reactivar las cuentas exige una sesión aunque exista una entrada local an
   const app = environment('#contenido/probabilidad-2', undefined, guestCloud(), { emailAccounts: true }, { 'zuka-ingreso': '2026-11-01T12:00:00.000Z' });
   assert.match(app.node('#detail-view').innerHTML, /Crea tu cuenta para continuar/);
   assert.doesNotMatch(app.node('#detail-view').innerHTML, /id="lesson-player"/);
-  app.navigate('#');
+  app.navigate('#inicio');
   assert.match(app.node('#today-panel').innerHTML, /href="#registro"/);
   assert.match(app.node('#today-panel').innerHTML, /href="#ingresar"/);
   assert.doesNotMatch(app.node('#today-panel').innerHTML, /data-slide-thumb="1"/);
@@ -780,7 +783,7 @@ test('Con sesión se puede entrar a cualquier lección, simulación, ejercicio y
 test('La sesión se comprueba antes de mostrar bienvenida o bloquear una lección', () => {
   const cloud = guestCloud();
   cloud.state.ready = false;
-  const app = environment('#', undefined, cloud);
+  const app = environment('#inicio', undefined, cloud);
   assert.match(app.node('#today-panel').innerHTML, /Preparando tu espacio/);
   assert.doesNotMatch(app.node('#today-panel').innerHTML, /Explorar la plataforma/);
   app.navigate('#contenido/probabilidad-2');
@@ -831,12 +834,12 @@ test('La recuperación de contraseña no redirige hasta guardar la contraseña y
   app.emitCloud();
   assert.equal(app.location.hash, '#contenido/probabilidad-2');
   const other = environment('#registro?continuar=https%3A%2F%2Fejemplo.com', undefined, registeredCloud());
-  assert.equal(other.location.hash, '#');
+  assert.equal(other.location.hash, '#inicio');
   assert.match(other.node('#today-panel').innerHTML, /class="button spotlight-start" href="#contenido\/fundamentos-matematicas-1">Empezar</);
 });
 
 test('Sin Supabase se puede explorar la primera lección pero no se habilita todo el contenido', () => {
-  const app = environment('#', undefined, null, { emailAccounts: false });
+  const app = environment('#inicio', undefined, null, { emailAccounts: false });
   assert.match(app.node('#today-panel').innerHTML, /data-slide-thumb="1"/);
   app.navigate('#contenido/probabilidad-1');
   assert.match(app.node('#detail-view').innerHTML, /id="lesson-player"/);
@@ -955,7 +958,7 @@ test('Los contactos de los programas y servicios usan el WhatsApp colombiano ind
 test('Las páginas públicas conservan el panel del estudiante y el acceso limitado de visitantes', () => {
   const app = environment('#programas');
   assert.match(app.node('#detail-view').innerHTML, /Mi aprendizaje/);
-  app.navigate('#');
+  app.navigate('#inicio');
   assert.equal(app.document.body.classList.contains('marketing-mode'), false);
   assert.match(app.node('#today-panel').innerHTML, /class="button spotlight-start" href="#contenido\/fundamentos-matematicas-1">Empezar</);
   const guest = environment('#programa/ingenieria', undefined, guestCloud(), { emailAccounts: false });
@@ -964,4 +967,123 @@ test('Las páginas públicas conservan el panel del estudiante y el acceso limit
   assert.match(guest.node('#detail-view').innerHTML, /data-slide-start="1"/);
   guest.navigate('#contenido/calculo-diferencial-1');
   assert.match(guest.node('#detail-view').innerHTML, /id="lesson-player"/);
+});
+
+test('El navegador siempre abre la portada de servicios y conserva el perfil local', () => {
+  const storage = { 'zuka-ingreso': '2026-11-01', 'mathbrain-profile': JSON.stringify({ name: 'Ana', goal: 3 }), 'mathbrain-progress': JSON.stringify(['probabilidad-1']) };
+  const app = environment('', undefined, null, { emailAccounts: false }, storage);
+  const html = app.node('#today-panel').innerHTML;
+  assert.match(html, /Cursos de ingeniería y ciencias/);
+  assert.match(html, /Asesoría en trabajos y exámenes/);
+  assert.match(html, /Tutorías/);
+  assert.match(html, /data-try-app[\s\S]*Probar la app/);
+  assert.match(html, /Te ayudamos con tus exámenes virtuales/);
+  assert.equal(app.document.body.classList.contains('marketing-mode'), true);
+  assert.doesNotMatch(html, /data-slide-thumb|spotlight-slide/);
+  app.navigate('#inicio');
+  assert.match(app.node('#today-panel').innerHTML, /<h1[^>]*>[^<]*Ana<\/h1>/);
+  assert.deepEqual(JSON.parse(app.stored.get('mathbrain-progress')), ['probabilidad-1']);
+});
+
+test('Saltar al contenido enfoca el área principal y no cambia a una ruta inexistente', () => {
+  const app = environment('');
+  const skip = app.node('.skip');
+  skip.closest = selector => selector === 'a.skip' ? skip : null;
+  let prevented = false;
+  app.document.emit('click', { target: skip, preventDefault() { prevented = true; } });
+  assert.equal(prevented, true);
+  assert.equal(app.document.activeElement, app.node('#main'));
+  assert.equal(app.location.hash, '');
+});
+
+test('La app instalada abre la bienvenida o el panel, sin pasar por la portada', () => {
+  const first = environment('', undefined, null, { emailAccounts: false }, {}, true);
+  assert.equal(first.document.body.classList.contains('onboarding-mode'), true);
+  const returning = environment('', undefined, null, { emailAccounts: false }, { 'zuka-ingreso': '2026-11-01' }, true);
+  assert.match(returning.node('#today-panel').innerHTML, /spotlight-slide/);
+  assert.equal(returning.document.body.classList.contains('marketing-mode'), false);
+});
+
+test('La portada ofrece descarga cuando el dispositivo es móvil o tableta', () => {
+  const app = environment('');
+  app.window.ZUKA_INSTALL = { isMobile: () => true, isStandalone: () => false };
+  app.navigate('#conoce');
+  assert.match(app.node('#detail-view').innerHTML, /data-try-app[\s\S]*Descargar app/);
+});
+
+test('El menú principal tiene las cinco opciones solicitadas y marca la sección activa', () => {
+  assert.deepEqual([...markup.matchAll(/data-nav="([^"]+)"/g)].map(match => match[1]), ['inicio', 'cursos', 'entrenamiento', 'tutorias', 'perfil']);
+  const app = environment('#inicio');
+  for (const id of ['inicio', 'cursos', 'entrenamiento', 'tutorias', 'perfil']) {
+    app.navigate(`#${id}`);
+    assert.equal(app.node(`[data-nav="${id}"]`).getAttribute('aria-current'), 'page');
+  }
+  app.navigate('#perfil');
+  assert.match(app.node('#detail-view').innerHTML, /href="#biblioteca"/);
+});
+
+test('Cada materia ofrece cuatro parciales de práctica que cubren sus ejercicios', () => {
+  const app = environment('#entrenamiento');
+  for (const course of app.courses) {
+    app.navigate(`#entrenamiento?curso=${course.id}`);
+    const html = app.node('#detail-view').innerHTML;
+    assert.equal((html.match(/data-training-exam="/g) || []).length, 4, course.id);
+    assert.equal((html.match(/data-training-unit="/g) || []).length, course.modules.length, course.id);
+    let count = 0;
+    for (let exam = 1; exam <= 4; exam++) {
+      app.navigate(`#entrenamiento/${course.id}/parcial-${exam}`);
+      const challenges = (app.node('#player-meter').innerHTML.match(/is-challenge/g) || []).length;
+      assert.ok(challenges > 0, `${course.id}, parcial ${exam}`);
+      count += challenges;
+      assert.match(app.node('#detail-view').innerHTML, new RegExp(`href="#entrenamiento\\?curso=${course.id}"`));
+    }
+    const expected = app.library.resources.filter(item => item.courseId === course.id && item.type === 'explanation').reduce((sum, lesson) => sum + lesson.steps.filter(step => step.type === 'exercise').length, 0);
+    assert.equal(count, expected, 'Los cuatro parciales recorren todos los ejercicios');
+  }
+});
+
+test('La selección de materia y los simulacros por unidad conservan la navegación', () => {
+  const app = environment('#entrenamiento');
+  app.change(app.node('#training-course'), 'probabilidad');
+  assert.equal(app.location.hash, '#entrenamiento?curso=probabilidad');
+  app.navigate('#entrenamiento/probabilidad/unidad-1');
+  assert.match(app.node('#detail-view').innerHTML, /Simulacro:/);
+  assert.ok((app.node('#player-meter').innerHTML.match(/is-challenge/g) || []).length > 0);
+  assert.equal(app.node('[data-nav="entrenamiento"]').getAttribute('aria-current'), 'page');
+  app.navigate('#entrenamiento/probabilidad/parcial-5');
+  assert.match(app.node('#detail-view').innerHTML, /Esta idea no está en ese enlace/);
+});
+
+test('El visitante entra por la bienvenida y vuelve al simulacro que eligió', () => {
+  const app = environment('#entrenamiento/probabilidad/parcial-1', undefined, null, { emailAccounts: false });
+  assert.equal(app.document.body.classList.contains('onboarding-mode'), true);
+  app.click(app.all('[data-slide-thumb]').at(-1));
+  assert.equal(app.location.hash, '#entrenamiento/probabilidad/parcial-1');
+  assert.match(app.node('#detail-view').innerHTML, /Primer parcial/);
+  assert.match(app.node('#detail-view').innerHTML, /id="lesson-player"/);
+});
+
+test('Terminar un entrenamiento no completa lecciones y permite volver a la misma materia', () => {
+  const app = environment('#entrenamiento/probabilidad/parcial-1');
+  const count = (app.node('#player-meter').innerHTML.match(/is-challenge/g) || []).length;
+  const next = () => app.click(app.all('[data-player-next]').at(-1));
+  next();
+  for (let index = 0; index < count; index++) {
+    app.click(app.all('[data-player-reveal]').at(-1));
+    app.click(app.all('[data-player-reveal]').at(-1));
+    next();
+  }
+  assert.match(app.node('#player-stage').innerHTML, /Simulacro terminado/);
+  assert.match(app.node('#player-bar').innerHTML, /href="#entrenamiento\?curso=probabilidad"/);
+  assert.equal(app.stored.has('mathbrain-progress'), false);
+});
+
+test('Tutorías permanece dentro de la app y ofrece el contacto acordado', () => {
+  const app = environment('#tutorias');
+  const html = app.node('#detail-view').innerHTML;
+  assert.equal(app.document.body.classList.contains('marketing-mode'), false);
+  assert.match(html, /Solicitar una tutoría/);
+  assert.match(html, /Te ayudamos con tus exámenes virtuales/);
+  assert.match(html, /https:\/\/wa\.me\/573243546355\?text=/);
+  assert.equal(app.node('[data-nav="tutorias"]').getAttribute('aria-current'), 'page');
 });

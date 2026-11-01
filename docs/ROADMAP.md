@@ -46,6 +46,13 @@ Zuka avanza por etapas pequeñas: cada una se termina, se prueba en el celular y
 - Cuentas en pausa mediante `emailAccounts: false`: sin inicializar el cliente de Supabase.
 - Gestos cancelables y cancelación de la entrada pendiente al visitar otra página.
 
+## ✅ Etapa 1.5 · Portada e instalación por dispositivo
+
+- Portada de cursos de ingeniería y ciencias, asesorías y tutorías al abrir desde navegador; la PWA instalada conserva la bienvenida y el panel.
+- QR local en computador y botón de instalación en celular o tableta, con instrucciones según el navegador.
+- Tema claro/oscuro y menú Inicio, Cursos, Entrenamiento, Tutorías y Perfil.
+- Cuatro parciales de práctica por materia y simulacros por unidad usando el contenido publicado.
+
 ## 🔜 Etapa 2 · Contenido completo
 
 - Videos de todas las lecciones de Fundamentos de Matemáticas (YouTube «No listado»).

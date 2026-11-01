@@ -38,6 +38,7 @@
   // Antes de entrar se puede explorar y probar la primera lección de cada curso.
   // El registro con correo (Supabase) queda en pausa; se reactiva con emailAccounts: true en config.js.
   const emailAccounts = () => window.ZUKA_CONFIG?.emailAccounts === true;
+  const standalone = () => window.ZUKA_INSTALL?.isStandalone() ?? (window.matchMedia('(display-mode: standalone)').matches || window.navigator?.standalone === true);
   let enteredThisVisit = false;
   let onboardingDestination = '';
   let onboardingShown = false;
@@ -134,7 +135,7 @@
     const profile = loadProfile();
     if (!profile.name) storeList('mathbrain-profile', { name: 'Estudiante', goal: profile.goal });
     rememberAuthDestination('');
-    const target = safeAuthDestination(destination);
+    const target = safeAuthDestination(destination) || 'inicio';
     history.replaceState(null, '', `#${target}`);
     lastRoutedHash = null;
     route();
@@ -451,6 +452,46 @@
     }));
   }
 
+  function trainingExams(course) {
+    const exercises = courseLessons(course).flatMap(lesson => (lesson.steps || []).filter(step => step.type === 'exercise').map(step => ({ lesson, step })));
+    return ['Primer parcial', 'Segundo parcial', 'Tercer parcial', 'Cuarto parcial'].map((title, index) => ({
+      title,
+      exercises: exercises.slice(Math.floor(index * exercises.length / 4), Math.floor((index + 1) * exercises.length / 4))
+    }));
+  }
+
+  function renderTrainingCatalog(parameters) {
+    const course = courses.find(item => item.id === parameters.get('curso')) || courses[0];
+    const exams = trainingExams(course);
+    const modules = courseModules(course).filter(module => reviewSteps(module).length);
+    select('#detail-view').innerHTML = `<section class="training-view" aria-labelledby="detail-title"><header class="service-page-heading"><h1 id="detail-title" tabindex="-1">Entrena para tu próximo parcial.</h1><p>Simulacros por materia y unidad, con ejercicios, pistas y soluciones para aprender de cada intento.</p></header>`
+      + `<label class="training-picker" for="training-course">Elige tu materia<select id="training-course" data-training-course>${courses.map(item => `<option value="${item.id}"${item.id === course.id ? ' selected' : ''}>${escape(item.title)}</option>`).join('')}</select></label>`
+      + `<div class="training-course-heading"><h2>${escape(course.title)}</h2><p>${escape(course.skills.join(' · '))}</p></div>`
+      + `<section class="training-section" aria-labelledby="training-exams-title"><h3 id="training-exams-title">Por parcial</h3><p>Cuatro bloques de práctica que recorren los ejercicios del curso en orden.</p><ol class="training-list">${exams.map((exam, index) => `<li><a href="#entrenamiento/${course.id}/parcial-${index + 1}" data-training-exam="${index + 1}"><span><strong>${exam.title}</strong><small>${plural(exam.exercises.length, 'ejercicio', 'ejercicios')} · ${exam.exercises.length ? escape(exam.exercises[0].lesson.title) : 'Contenido en preparación'}</small></span>${icon('right')}</a></li>`).join('')}</ol></section>`
+      + `<section class="training-section" aria-labelledby="training-units-title"><h3 id="training-units-title">Por unidad</h3><p>¿Quieres reforzar un tema concreto? Practica una unidad a la vez.</p><ul class="training-list">${modules.map(module => `<li><a href="#entrenamiento/${course.id}/unidad-${module.index + 1}" data-training-unit="${module.index + 1}"><span><strong>${escape(module.name)}</strong><small>${plural(reviewSteps(module).length, 'reto', 'retos')} · ${escape(module.kicker)}</small></span>${icon('right')}</a></li>`).join('')}</ul></section>`
+      + `<aside class="training-support"><h2>Te ayudamos con tus exámenes virtuales.</h2><p>Prepara tus evaluaciones, resuelve dudas y trabaja los temas que necesitas reforzar con acompañamiento.</p><a class="button button-primary" href="${marketing.contact('asesoría para mis exámenes virtuales')}" target="_blank" rel="noopener noreferrer">Consultar una asesoría${icon('right')}</a></aside></section>`;
+    document.title = 'Entrenamiento | Zuka';
+  }
+
+  function renderTraining(course, type, number) {
+    const index = number - 1;
+    const exam = type === 'parcial' ? trainingExams(course)[index] : null;
+    const unit = type === 'unidad' ? courseModules(course)[index] : null;
+    const module = unit || (exam && { index: `parcial-${number}`, name: `${exam.title} · ${course.title}`, kicker: course.title });
+    const steps = unit ? reviewSteps(unit) : exam?.exercises.map(({ step }) => ({ type: 'exercise', html: step.html.replace(/^(?:<h2>[\s\S]*?<\/h2>)+/, '') }));
+    if (!module || !steps?.length) return false;
+    const title = unit ? `Simulacro: ${unit.name}` : `${exam.title} · ${course.title}`;
+    document.title = `${title} | Zuka`;
+    startPlayer({ kind: 'review', training: true, course, module, color: course.color, title, eyebrow: '', exit: `#entrenamiento?curso=${course.id}`, reading: '', steps: [{ type: 'intro', html: `<h2>Prepárate con práctica.</h2><p>${plural(steps.length, 'ejercicio', 'ejercicios')} para poner a prueba lo aprendido. Responde a tu ritmo y revisa la explicación cuando la necesites.</p><p>Este es un simulacro de práctica con los ejercicios del curso.</p>` }, ...steps] });
+    return true;
+  }
+
+  function renderTutoring() {
+    const support = marketing.programs.find(item => item.id === 'tutorias');
+    select('#detail-view').innerHTML = `<section class="tutoring-view" aria-labelledby="detail-title"><header class="service-page-heading"><h1 id="detail-title" tabindex="-1">Un espacio para entenderlo contigo.</h1><p>${escape(support.lead)}</p></header><div class="tutoring-intro"><span aria-hidden="true">${mascot.svg('saluda')}</span><div><h2>¿En qué necesitas ayuda?</h2><p>Cuéntanos tu materia, el tema y cuándo necesitas la tutoría. Conversamos por WhatsApp para organizar el acompañamiento.</p><a class="button button-primary" href="${marketing.contact('una tutoría: quiero consultar disponibilidad y cómo empezar')}" target="_blank" rel="noopener noreferrer">Solicitar una tutoría${icon('right')}</a></div></div><div class="tutoring-options">${support.items.map(item => `<section><h2>${escape(item.title)}</h2><p>${escape(item.description)}</p><ul>${item.topics.map(topic => `<li>${escape(topic)}</li>`).join('')}</ul></section>`).join('')}</div><aside class="training-support"><h2>Te ayudamos con tus exámenes virtuales.</h2><p>También te orientamos en tus trabajos y en la preparación de tus evaluaciones.</p><a class="text-button" href="${marketing.contact('asesoría en trabajos y exámenes virtuales')}" target="_blank" rel="noopener noreferrer">Consultar asesorías${icon('right')}</a></aside></section>`;
+    document.title = 'Tutorías | Zuka';
+  }
+
   function renderCatalog() {
     select('#catalog-heading').hidden = false;
     select('#results-count').textContent = '';
@@ -754,7 +795,7 @@
 
   function startPlayer(state) {
     player = { index: 0, results: {}, gains: {}, xp: 0, firstTry: 0, ...state };
-    select('#detail-view').innerHTML = `<section class="lesson-player ${player.color}" id="lesson-player" aria-labelledby="detail-title"><header class="player-top"><a class="player-close" href="${player.exit}" aria-label="Salir y volver al curso">${icon('close')}</a><div class="player-meter" id="player-meter"></div><span class="player-xp" id="player-xp" aria-live="polite"></span></header><div class="player-heading"><p class="eyebrow">${escape(player.eyebrow)}</p><h1 id="detail-title" tabindex="-1">${escape(player.title)}</h1>${player.reading ? `<a class="player-reading" href="${player.reading}">${icon('book')}Ver toda la lección en una página</a>` : ''}</div><div class="player-stage" id="player-stage"></div><div class="player-bar" id="player-bar"></div></section>`;
+    select('#detail-view').innerHTML = `<section class="lesson-player ${player.color}" id="lesson-player" aria-labelledby="detail-title"><header class="player-top"><a class="player-close" href="${player.exit}" aria-label="${player.training ? 'Salir y volver a Entrenamiento' : 'Salir y volver al curso'}">${icon('close')}</a><div class="player-meter" id="player-meter"></div><span class="player-xp" id="player-xp" aria-live="polite"></span></header><div class="player-heading">${player.eyebrow ? `<p class="eyebrow">${escape(player.eyebrow)}</p>` : ''}<h1 id="detail-title" tabindex="-1">${escape(player.title)}</h1>${player.reading ? `<a class="player-reading" href="${player.reading}">${icon('book')}Ver toda la lección en una página</a>` : ''}</div><div class="player-stage" id="player-stage"></div><div class="player-bar" id="player-bar"></div></section>`;
     renderPlayerStep();
   }
 
@@ -782,7 +823,7 @@
 
   function playerMeter() {
     const total = player.steps.length;
-    return `<ol class="player-segments" role="progressbar" aria-label="Avance de la lección" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${Math.min(player.index, total)}">${player.steps.map((step, index) => `<li class="${index < player.index ? 'is-done' : index === player.index ? 'is-current' : ''}${step.type === 'exercise' ? ' is-challenge' : ''}"></li>`).join('')}</ol>`;
+    return `<ol class="player-segments" role="progressbar" aria-label="${player.training ? 'Avance del simulacro' : 'Avance de la lección'}" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${Math.min(player.index, total)}">${player.steps.map((step, index) => `<li class="${index < player.index ? 'is-done' : index === player.index ? 'is-current' : ''}${step.type === 'exercise' ? ' is-challenge' : ''}"></li>`).join('')}</ol>`;
   }
 
   function renderPlayerStep() {
@@ -793,7 +834,7 @@
     select('#lesson-player')?.classList.toggle('is-immersive', step?.type === 'video' && /video-stage is-vertical/.test(step.html));
     if (!step) return finishPlayer();
     const labels = { exercise: 'Tu turno', idea: 'Idea clave', example: 'Ejemplo', note: 'Atención', video: 'Video', intro: 'Repaso' };
-    select('#player-stage').innerHTML = `<article class="player-card reader-body lesson-content step-${step.type}" id="player-card" tabindex="-1">${labels[step.type] ? `<p class="player-step-label">${labels[step.type]}</p>` : ''}${step.html}</article>`;
+    select('#player-stage').innerHTML = `<article class="player-card reader-body lesson-content step-${step.type}" id="player-card" tabindex="-1">${labels[step.type] && !(player.training && step.type === 'intro') ? `<p class="player-step-label">${labels[step.type]}</p>` : ''}${step.html}</article>`;
     const form = document.querySelector('#player-stage .lesson-exercise');
     form?.addEventListener('submit', event => {
       event.preventDefault();
@@ -923,9 +964,9 @@
       recordStudyDay();
       saveStats();
       mood = passed ? 'celebra' : 'animo';
-      title = passed ? '¡Unidad superada!' : 'Repaso terminado';
-      detail = `<p class="player-end-skill">${passed ? `Dominas <strong>${escape(module.name)}</strong>.` : `Repasa las lecciones de <strong>${escape(module.name)}</strong> y vuelve a intentarlo cuando quieras.`}</p>`;
-      destination = `#curso/${course.id}`;
+      title = player.training ? (passed ? '¡Simulacro superado!' : 'Simulacro terminado') : (passed ? '¡Unidad superada!' : 'Repaso terminado');
+      detail = player.training ? `<p class="player-end-skill">${correct} de ${challenges} respuestas correctas en <strong>${escape(module.name)}</strong>. Puedes volver a entrenar cuando quieras.</p>` : `<p class="player-end-skill">${passed ? `Dominas <strong>${escape(module.name)}</strong>.` : `Repasa las lecciones de <strong>${escape(module.name)}</strong> y vuelve a intentarlo cuando quieras.`}</p>`;
+      destination = player.exit;
     }
     updateStatsChip();
     select('#player-xp').textContent = player.xp ? `+${player.xp} XP` : '';
@@ -947,7 +988,7 @@
   try { authDestination = safeAuthDestination(sessionStorage.getItem('zuka-auth-return')); } catch { /* La navegación funciona también sin almacenamiento. */ }
 
   function safeAuthDestination(value) {
-    return typeof value === 'string' && /^(?:contenido|curso|repaso)\/[\w-]+(?:\/\d+)?(?:\?vista=lectura)?$/.test(value) ? value : '';
+    return typeof value === 'string' && /^(?:(?:contenido|curso|repaso)\/[\w-]+(?:\/\d+)?(?:\?vista=lectura)?|entrenamiento\/[\w-]+\/(?:parcial|unidad)-[1-9]\d*)$/.test(value) ? value : '';
   }
 
   function rememberAuthDestination(destination) {
@@ -964,7 +1005,7 @@
     const destination = authDestination;
     rememberAuthDestination('');
     authNotice = '';
-    history.replaceState(null, '', `#${destination}`);
+    history.replaceState(null, '', `#${destination || 'inicio'}`);
     lastRoutedHash = null;
     route();
     return true;
@@ -1150,6 +1191,7 @@
     select('#detail-view').innerHTML = `<section class="profile-view" aria-labelledby="detail-title">`
       + `<header class="profile-header profile-hero"><span class="profile-initial" aria-hidden="true">${profile.name ? escape(profile.name.trim().charAt(0).toUpperCase()) : mascot.svg(streak ? 'celebra' : 'feliz')}</span><div class="profile-identity"><p class="eyebrow">TU PERFIL</p><h1 id="detail-title" tabindex="-1">${profile.name ? `Hola, ${escape(profile.name)}` : 'Hola'}</h1><p class="profile-level"><strong>Nivel ${level.level}</strong> · ${stats.xp} XP</p><div class="profile-level-bar"><span class="course-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="${level.need}" aria-valuenow="${level.into}" aria-label="Progreso hacia el nivel ${level.level + 1}"><span style="width:${level.percent}%"></span></span><small>${level.need - level.into} XP para el nivel ${level.level + 1}</small></div></div></header>`
       + `<ul class="profile-stats" aria-label="Tus números">${statItems.map(([name, value, label]) => `<li>${icon(name)}<strong>${value}</strong><span>${label}</span></li>`).join('')}</ul>`
+      + `<nav class="profile-shortcuts" aria-label="Tus recursos"><a class="text-button" href="#biblioteca">${icon('bookmark')}Mi biblioteca</a><a class="text-button" href="#simulaciones">${icon('simulation')}Simulaciones</a></nav>`
       + accountCard()
       + `<form class="profile-name" data-profile-form="1"><div class="profile-field"><label for="profile-name">¿Cómo quieres que te llamemos?</label><input id="profile-name" name="name" type="text" maxlength="40" autocomplete="nickname" placeholder="Tu nombre o apodo" value="${escape(profile.name)}"></div><div class="profile-field"><label for="profile-goal">Meta semanal <span>(opcional)</span></label><select id="profile-goal" name="goal">${[[0, 'Sin meta'], [2, '2 días por semana'], [3, '3 días por semana'], [5, '5 días por semana'], [7, 'Todos los días']].map(([value, label]) => `<option value="${value}"${profile.goal === value ? ' selected' : ''}>${label}</option>`).join('')}</select></div><button class="button button-secondary" type="submit">Guardar</button></form>`
       + `<section class="profile-card" aria-labelledby="profile-week-title"><div class="profile-card-heading"><h2 id="profile-week-title">Últimos 7 días</h2><p>${studiedWeek ? `Estudiaste ${plural(studiedWeek, 'día', 'días')}${profile.goal ? ` de tu meta de ${profile.goal}` : ' de 7'}.` : 'Completa una lección y aparecerá aquí.'}</p></div><ol class="profile-week">${week.map(day => `<li class="${day.done ? 'is-done' : ''}${day.today ? ' is-today' : ''}"><span aria-hidden="true">${day.done ? icon('check') : ''}</span><small aria-hidden="true">${escape(day.short)}</small><span class="sr-only">${escape(day.long)}: ${day.done ? 'estudiaste' : 'sin estudio'}</span></li>`).join('')}</ol></section>`
@@ -1225,7 +1267,7 @@
     const parameters = new URLSearchParams(rawParameters);
     filters = { query: (parameters.get('q') || '').slice(0, 160), type: library.formats[parameters.get('tipo')] ? parameters.get('tipo') : 'all', topic: library.topics.some(topic => topic.id === parameters.get('tema')) ? parameters.get('tema') : 'all', level: ['Inicial', 'Intermedio'].includes(parameters.get('nivel')) ? parameters.get('nivel') : 'all' };
     courseFilters = { topic: library.topics.some(topic => topic.id === parameters.get('curso_tema')) ? parameters.get('curso_tema') : 'all', level: ['Inicial', 'Intermedio'].includes(parameters.get('curso_nivel')) ? parameters.get('curso_nivel') : 'all' };
-    page = !destination || destination === 'inicio' ? 'inicio' : destination === 'biblioteca' ? 'biblioteca' : destination === 'nosotros' ? 'nosotros' : destination === 'perfil' ? 'perfil' : ['programas', 'escuelas', 'conoce'].includes(destination) || /^(?:programa|escuela)\/[\w-]+$/.test(destination) ? 'oferta' : ['registro', 'ingresar', 'ingreso'].includes(destination) ? 'acceso' : ['explorar', 'cursos', 'enfoque', 'simulaciones', 'ejercicios'].includes(destination) ? 'explorar' : 'detalle';
+    page = !destination && !standalone() || destination === 'descargar' ? 'portada' : !destination || destination === 'inicio' ? 'inicio' : destination === 'entrenamiento' ? 'entrenamiento' : destination === 'tutorias' ? 'tutorias' : destination === 'biblioteca' ? 'biblioteca' : destination === 'nosotros' ? 'nosotros' : destination === 'perfil' ? 'perfil' : ['programas', 'escuelas', 'conoce'].includes(destination) || /^(?:programa|escuela)\/[\w-]+$/.test(destination) ? 'oferta' : ['registro', 'ingresar', 'ingreso'].includes(destination) ? 'acceso' : ['explorar', 'cursos', 'enfoque', 'simulaciones', 'ejercicios'].includes(destination) ? 'explorar' : 'detalle';
     if (page === 'acceso') {
       authMode = destination === 'registro' ? 'signup' : parameters.get('modo') === 'reset' ? 'reset' : 'signin';
       if (parameters.has('continuar')) rememberAuthDestination(parameters.get('continuar'));
@@ -1235,28 +1277,32 @@
     if (destination === 'simulaciones') filters.type = 'simulation';
     if (destination === 'ejercicios') filters.type = 'exercise';
     // Las páginas públicas comparten componentes: vacía las vistas ocultas para no duplicar sus identificadores.
-    if (page !== 'inicio') select('#today-panel').replaceChildren();
+    if (!['inicio', 'portada'].includes(page)) select('#today-panel').replaceChildren();
     if (page !== 'nosotros') select('#about-view').replaceChildren();
     if (page !== 'cursos') select('#course-grid').replaceChildren();
-    select('#home-view').hidden = page !== 'inicio';
+    select('#home-view').hidden = !['inicio', 'portada'].includes(page);
     select('#courses-view').hidden = page !== 'cursos';
     select('.discovery').hidden = !['explorar', 'biblioteca'].includes(page);
-    select('#detail-view').hidden = !['detalle', 'perfil', 'acceso', 'oferta'].includes(page);
+    select('#detail-view').hidden = !['detalle', 'perfil', 'acceso', 'oferta', 'entrenamiento', 'tutorias'].includes(page);
     select('#about-view').hidden = page !== 'nosotros';
     const exploreNotice = select('#explore-notice');
     exploreNotice.innerHTML = `${icon('lock')}<p><strong>Estás explorando.</strong> Prueba la primera lección de cada curso. ${emailAccounts() ? '<a href="#registro">Crea tu cuenta gratis</a> para acceder a todo.' : '<a href="#ingreso">Desliza para empezar</a>: es gratis, sin registro, y accedes a todo.'}</p>${emailAccounts() ? '<a class="text-button" href="#ingresar">Iniciar sesión</a>' : ''}`;
-    exploreNotice.hidden = hasAccount() || !(['cursos', 'explorar', 'biblioteca'].includes(page) || (page === 'detalle' && /^curso\/[\w-]+$/.test(destination)));
+    exploreNotice.hidden = hasAccount() || !(['cursos', 'explorar', 'biblioteca', 'entrenamiento'].includes(page) || (page === 'detalle' && /^curso\/[\w-]+$/.test(destination)));
     select('#content-search').value = filters.query;
     player = null;
     if (page === 'detalle') {
       const resourceMatch = destination.match(/^contenido\/([\w-]+)$/);
       const courseMatch = destination.match(/^curso\/([\w-]+)(?:\/(\d+))?$/);
       const reviewMatch = destination.match(/^repaso\/([\w-]+)\/(\d+)$/);
+      const trainingMatch = destination.match(/^entrenamiento\/([\w-]+)\/(parcial|unidad)-([1-9]\d*)$/);
+      const trainingCourse = trainingMatch && courses.find(candidate => candidate.id === trainingMatch[1]);
       const course = courseMatch && courses.find(candidate => candidate.id === courseMatch[1]);
       const reviewCourse = reviewMatch && courses.find(candidate => candidate.id === reviewMatch[1]);
       const resource = resourceMatch ? resourceById.get(resourceMatch[1]) : course && courseMatch[2] ? resourceById.get(`${course.id}-${Math.min(course.lessons.length, Math.max(1, Number(courseMatch[2])))}`) : null;
       if (resource && (accountPending() || !canStudy(resource))) renderAccessGate(resource.title, `${contentDestination(resource)}${parameters.get('vista') === 'lectura' ? '?vista=lectura' : ''}`);
       else if (resource) renderResource(resource, parameters);
+      else if (trainingCourse && (accountPending() || !hasAccount())) renderAccessGate('Tu simulacro de práctica', destination);
+      else if (trainingCourse && renderTraining(trainingCourse, trainingMatch[2], Number(trainingMatch[3]))) { /* entrenamiento por parcial o unidad */ }
       else if (course) renderCourse(course);
       else if (reviewCourse && courseModules(reviewCourse)[Number(reviewMatch[2]) - 1] && (accountPending() || !hasAccount())) renderAccessGate(`Repaso de ${reviewCourse.title}`, destination);
       else if (reviewCourse && renderReview(reviewCourse, Number(reviewMatch[2]) - 1)) { /* repaso del nivel */ }
@@ -1264,6 +1310,10 @@
     } else if (page === 'cursos') {
       select('#detail-view').replaceChildren();
       renderCourses();
+    } else if (page === 'entrenamiento') {
+      renderTrainingCatalog(parameters);
+    } else if (page === 'tutorias') {
+      renderTutoring();
     } else if (page === 'perfil') {
       renderProfile();
     } else if (page === 'acceso') {
@@ -1276,15 +1326,16 @@
       document.title = 'Sobre Zuka | Zuka';
     } else {
       select('#detail-view').replaceChildren();
-      if (page === 'inicio') renderHome();
+      if (page === 'portada') { select('#today-panel').innerHTML = marketing.home(hasAccount()); document.title = 'Zuka — Tus sueños merecen un camino'; }
+      else if (page === 'inicio') renderHome();
       else renderCatalog();
     }
     // Durante una lección paso a paso, la interfaz se concentra en la lección, como en una app de aprendizaje.
     document.body?.classList.toggle('lesson-mode', Boolean(player));
-    document.body?.classList.toggle('marketing-mode', page === 'oferta' || page === 'nosotros' || (page === 'inicio' && !hasAccount()) || onboardingShown);
+    document.body?.classList.toggle('marketing-mode', page === 'portada' || page === 'oferta' || page === 'nosotros' || (page === 'inicio' && !hasAccount()) || onboardingShown);
     document.body?.classList.toggle('onboarding-mode', onboardingShown);
     updateStatsChip();
-    const activeNav = page === 'acceso' ? 'perfil' : page === 'cursos' || (page === 'detalle' && destination.startsWith('curso/')) ? 'explorar' : page === 'explorar' ? filters.type === 'simulation' ? 'simulaciones' : filters.type === 'exercise' ? 'ejercicios' : 'explorar' : page;
+    const activeNav = page === 'acceso' ? 'perfil' : destination.startsWith('entrenamiento/') ? 'entrenamiento' : page === 'cursos' || page === 'explorar' || (page === 'detalle' && /^(?:curso|contenido|repaso)\//.test(destination)) ? 'cursos' : page;
     selectAll('[data-nav]').forEach(link => {
       const active = link.dataset.nav === activeNav;
       link.classList.toggle('active', active);
@@ -1293,9 +1344,10 @@
     });
     if (shouldFocus) {
       window.scrollTo({ top: 0, behavior: 'instant' });
-      const heading = ['detalle', 'perfil', 'acceso', 'oferta'].includes(page) ? select('#detail-title') : page === 'nosotros' ? select('#about-title') : page === 'inicio' ? select('#home-title') : page === 'cursos' ? select('#courses-title') : select('#catalog-title');
+      const heading = ['detalle', 'perfil', 'acceso', 'oferta', 'entrenamiento', 'tutorias'].includes(page) ? select('#detail-title') : page === 'nosotros' ? select('#about-title') : ['inicio', 'portada'].includes(page) ? select('#home-title') : page === 'cursos' ? select('#courses-title') : select('#catalog-title');
       heading?.focus({ preventScroll: true });
     }
+    document.dispatchEvent(new CustomEvent('zuka:routechange'));
   }
 
   function simulationControls(resource) {
@@ -1471,6 +1523,12 @@
     if (event.key === '/' && !event.ctrlKey && !event.metaKey && !event.altKey && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) && !document.activeElement.isContentEditable) { event.preventDefault(); select('#content-search').focus(); }
   });
   document.addEventListener('click', async event => {
+    if (event.target.closest('a.skip')) {
+      event.preventDefault();
+      select('#main').focus();
+      select('#main').scrollIntoView?.({ block: 'start' });
+      return;
+    }
     if (event.target.closest('.skip')) {
       event.preventDefault();
       select('#main').focus();
@@ -1574,6 +1632,13 @@
     toast(name ? `Listo, ${name}. Así te saludará Zuka.` : 'Nombre borrado.');
   });
   document.addEventListener('change', event => {
+    const trainingCourse = event.target.closest('[data-training-course]');
+    if (trainingCourse && courses.some(course => course.id === trainingCourse.value)) {
+      history.pushState(null, '', `#entrenamiento?curso=${trainingCourse.value}`);
+      route(false);
+      select('#training-course')?.focus();
+      return;
+    }
     const input = event.target.closest('[data-profile-import]');
     if (input?.files?.[0]) importProgress(input.files[0]);
   });

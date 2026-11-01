@@ -26,7 +26,8 @@ function environment({ saved = null, systemDark = false, readFails = false, writ
   };
   const root = { dataset: {}, style: {} };
   const meta = { content: '#0e1424', setAttribute(name, value) { this[name] = value; } };
-  const controls = [target({ value: 'dark' }), target({ value: 'dark' })];
+  const controls = [target({ value: 'dark', matches: selector => selector === '[data-theme-select]' }), target({ value: 'dark', matches: selector => selector === '[data-theme-select]' })];
+  const toggles = Array.from({ length: 2 }, () => target({ setAttribute(name, value) { this[name] = value; }, closest(selector) { return selector === '[data-theme-toggle]' ? this : null; } }));
   const icons = ['dark', 'light', 'system'].map(preference => ({
     dataset: { themeIcon: preference }, hidden: preference !== 'dark',
     setAttribute(name) { if (name === 'hidden') this.hidden = true; },
@@ -57,7 +58,7 @@ function environment({ saved = null, systemDark = false, readFails = false, writ
   const document = target({
     readyState, documentElement: root,
     querySelector: selector => selector === 'meta[name="theme-color"]' ? meta : null,
-    querySelectorAll: selector => !mounted ? [] : selector === '[data-theme-select]' ? controls : selector === '[data-theme-icon]' ? icons : [],
+    querySelectorAll: selector => !mounted ? [] : selector === '[data-theme-select]' ? controls : selector === '[data-theme-toggle]' ? toggles : selector === '[data-theme-icon]' ? icons : [],
     getElementById: id => mounted && id === 'theme-status' ? status : null,
     dispatchEvent(event) { events.push(event); return true; }
   });
@@ -68,7 +69,7 @@ function environment({ saved = null, systemDark = false, readFails = false, writ
     }
   });
   return {
-    root, meta, controls, icons, status, events, stored, writes, document, window, media,
+    root, meta, controls, toggles, icons, status, events, stored, writes, document, window, media,
     ready() {
       mounted = true;
       document.readyState = 'interactive';
@@ -76,8 +77,9 @@ function environment({ saved = null, systemDark = false, readFails = false, writ
     },
     select(preference, index = 0) {
       controls[index].value = preference;
-      controls[index].emit('change');
+      document.emit('change', { target: controls[index] });
     },
+    toggle(index = 0) { document.emit('click', { target: toggles[index] }); },
     setSystem(dark) {
       media.matches = dark;
       media.emit('change', { matches: dark });
@@ -146,40 +148,40 @@ test('Guardar un almacenamiento bloqueado aplica el tema durante la visita e inf
   assert.match(env.status.textContent, /Tema oscuro activado/);
 });
 
-test('Los controles permiten elegir claro, oscuro y sistema y guardan la elección', () => {
+test('Los controles solo aceptan claro y oscuro y guardan la elección', () => {
   const env = environment();
   for (const [preference, theme, message] of [
     ['light', 'light', 'Tema claro activado.'],
-    ['dark', 'dark', 'Tema oscuro activado.'],
-    ['system', 'light', 'Tema del sistema: claro.']
+    ['dark', 'dark', 'Tema oscuro activado.']
   ]) {
     env.select(preference, 1);
     assertTheme(env, theme, preference);
     assert.equal(env.stored.get(storageKey), preference);
     assert.equal(env.status.textContent, message);
   }
-  assert.deepEqual(env.writes, ['light', 'dark', 'system'].map(value => ({ key: storageKey, value })));
+  env.select('system');
+  assertTheme(env, 'dark', 'dark', false);
+  assert.equal(env.stored.get(storageKey), 'dark');
+  assert.deepEqual(env.writes, ['light', 'dark'].map(value => ({ key: storageKey, value })));
 });
 
 test('Volver a abrir la app recupera una selección guardada sin anunciar un cambio', () => {
   for (const [saved, systemDark, theme] of [['dark', false, 'dark'], ['light', true, 'light'], ['system', false, 'light'], ['system', true, 'dark']]) {
     const env = environment({ saved, systemDark });
-    assertTheme(env, theme, saved);
+    assertTheme(env, theme);
     assert.equal(env.status.textContent, '');
-    assert.equal(env.writes.length, 0);
+    assert.equal(env.writes.length, saved === 'system' ? 1 : 0);
   }
 });
 
-test('El modo sistema responde a cambios del dispositivo sin sobrescribir la preferencia', () => {
-  const env = environment({ saved: 'system' });
-  env.setSystem(true);
-  assertTheme(env, 'dark', 'system');
-  assert.equal(env.status.textContent, 'Tema del sistema: oscuro.');
+test('Una preferencia anterior del sistema se convierte una vez y deja de seguir al dispositivo', () => {
+  const env = environment({ saved: 'system', systemDark: true });
+  assertTheme(env, 'dark');
   env.setSystem(false);
-  assertTheme(env, 'light', 'system');
-  assert.equal(env.status.textContent, 'Tema del sistema: claro.');
-  assert.equal(env.stored.get(storageKey), 'system');
-  assert.equal(env.writes.length, 0);
+  assertTheme(env, 'dark');
+  assert.equal(env.status.textContent, '');
+  assert.equal(env.stored.get(storageKey), 'dark');
+  assert.equal(env.writes.length, 1);
 });
 
 test('Los temas elegidos explícitamente ignoran los cambios de apariencia del dispositivo', () => {
@@ -209,9 +211,9 @@ test('Otra pestaña sincroniza la preferencia y el borrado de almacenamiento rec
   assertTheme(env, 'dark');
   assert.equal(env.status.textContent, 'Tema oscuro activado.');
   env.window.emit('storage', { key: storageKey, newValue: 'system' });
-  assertTheme(env, 'light', 'system');
+  assertTheme(env, 'light');
   env.setSystem(true);
-  assertTheme(env, 'dark', 'system');
+  assertTheme(env, 'light');
   env.window.emit('storage', { key: storageKey, newValue: null });
   assertTheme(env, 'light');
   env.window.emit('storage', { key: storageKey, newValue: 'dark' });
@@ -231,19 +233,31 @@ test('Un evento de almacenamiento ajeno no altera el tema y un valor inválido v
   assert.equal(env.writes.length, 0);
 });
 
-test('La página aplica el tema antes del CSS y ofrece un selector con etiqueta y estado accesible', () => {
+test('El botón alterna entre claro y oscuro y se actualiza tras una navegación sin volver a emitir cambios', () => {
+  const env = environment();
+  assert.equal(env.toggles[0]['aria-label'], 'Cambiar a tema oscuro');
+  env.toggle();
+  assertTheme(env, 'dark');
+  assert.equal(env.toggles[1]['aria-label'], 'Cambiar a tema claro');
+  env.toggle(1);
+  assertTheme(env, 'light');
+  const count = env.events.length;
+  env.document.emit('zuka:routechange');
+  assert.equal(env.events.length, count, 'Refrescar botones no debe provocar un bucle de renderizado');
+});
+
+test('La página aplica el tema antes del CSS y ofrece un botón accesible sin opción del sistema', () => {
   const html = fs.readFileSync(path.join(directory, 'index.html'), 'utf8');
   const script = html.match(/<script\b[^>]*\bsrc=["'](?:\.\/)?theme\.js["'][^>]*><\/script>/i);
   assert.ok(script);
   assert.doesNotMatch(script[0], /\b(?:defer|async|type\s*=\s*["']module["'])/i);
   assert.ok(script.index < html.search(/<link\b[^>]*\brel=["']stylesheet["']/i));
   assert.match(html, /<link\b[^>]*rel="stylesheet"[^>]*href="themes\.css"/);
-  const control = html.match(/<label\b[^>]*class="theme-control"[^>]*>([\s\S]*?)<\/label>/);
+  const control = html.match(/<button\b[^>]*class="theme-control"[^>]*data-theme-toggle[^>]*>([\s\S]*?)<\/button>/);
   assert.ok(control);
-  assert.match(control[1], /Tema de la aplicación/);
-  assert.match(control[1], /<select\b[^>]*data-theme-select/);
-  for (const preference of ['dark', 'light', 'system']) {
-    assert.ok(control[1].includes(`<option value="${preference}">`));
+  assert.match(control[0], /aria-label="Cambiar a tema oscuro"/);
+  assert.doesNotMatch(html, /<option value="system">|data-theme-icon="system"/);
+  for (const preference of ['dark', 'light']) {
     assert.ok(control[1].includes(`data-theme-icon="${preference}"`));
   }
   const status = html.match(/<[^>]+\bid="theme-status"[^>]*>/);

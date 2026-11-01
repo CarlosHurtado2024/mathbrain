@@ -10,9 +10,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Zuka">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="description" content="Tus sueños merecen un camino. PreICFES, preuniversitario, preingeniero, escuelas de ingeniería, tutorías y asesorías para ingresar a la universidad y avanzar en tu carrera.">
+  <meta name="description" content="Cursos de ingeniería y ciencias, asesoría en trabajos y exámenes y tutorías para avanzar en tu carrera. Prueba Zuka o instálala en tu celular para aprender a tu ritmo.">
   <meta property="og:title" content="Zuka — Tus sueños merecen un camino">
-  <meta property="og:description" content="Te acompañamos para ingresar, aprender, avanzar y graduarte. Conoce nuestros programas, cursos por escuelas, tutorías y asesorías.">
+  <meta property="og:description" content="Cursos de ingeniería y ciencias, tutorías y asesorías para seguir avanzando. Entrena por materia y unidad y lleva Zuka en tu celular.">
   <title>Zuka — Tus sueños merecen un camino</title>
   <script src="theme.js"></script>
   <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
@@ -38,30 +38,30 @@
   <script defer src="config.js"></script>
   <script defer src="vendor/supabase/supabase.js"></script>
   <script defer src="cloud.js"></script>
+  <script defer src="vendor/qrcode/qrcodegen.js"></script>
+  <script defer src="install.js"></script>
   <script defer src="landing.js"></script>
   <script defer src="app.js"></script>
-  <script defer src="install.js"></script>
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
   <aside class="sidebar" aria-label="Menú de Zuka">
-    <a class="brand" href="#" aria-label="Zuka, inicio"><img src="assets/mark.svg" alt="" width="40" height="40"><span>Zuka<small>TU IMPULSO PARA APRENDER</small></span></a>
+    <a class="brand" href="#inicio" aria-label="Zuka, inicio"><img src="assets/mark.svg" alt="" width="40" height="40"><span>Zuka<small>TU IMPULSO PARA APRENDER</small></span></a>
     <nav class="main-nav" aria-label="Navegación principal">
-      <a href="#" data-nav="inicio"><span data-icon="home"></span><span>Inicio</span></a>
-      <a href="#explorar" data-nav="explorar"><span data-icon="search"></span><span>Explorar</span></a>
-      <a href="#simulaciones" data-nav="simulaciones"><span data-icon="simulation"></span><span>Simulaciones</span></a>
-      <a href="#ejercicios" data-nav="ejercicios"><span data-icon="exercise"></span><span>Ejercicios resueltos</span></a>
-      <a href="#biblioteca" data-nav="biblioteca"><span data-icon="bookmark"></span><span>Mi biblioteca <span id="saved-count" class="nav-count">0</span></span></a>
+      <a href="#inicio" data-nav="inicio"><span data-icon="home"></span><span>Inicio</span></a>
+      <a href="#cursos" data-nav="cursos"><span data-icon="book"></span><span>Cursos</span></a>
+      <a href="#entrenamiento" data-nav="entrenamiento"><span data-icon="exercise"></span><span>Entrenamiento</span></a>
+      <a href="#tutorias" data-nav="tutorias"><span aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l-3 2V11.5A8.5 8.5 0 0 1 9.5 3h3a8.5 8.5 0 0 1 8.5 8.5Z"/><path d="M7 10h8M7 14h5"/></svg></span><span>Tutorías</span></a>
       <a href="#perfil" data-nav="perfil"><span data-icon="user"></span><span>Perfil</span></a>
     </nav>
     <div class="sidebar-topics"><p class="sidebar-label">MATERIAS</p><a href="#explorar?tema=fundamentos"><i class="topic-dot purple"></i>Fundamentos</a><a href="#explorar?tema=calculo"><i class="topic-dot blue"></i>Cálculo</a><a href="#explorar?tema=probabilidad"><i class="topic-dot sand"></i>Probabilidad</a><a href="#explorar?tema=estadistica"><i class="topic-dot green"></i>Estadística</a></div>
-    <div class="sidebar-bottom"><a href="#programas">Programas y servicios</a><a href="#escuelas">Escuelas de ingeniería</a><a href="#nosotros">Sobre Zuka</a></div>
+    <div class="sidebar-bottom"><a href="#biblioteca">Mi biblioteca <span id="saved-count" class="nav-count">0</span></a><a href="#programas">Programas y servicios</a><a href="#escuelas">Escuelas de ingeniería</a><a href="#nosotros">Sobre Zuka</a></div>
   </aside>
   <div class="app-shell">
     <header class="topbar">
-      <a href="#" class="mobile-brand" aria-label="Zuka, inicio"><img src="assets/mark.svg" alt="" width="32" height="32"></a>
+      <a href="#inicio" class="mobile-brand" aria-label="Zuka, inicio"><img src="assets/mark.svg" alt="" width="32" height="32"></a>
       <form id="search-form" class="global-search" role="search"><span data-icon="search"></span><label class="sr-only" for="content-search">Buscar un tema, una explicación o un ejercicio</label><input id="content-search" type="search" placeholder="¿Qué quieres entender hoy?" autocomplete="off" maxlength="160"><kbd aria-hidden="true">/</kbd></form>
-      <a class="stats-chip" id="stats-chip" href="#perfil" title="Tu racha y tus puntos: abre tu perfil"><span class="stats-streak"><span data-icon="flame"></span><strong id="streak-count">0</strong></span><span class="stats-xp" id="xp-count">0 XP</span></a><label class="theme-control" title="Cambiar el tema de Zuka"><span class="sr-only">Tema de la aplicación</span><svg data-theme-icon="dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14A8.7 8.7 0 0 1 10 3.5 8.8 8.8 0 1 0 20.5 14Z"/></svg><svg data-theme-icon="light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" hidden><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><svg data-theme-icon="system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg><select id="theme-select" data-theme-select><option value="dark">Oscuro</option><option value="light">Claro</option><option value="system">Sistema</option></select></label>
+      <a class="stats-chip" id="stats-chip" href="#perfil" title="Tu racha y tus puntos: abre tu perfil"><span class="stats-streak"><span data-icon="flame"></span><strong id="streak-count">0</strong></span><span class="stats-xp" id="xp-count">0 XP</span></a><button class="theme-control" type="button" data-theme-toggle aria-label="Cambiar a tema oscuro" title="Cambiar a tema oscuro"><svg data-theme-icon="dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><path d="M20.5 14A8.7 8.7 0 0 1 10 3.5 8.8 8.8 0 1 0 20.5 14Z"/></svg><svg data-theme-icon="light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg></button>
       <button class="install-app-button" type="button" data-install aria-label="Instalar Zuka" aria-haspopup="dialog" aria-controls="install-dialog" title="Instalar Zuka"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></svg><span>Instalar Zuka</span></button>
     </header>
     <main id="main" tabindex="-1">
@@ -90,14 +90,22 @@
   <dialog class="install-dialog" id="install-dialog" aria-labelledby="install-title" aria-describedby="install-description">
     <button id="close-install" class="close-install" type="button" aria-label="Cerrar instrucciones de instalación">×</button>
     <img src="assets/icons/icon-192.png" alt="" width="76" height="76">
-    <p class="eyebrow">ZUKA EN TU DISPOSITIVO</p>
     <h2 id="install-title">Instalar Zuka</h2>
-    <p id="install-description">En tu dispositivo aparecerá con el nombre Zuka y este icono morado y verde. Ábrela desde tus aplicaciones para seguir aprendiendo.</p>
+    <p id="install-description">Zuka aparecerá con su nombre e icono en tu pantalla de inicio. Ábrela desde allí para seguir aprendiendo.</p>
+    <div id="install-phone" class="install-phone" hidden>
+      <div id="install-qr" class="install-qr" role="img" aria-label="Código QR para abrir la descarga de Zuka en tu celular"></div>
+      <p>Abre la cámara de tu celular, escanea el código y toca el enlace para instalar Zuka.</p>
+      <a id="install-address" class="install-address"></a>
+      <p id="install-qr-note" class="install-note"></p>
+      <a class="button button-secondary" href="#inicio" data-open-app>Probar en este navegador</a>
+    </div>
+    <div id="install-device">
     <button type="button" id="install-native" class="button button-primary" hidden>Instalar Zuka</button>
     <h3 id="install-guide-title"></h3>
     <ol id="install-steps"></ol>
     <p id="install-note" class="install-note"></p>
     <p class="install-offline" id="install-offline">Al completar la preparación, podrás usar las explicaciones, los ejercicios y las simulaciones sin conexión. Los vídeos externos necesitan internet.</p>
+    </div>
     <p id="install-feedback" class="install-feedback"></p>
   </dialog>
   <div class="app-update" id="app-update" role="status" hidden><p>Hay una nueva versión de Zuka.</p><button id="update-app" type="button">Actualizar</button><button id="dismiss-update" type="button" aria-label="Actualizar más tarde">Más tarde</button></div>

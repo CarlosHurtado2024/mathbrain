@@ -4,8 +4,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const source = fs.readFileSync(path.join(__dirname, '../dist/install.js'), 'utf8');
+const qrSource = fs.readFileSync(path.join(__dirname, '../dist/vendor/qrcode/qrcodegen.js'), 'utf8');
 
-function environment({ userAgent = 'Chrome Windows', platform = 'Win32', maxTouchPoints = 0, standalone = false, navigatorStandalone = false, serviceWorker = true, secure = true, controlled = false, waiting = false, registerFails = false, readyState = 'loading', installingState = null, activeState = null } = {}) {
+function environment({ userAgent = 'Chrome Windows', platform = 'Win32', maxTouchPoints = 0, standalone = false, navigatorStandalone = false, serviceWorker = true, secure = true, controlled = false, waiting = false, registerFails = false, readyState = 'loading', installingState = null, activeState = null, address = 'https://zuka.test/app/' } = {}) {
   const target = extra => {
     const listeners = new Map();
     return Object.assign({
@@ -24,7 +25,8 @@ function environment({ userAgent = 'Chrome Windows', platform = 'Win32', maxTouc
   const classes = new Set();
   const elements = new Map([
     'install-dialog', 'install-native', 'install-feedback', 'app-update', 'update-app',
-    'install-guide-title', 'install-steps', 'install-note', 'install-offline', 'close-install', 'dismiss-update', 'toast'
+    'install-guide-title', 'install-steps', 'install-note', 'install-offline', 'close-install', 'dismiss-update', 'toast',
+    'install-phone', 'install-device', 'install-title', 'install-description', 'install-qr', 'install-address', 'install-qr-note'
   ].map(id => [id, target({
     hidden: id === 'install-native' || id === 'app-update', disabled: false, textContent: '',
     children: [], replaceChildren(...children) { this.children = children; },
@@ -38,6 +40,11 @@ function environment({ userAgent = 'Chrome Windows', platform = 'Win32', maxTouc
     getBoundingClientRect: () => ({ left: 100, right: 500, top: 100, bottom: 500 })
   });
   const buttons = [target({ hidden: false, disabled: false }), target({ hidden: false, disabled: false })];
+  const tryButton = target({ hidden: false, disabled: false });
+  for (const button of [...buttons, tryButton]) {
+    button.closest = selector => selector === (button === tryButton ? '[data-try-app]' : '[data-install]') ? button : null;
+    button.emit = (name, event = {}) => document.emit(name, { target: button, ...event });
+  }
   const media = target({ matches: standalone });
   const worker = target({ state: installingState || 'installed', messages: [], postMessage(message) { this.messages.push(message); } });
   const registration = target({ waiting: waiting ? worker : null, installing: installingState ? worker : null, active: activeState ? { state: activeState } : null });
@@ -56,23 +63,25 @@ function environment({ userAgent = 'Chrome Windows', platform = 'Win32', maxTouc
   const window = target({
     isSecureContext: secure,
     matchMedia: () => media,
-    location: { reload() { reloadCount++; } }
+    location: { href: address, hash: new URL(address).hash, reload() { reloadCount++; } }
   });
-  const document = {
+  const document = target({
     readyState,
-    querySelectorAll: () => buttons,
+    querySelectorAll: () => [...buttons, tryButton],
     getElementById: id => elements.get(id),
     createElement: tagName => ({ tagName, textContent: '' })
-  };
+  });
   const timers = new Map();
   let timerNumber = 0;
-  vm.runInNewContext(source, {
-    window, document, navigator,
+  const context = vm.createContext({
+    window, document, navigator, URL,
     setTimeout(callback) { timers.set(++timerNumber, callback); return timerNumber; },
     clearTimeout(timer) { timers.delete(timer); }
   });
+  vm.runInContext(qrSource, context);
+  vm.runInContext(source, context);
   return {
-    buttons, dialog, elements, media, window, registration, worker, registerCalls, serviceWorkerContainer,
+    buttons, tryButton, document, dialog, elements, media, window, registration, worker, registerCalls, serviceWorkerContainer,
     get reloadCount() { return reloadCount; },
     offerPrompt({ outcome = 'dismissed', promptFails = false, promptPromise, choicePromise } = {}) {
       const event = {
@@ -90,6 +99,71 @@ function environment({ userAgent = 'Chrome Windows', platform = 'Win32', maxTouc
     }
   };
 }
+
+test('Probar desde computador muestra un QR local con un enlace limpio y no consume la invitación de instalación', async () => {
+  const env = environment({ address: 'https://zuka.test/campus/?token=privado#perfil' });
+  const invitation = env.offerPrompt();
+  await env.tryButton.emit('click');
+  assert.equal(env.dialog.open, true);
+  assert.equal(invitation.calls, 0);
+  assert.equal(env.elements.get('install-phone').hidden, false);
+  assert.equal(env.elements.get('install-device').hidden, true);
+  assert.equal(env.elements.get('install-address').href, 'https://zuka.test/campus/#descargar');
+  const svg = env.elements.get('install-qr').innerHTML;
+  assert.match(svg, /viewBox="0 0 \d+ \d+"/);
+  assert.match(svg, /shape-rendering="crispEdges"/);
+  assert.ok((svg.match(/h1v1h-1z/g) || []).length > 100, 'El código contiene una matriz QR real');
+  const modules = [...svg.matchAll(/M(\d+),(\d+)h1v1h-1z/g)];
+  assert.ok(modules.every(match => Number(match[1]) >= 4 && Number(match[2]) >= 4), 'El QR conserva una zona blanca de cuatro módulos');
+});
+
+test('Probar desde Android utiliza la instalación nativa y, sin ella, muestra los pasos del dispositivo', async () => {
+  const env = environment({ userAgent: 'Mozilla/5.0 Android Chrome' });
+  assert.equal(env.window.ZUKA_INSTALL.isMobile(), true);
+  const invitation = env.offerPrompt({ outcome: 'dismissed' });
+  await env.tryButton.emit('click');
+  assert.equal(invitation.calls, 1);
+  await env.tryButton.emit('click');
+  assert.equal(env.elements.get('install-device').hidden, false);
+  assert.equal(env.elements.get('install-phone').hidden, true);
+  assert.equal(env.elements.get('install-guide-title').textContent, 'En tu celular o tableta');
+});
+
+test('El enlace del QR abre la guía para iPad y los botones nuevos funcionan después de navegar', async () => {
+  const env = environment({ userAgent: 'Mozilla/5.0 Macintosh Safari', platform: 'MacIntel', maxTouchPoints: 5, address: 'https://zuka.test/#descargar' });
+  assert.equal(env.window.ZUKA_INSTALL.isMobile(), true);
+  await env.document.emit('zuka:routechange');
+  assert.equal(env.dialog.open, true);
+  assert.equal(env.elements.get('install-guide-title').textContent, 'En tu iPhone o iPad');
+  env.dialog.close();
+  const dynamicButton = { closest: selector => selector === '[data-try-app]' ? dynamicButton : null };
+  await env.document.emit('click', { target: dynamicButton });
+  assert.equal(env.dialog.open, true);
+});
+
+test('El QR de una vista local informa que necesita la dirección publicada', async () => {
+  const env = environment({ address: 'http://localhost:4177/' });
+  await env.tryButton.emit('click');
+  assert.match(env.elements.get('install-qr-note').textContent, /dirección pública/);
+});
+
+test('Cerrar la descarga se respeta al cambiar tema; salir y volver permite abrirla de nuevo', async () => {
+  for (const userAgent of ['Android Chrome', 'Chrome Windows']) {
+    const env = environment({ userAgent, address: 'https://zuka.test/#descargar' });
+    await env.document.emit('zuka:routechange');
+    assert.equal(env.dialog.open, true);
+    await env.elements.get('close-install').emit('click');
+    assert.equal(env.dialog.open, false);
+    // El cambio de tema vuelve a dibujar la misma ruta y emite este evento.
+    await env.document.emit('zuka:routechange');
+    assert.equal(env.dialog.open, false, 'Redibujar no debe repetir la invitación');
+    env.window.location.hash = '#inicio';
+    await env.document.emit('zuka:routechange');
+    env.window.location.hash = '#descargar';
+    await env.document.emit('zuka:routechange');
+    assert.equal(env.dialog.open, true, 'Una nueva visita a la ruta sí abre la descarga');
+  }
+});
 
 const platforms = [
   { name: 'iPhone', userAgent: 'Mozilla/5.0 (iPhone) AppleWebKit Safari', title: 'En tu iPhone o iPad', step: /pantalla de inicio/ },

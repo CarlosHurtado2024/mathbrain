@@ -8,7 +8,7 @@ Estado: ✅ hecho · 🔜 planificado (ver `ROADMAP.md`).
 
 | Id | Requisito | Estado |
 | --- | --- | --- |
-| RF-00 | Bienvenida con deslizamiento, toque o teclado; crea un perfil local y permite acceder a todo. Antes de entrar se explora la primera lección de cada curso; los programas están en #conoce | ✅ |
+| RF-00 | La raíz del navegador muestra la portada de servicios. La PWA instalada y #inicio abren la bienvenida o el panel; la entrada con deslizamiento, toque o teclado conserva el perfil local | ✅ |
 | RF-01 | Catálogo de ingeniería agrupado por escuelas de Matemáticas, Física, Estadística y Programación, con filtros y datos reales de los cursos en plataforma | ✅ |
 | RF-02 | Página de curso con camino de niveles: lecciones completadas, actual y siguientes | ✅ |
 | RF-03 | Programa del curso: objetivos, habilidades, requisitos y módulos; descargable en texto | ✅ |
@@ -27,6 +27,7 @@ Estado: ✅ hecho · 🔜 planificado (ver `ROADMAP.md`).
 | RF-43 | Tutorías y asesoría en trabajos y preparación para exámenes con consulta por WhatsApp | ✅ |
 | RF-44 | Sobre Zuka presenta la visión y el objetivo de ayudar a ingresar, permanecer y culminar los estudios, sin biografía del fundador | ✅ |
 | RF-45 | Se distingue entre cursos en plataforma y cursos con acompañamiento, sin inventar lecciones publicadas | ✅ |
+| RF-46 | La portada destaca cursos de ingeniería y ciencias, asesoría en trabajos y exámenes y tutorías, e incluye el apoyo en exámenes virtuales | ✅ |
 
 ### Aprendizaje
 
@@ -38,6 +39,7 @@ Estado: ✅ hecho · 🔜 planificado (ver `ROADMAP.md`).
 | RF-13 | Vista de lectura con la lección completa | ✅ |
 | RF-14 | Repaso de cada nivel (se supera con el 70 %) | ✅ |
 | RF-15 | Practicar de nuevo los retos fallados (repaso espaciado) | 🔜 |
+| RF-16 | Entrenamiento por materia: cuatro parciales de práctica que distribuyen los ejercicios del curso, y simulacros por unidad con pistas y soluciones; no marcan lecciones como completadas | ✅ |
 
 ### Progreso y perfil
 
@@ -59,8 +61,10 @@ Estado: ✅ hecho · 🔜 planificado (ver `ROADMAP.md`).
 | RF-30 | Instalación como PWA con icono propio (Android, iOS, escritorio) | ✅ |
 | RF-31 | Uso sin conexión tras la primera visita (excepto videos) | ✅ |
 | RF-32 | Aviso de nueva versión con actualización a petición | ✅ |
-| RF-33 | Tema claro, oscuro o del sistema | ✅ |
+| RF-33 | Botón que alterna solo entre tema claro y oscuro; recuerda la elección y convierte una preferencia anterior del sistema en un tema fijo | ✅ |
 | RF-34 | Publicación en Google Play como Trusted Web Activity | 🔜 |
+| RF-35 | Probar la app en computador abre un QR hacia #descargar; en Android, iPhone y tabletas se ofrece la instalación del navegador o sus instrucciones | ✅ |
+| RF-36 | Menú inferior: Inicio, Cursos, Entrenamiento, Tutorías y Perfil. Biblioteca y simulaciones siguen accesibles desde Perfil | ✅ |
 
 ## Requisitos no funcionales
 

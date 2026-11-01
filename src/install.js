@@ -1,15 +1,17 @@
 (() => {
   'use strict';
 
-  const buttons = [...document.querySelectorAll('[data-install]')];
+  const buttons = () => [...document.querySelectorAll('[data-install], [data-try-app]')];
   const dialog = document.getElementById('install-dialog');
-  if (!buttons.length || !dialog) return;
+  if (!dialog) return;
   const nativeButton = document.getElementById('install-native');
   const feedback = document.getElementById('install-feedback');
   const offlineNote = document.getElementById('install-offline');
   const updateBanner = document.getElementById('app-update');
   const updateButton = document.getElementById('update-app');
   const standalone = window.matchMedia('(display-mode: standalone)');
+  const isMobile = () => /Android|iPad|iPhone|iPod/i.test(navigator.userAgent || '') || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  window.ZUKA_INSTALL = { isMobile, isStandalone: () => standalone.matches || navigator.standalone === true };
   let installed = standalone.matches || navigator.standalone === true;
   let installPrompt = null;
   let prompting = false;
@@ -17,9 +19,10 @@
   let refreshRequested = false;
   let reloading = false;
   let toastTimer;
+  let downloadRouteActive = false;
 
   function syncButtons() {
-    for (const button of buttons) {
+    for (const button of buttons()) {
       button.hidden = installed;
       button.disabled = prompting;
     }
@@ -68,9 +71,44 @@
   }
 
   function showInstructions() {
+    document.getElementById('install-phone').hidden = true;
+    document.getElementById('install-device').hidden = false;
+    document.getElementById('install-title').textContent = 'Instalar Zuka';
+    document.getElementById('install-description').textContent = 'Zuka aparecerá con su nombre e icono en tu pantalla de inicio. Ábrela desde allí para seguir aprendiendo.';
     prepareInstructions();
     syncButtons();
     if (!dialog.open) dialog.showModal();
+  }
+
+  function showPhoneDownload() {
+    const address = new URL('./', window.location.href);
+    address.hash = 'descargar';
+    const link = document.getElementById('install-address');
+    link.href = address.href;
+    link.textContent = `${address.host}${address.pathname}`;
+    document.getElementById('install-title').textContent = 'Lleva Zuka a tu celular';
+    document.getElementById('install-description').textContent = 'Tu próxima lección, a un escaneo de distancia.';
+    document.getElementById('install-phone').hidden = false;
+    document.getElementById('install-device').hidden = true;
+    const note = document.getElementById('install-qr-note');
+    note.textContent = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(address.hostname) ? 'Esta es una vista local. Abre la dirección pública de Zuka para escanear el QR desde otro dispositivo.' : 'Funciona en Android, iPhone y tabletas. La instalación se completa desde el navegador del dispositivo.';
+    const container = document.getElementById('install-qr');
+    try {
+      const qr = qrcodegen.QrCode.encodeText(address.href, qrcodegen.QrCode.Ecc.MEDIUM);
+      const modules = [];
+      for (let y = 0; y < qr.size; y++) for (let x = 0; x < qr.size; x++) if (qr.getModule(x, y)) modules.push(`M${x + 4},${y + 4}h1v1h-1z`);
+      const size = qr.size + 8;
+      container.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="224" height="224" aria-hidden="true" shape-rendering="crispEdges"><path fill="#fff" d="M0,0h${size}v${size}H0z"/><path fill="#17203a" d="${modules.join('')}"/></svg>`;
+    } catch {
+      container.replaceChildren();
+      note.textContent = 'No se pudo generar el QR. Abre el enlace en tu celular para instalar Zuka.';
+    }
+    if (!dialog.open) dialog.showModal();
+  }
+
+  function tryApp() {
+    if (isMobile()) return requestInstallation();
+    showPhoneDownload();
   }
 
   async function requestInstallation() {
@@ -114,7 +152,18 @@
     installed = event.matches || navigator.standalone === true;
     syncButtons();
   });
-  buttons.forEach(button => button.addEventListener('click', requestInstallation));
+  document.addEventListener('click', event => {
+    if (event.target.closest?.('[data-try-app]')) return tryApp();
+    else if (event.target.closest?.('[data-install]')) return requestInstallation();
+    else if (event.target.closest?.('[data-open-app]')) dialog.close();
+  });
+  document.addEventListener('zuka:routechange', () => {
+    syncButtons();
+    const downloadRoute = window.location.hash === '#descargar';
+    const enteringDownload = downloadRoute && !downloadRouteActive;
+    downloadRouteActive = downloadRoute;
+    if (enteringDownload) isMobile() ? showInstructions() : showPhoneDownload();
+  });
   nativeButton.addEventListener('click', requestInstallation);
   document.getElementById('close-install').addEventListener('click', () => dialog.close());
   dialog.addEventListener('click', event => {

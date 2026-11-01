@@ -62,7 +62,7 @@ mathbrain/
 Orden de carga en `index.html`:
 
 1. `theme.js` (sin `defer`): aplica el tema guardado antes de pintar.
-2. Con `defer`, en orden: `courses.js` → `content.js` → `library.js` (une lecciones, simulaciones y ejercicios en `window.MATHBRAIN_LIBRARY`) → `mascot.js` → `config.js` → `vendor/supabase/supabase.js` → `cloud.js` (cuenta y sincronización, `window.ZUKA_CLOUD`) → `landing.js` (`window.ZUKA_MARKETING`) → `app.js` → `install.js`.
+2. Con `defer`, en orden: `courses.js` → `content.js` → `library.js` (une lecciones, simulaciones y ejercicios en `window.MATHBRAIN_LIBRARY`) → `mascot.js` → `config.js` → `vendor/supabase/supabase.js` → `cloud.js` → `vendor/qrcode/qrcodegen.js` → `install.js` (`window.ZUKA_INSTALL`) → `landing.js` (`window.ZUKA_MARKETING`) → `app.js`.
 
 `app.js` es un módulo autoejecutable que lee el estado guardado, dibuja la vista según la dirección y escucha `hashchange`.
 
@@ -72,7 +72,9 @@ Orden de carga en `index.html`:
 
 | Dirección | Vista |
 | --- | --- |
-| `#` o `#inicio` | Modo local: bienvenida o panel después de entrar. Con cuentas activadas: landing o panel según la sesión |
+| Raíz o `#` | Navegador: portada de servicios, aunque exista un perfil. PWA en modo standalone: bienvenida o panel |
+| `#inicio` | Bienvenida o panel de aprendizaje, también desde el navegador |
+| `#descargar` | Portada y guía de instalación en móvil/tableta, o QR en computador |
 | `#conoce` | Landing de programas, escuelas y servicios |
 | `#programas`, `#programa/<id>` | Oferta y detalle de PreICFES, preuniversitario, preingeniero, ingeniería, tutorías y asesorías |
 | `#escuelas`, `#escuela/<id>` | Escuelas de Matemáticas, Física, Estadística y Programación, y sus cursos |
@@ -81,6 +83,10 @@ Orden de carga en `index.html`:
 | `#simulaciones`, `#ejercicios` | Contenidos de ese formato |
 | `#biblioteca` | Guardados |
 | `#perfil` | Perfil del estudiante |
+| `#entrenamiento?curso=<id>` | Selector de materia, cuatro parciales de práctica y simulacros por unidad |
+| `#entrenamiento/<id>/parcial-<1-4>` | Simulacro con un cuarto de los ejercicios del curso, en orden |
+| `#entrenamiento/<id>/unidad-<n>` | Simulacro de la unidad, con los retos del repaso existente |
+| `#tutorias` | Acompañamiento y contacto de tutorías dentro de la app |
 | `#ingreso` | Bienvenida de entrada local con retorno a la lección solicitada |
 | `#registro`, `#ingresar` | Cuentas si emailAccounts está activo; en modo local conservan el destino y llevan a la bienvenida o al panel |
 | `#nosotros` | Visión y objetivo de Zuka: ingreso, permanencia y culminación de los estudios |
@@ -101,7 +107,9 @@ Las pantallas de cuenta y la bienvenida aceptan `continuar` con una ruta interna
 
 - **Manifiesto** (`src/manifest.webmanifest`): nombre Zuka, `display: standalone`, colores, iconos (incluido el adaptable de Android) y accesos directos.
 - **Service worker** (`src/sw.js`): al instalarse guarda en caché todos los `SHELL_FILES`; responde primero desde la caché y, si falta algo, va a la red y lo guarda. Las navegaciones sirven `index.html`. Al activarse borra las cachés anteriores con el prefijo `mathbrain-shell-`. Se actualiza solo cuando la persona acepta el aviso (`ACTIVATE_UPDATE`).
-- **Instalación** (`src/install.js`): usa `beforeinstallprompt` cuando el navegador lo ofrece y, si no, muestra los pasos del dispositivo.
+- **Instalación** (`src/install.js`): usa `beforeinstallprompt` cuando el navegador lo ofrece y, si no, muestra los pasos del dispositivo. El botón público detecta Android e iOS, incluido iPad con agente de escritorio. En PC muestra un QR generado localmente con Nayuki 1.8.0 (MIT), sin servicios externos. El enlace conserva el directorio de la página, elimina consultas y apunta a `#descargar`; se adapta al dominio desde el que se sirve. Una vista en localhost advierte que el celular necesita la dirección pública.
+
+Los controles de tema e instalación usan eventos delegados para seguir funcionando al cambiar de página. `app.js` emite `zuka:routechange` después de renderizar; el refresco de botones de tema no vuelve a emitir un cambio de tema. La barra principal contiene Inicio, Cursos, Entrenamiento, Tutorías y Perfil; Biblioteca y Simulaciones están también en Perfil.
 
 La identidad instalada es **Zuka** en `name`, `short_name`, `application-name` y `apple-mobile-web-app-title`. El manifiesto define los PNG de 192 y 512 px y el adaptable de Android; el HTML añade iconos PNG de compatibilidad y el de Apple de 180 px. La ayuda de instalación muestra el mismo icono y el nombre «Instalar Zuka». Se mantienen el `id`, `start_url`, `scope` y la URL del manifiesto para actualizar la misma app.
 

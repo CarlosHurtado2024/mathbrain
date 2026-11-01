@@ -83,3 +83,11 @@ El logo integra el destello ámbar y una Z azul marino sobre una base cobalto. `
 La landing presenta programas, escuelas, visión y acompañamiento. La bienvenida permite deslizar, tocar o usar el teclado para crear un perfil local y acceder a todas las lecciones. Antes de entrar se prueba la primera lección de cada curso; las cuentas de correo quedan disponibles mediante emailAccounts, en pausa por defecto. El rediseño conserva rutas, contacto, progreso, claves `mathbrain-*`, sincronización e instalación PWA. No se añaden cifras, reseñas o resultados inventados.
 
 La revisión visual debe cubrir 375 px, tableta y escritorio, ambos temas, formularios, filtros, estados de práctica y final de lección, sin desplazamiento horizontal. Los assets de identidad y la fuente deben estar en el shell del service worker.
+
+## Portada, instalación y entrenamiento
+
+En una pestaña del navegador, la raíz siempre presenta los servicios y la acción para probar o descargar Zuka. La app instalada conserva la bienvenida y el panel del estudiante. La portada mantiene la identidad existente, con tres filas de servicios; en pantallas compactas se prioriza el texto y se oculta la ilustración del camino.
+
+El cambio de tema es un botón con dos estados, claro y oscuro, una etiqueta que indica la siguiente acción y foco conservado tras el cambio. La instalación en computador muestra un QR oscuro sobre blanco con cuatro módulos de margen; no se colorea ni se deforma el código.
+
+La navegación móvil tiene cinco destinos: Inicio, Cursos, Entrenamiento, Tutorías y Perfil. Entrenamiento recibe más espacio para mantener su etiqueta en una línea. Su contenido usa una selección de materia y listas de parciales y unidades, con cantidades de ejercicios reales y sin presentar los simulacros como exámenes oficiales.

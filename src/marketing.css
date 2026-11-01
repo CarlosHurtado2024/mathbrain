@@ -1,4 +1,26 @@
 /* Páginas públicas de Zuka. Identidad y temas: identity.css. */
+.m-service-list { border-top: 1px solid var(--brand-line); }
+.m-service-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) 190px; align-items: start; gap: 36px; padding-block: 34px; border-bottom: 1px solid var(--brand-line); }
+.m-service-row h3 { max-width: 20ch; font-size: 24px; line-height: 1.35; font-weight: 750; letter-spacing: -.025em; text-wrap: balance; }
+.m-service-row > p { color: var(--brand-secondary); font-size: 15px; line-height: 1.8; }
+.m-service-row .m-text-link { align-self: center; font-size: 13px; }
+.m-services .m-section-heading { align-items: center; }
+.m-services .m-section-heading > p { font-size: 15px; }
+.m-header .m-nav-actions { gap: 12px; }
+.m-hero-copy .m-hero-note { font-size: 14px; }
+.m-hero-copy h1 { letter-spacing: -.035em; }
+@media (max-width: 1000px) {
+  .m-service-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 16px 30px; }
+  .m-service-row .m-text-link { grid-column: 2; justify-self: start; }
+}
+@media (max-width: 650px) {
+  .m-service-row { grid-template-columns: minmax(0, 1fr); gap: 12px; padding-block: 28px; }
+  .m-service-row .m-text-link { grid-column: auto; }
+  .m-service-row h3 { max-width: 25ch; font-size: 23px; }
+  .m-header .m-nav-wrap { gap: 12px; }
+  .m-header .m-nav-actions { gap: 8px; }
+  .m-nav-actions .m-button.is-small { padding-inline: 12px; font-size: 12px; }
+}
 html[data-theme] body.marketing-mode { padding-bottom: 0; background: var(--m-bg); }
 html[data-theme] body.marketing-mode > .sidebar,
 html[data-theme] body.marketing-mode .app-shell > .topbar,

@@ -5,6 +5,72 @@
 */
 
 /* Colores de cada curso: cobalto, cielo, ámbar, coral y rosa. */
+html[data-theme] button.theme-control { display: grid; place-items: center; width: 44px; min-width: 44px; height: 44px; padding: 0; border: 1px solid var(--brand-line); border-radius: 10px; background: var(--brand-surface); color: var(--brand-secondary); cursor: pointer; }
+html[data-theme] button.theme-control:hover { background: var(--brand-inset); color: var(--brand-primary); }
+button.theme-control > svg { width: 20px; height: 20px; }
+html[data-theme] .global-search input::placeholder { color: var(--brand-secondary); opacity: 1; }
+html[data-theme] .m-hero h1 { letter-spacing: -.035em; }
+@media (max-width: 1100px) { .m-account-link { display: none; } }
+.service-page-heading { margin-bottom: 32px; }
+.service-page-heading h1 { max-width: 22ch; font-size: clamp(30px, 4vw, 42px); font-weight: 800; line-height: 1.2; letter-spacing: -.03em; text-wrap: balance; }
+.service-page-heading h1:focus { outline: none; }
+.service-page-heading > p { max-width: 64ch; margin-top: 16px; color: var(--brand-secondary); font-size: 16px; line-height: 1.8; }
+.training-view, .tutoring-view { max-width: 920px; margin-inline: auto; padding-block: 16px 40px; }
+.training-picker { display: grid; gap: 9px; max-width: 460px; font-size: 14px; font-weight: 700; }
+.training-picker select { width: 100%; min-height: 48px; padding: 10px 38px 10px 14px; border: 1px solid var(--brand-line-strong); border-radius: 10px; background: var(--brand-surface); color: var(--brand-ink); font: inherit; font-size: 16px; }
+.training-course-heading { margin-top: 32px; }
+.training-course-heading h2 { font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
+.training-course-heading p { margin-top: 8px; color: var(--brand-secondary); font-size: 14px; line-height: 1.8; }
+.training-section { margin-top: 36px; }
+.training-section h3 { font-size: 20px; font-weight: 750; }
+.training-section > p { margin-block: 8px 16px; color: var(--brand-secondary); font-size: 15px; line-height: 1.7; }
+.training-list { padding: 0; list-style: none; border-top: 1px solid var(--brand-line); }
+.training-list li { border-bottom: 1px solid var(--brand-line); }
+.training-list a { display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 80px; padding: 18px 8px; color: var(--brand-ink); border-radius: 8px; }
+.training-list a:hover { background: var(--brand-primary-soft); }
+.training-list a > span { min-width: 0; }
+.training-list strong { display: block; font-size: 16px; font-weight: 700; }
+.training-list small { display: block; margin-top: 6px; color: var(--brand-secondary); font-size: 14px; line-height: 1.6; }
+.training-list a > svg { flex-shrink: 0; color: var(--brand-primary); }
+.training-support { margin-top: 40px; padding: 28px; border-radius: 16px; background: var(--brand-primary-soft); }
+.training-support h2 { max-width: 30ch; font-size: 23px; font-weight: 750; line-height: 1.35; letter-spacing: -.02em; }
+.training-support p { max-width: 62ch; margin-block: 12px 20px; color: var(--brand-secondary); font-size: 15px; line-height: 1.75; }
+.tutoring-intro { display: flex; align-items: center; gap: 30px; padding-block: 12px 36px; }
+.tutoring-intro > span { flex: 0 0 140px; }
+.tutoring-intro > span > svg { width: 140px; height: 150px; }
+.tutoring-intro h2, .tutoring-options h2 { font-size: 22px; font-weight: 750; letter-spacing: -.02em; }
+.tutoring-intro p { margin-block: 12px 22px; color: var(--brand-secondary); font-size: 15px; line-height: 1.8; }
+.tutoring-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px; padding-block: 32px; border-block: 1px solid var(--brand-line); }
+.tutoring-options p, .tutoring-options ul { margin-top: 12px; color: var(--brand-secondary); font-size: 15px; line-height: 1.8; }
+.tutoring-options ul { padding-left: 18px; }
+.profile-shortcuts { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-bottom: 16px; }
+html[data-theme] .install-dialog { width: min(440px, calc(100% - 32px)); max-height: calc(100svh - 32px); padding: 30px; overflow-y: auto; border: 0; border-radius: 16px; background: var(--brand-surface); color: var(--brand-ink); box-shadow: 0 24px 80px rgb(8 15 32 / .3); }
+html[data-theme] .install-dialog h2 { margin-top: 16px; color: var(--brand-ink); font-size: 28px; font-weight: 800; line-height: 1.25; letter-spacing: -.025em; }
+html[data-theme] .install-dialog p, html[data-theme] .install-dialog ol { color: var(--brand-secondary); }
+.install-phone > p { font-size: 15px; line-height: 1.75; }
+.install-qr { display: grid; place-items: center; margin: 22px auto 18px; }
+.install-qr svg { display: block; width: 224px; max-width: 100%; height: auto; border-radius: 8px; }
+.install-address { display: block; margin-top: 12px; color: var(--brand-primary); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.install-phone .install-note { margin-top: 14px; font-size: 13px; }
+.install-phone > .button { width: 100%; margin-top: 20px; }
+#install-device ol { padding-left: 22px; }
+#install-device li { padding-left: 4px; }
+@media (max-width: 650px) {
+  .main-nav a { min-width: 0; }
+  .main-nav a[data-nav="entrenamiento"] { flex: 1.5; }
+  .main-nav a > span:last-child { font-size: 11px; line-height: 1.25; white-space: nowrap; overflow-wrap: normal; letter-spacing: -.01em; }
+  .training-view, .tutoring-view { padding-top: 8px; }
+  .training-support { padding: 22px; }
+  .tutoring-intro { flex-direction: column; align-items: start; gap: 12px; }
+  .tutoring-intro > span { flex-basis: auto; }
+  .tutoring-intro > span > svg { width: 100px; height: 108px; }
+  .tutoring-options { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  html[data-theme] .install-dialog { padding: 26px 22px; }
+}
+@media (max-width: 900px) {
+  .m-hero { grid-template-columns: minmax(0, 1fr); }
+  .m-hero > .m-journey { display: none; }
+}
 html[data-theme] .purple { --fun: #2f5bea; --fun-dark: #2149cf; --fun-soft: #eaf0ff; --fun-ink: #ffffff; }
 html[data-theme] .blue { --fun: #0284c7; --fun-dark: #0369a1; --fun-soft: #e0f2fe; --fun-ink: #ffffff; }
 html[data-theme] .sand { --fun: #f59e0b; --fun-dark: #b45309; --fun-soft: #fff5df; --fun-ink: #2b1a00; }

@@ -3,6 +3,7 @@ node_modules/
 *.tar.gz
 *.tar
 .preview/
+.impeccable/review/
 .vercel/
 .env
 .env.*
