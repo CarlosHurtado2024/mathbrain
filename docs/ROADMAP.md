@@ -36,6 +36,7 @@ Zuka avanza por etapas pequeñas: cada una se termina, se prueba en el celular y
 - Inicio con carrusel de cursos (unidad, ilustración, lección actual y siguiente, botón «Empezar/Continuar»).
 - Lección con barra inferior: «Comprobar», «¡Correcto! +XP · ¿Por qué?» y «Casi. · Intentar de nuevo».
 - Catálogo con categorías en fila y cursos conectados; perfil con inicial y cifras en tarjetas.
+- Pulido con Impeccable (crítica 25/40): fuera el fondo espacial animado del tema oscuro (tapaba «Continuar»); «Ver solución» pide confirmación y no salta el reto por accidente; contrastes AA, sin restos de verde azulado y textos funcionales de 11 px o más. Pendiente (P2): progreso y accesibilidad del carrusel, y lecciones con pasos más cortos y retroalimentación que diagnostica errores típicos.
 
 ## 🔜 Etapa 2 · Contenido completo
 

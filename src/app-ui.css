@@ -119,3 +119,7 @@ html[data-theme] .profile-stats li:nth-child(4) .icon { color: var(--brand-prima
   .spotlight-track { scroll-behavior: auto; }
   .spotlight-start, html[data-theme] .player-actions .button { transition: none; }
 }
+
+/* La solución de la tarjeta espera al primer intento (o a que se pida verla): así no se salta el reto sin querer. */
+html[data-theme] .player-card .lesson-exercise:not([data-state="correct"]):not([data-state="incorrect"]):not([data-revealed]) .lesson-solution { display: none; }
+.player-link.is-armed { background: var(--brand-accent); color: var(--brand-on-accent); }

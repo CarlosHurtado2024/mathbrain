@@ -150,7 +150,7 @@ test('La instalación prepara únicamente archivos locales existentes, incluyend
     assert.ok(fs.statSync(path.join(directory, parsed.pathname === '/' ? 'index.html' : parsed.pathname)).isFile(), address);
   }
   const manifest = JSON.parse(fs.readFileSync(path.join(directory, 'manifest.webmanifest'), 'utf8'));
-  for (const filename of ['index.html', 'app.js', 'library.js', 'courses.js', 'space.js', 'install.js', 'manifest.webmanifest', ...manifest.icons.map(icon => icon.src)]) {
+  for (const filename of ['index.html', 'app.js', 'library.js', 'courses.js', 'install.js', 'manifest.webmanifest', ...manifest.icons.map(icon => icon.src)]) {
     assert.ok(addresses.includes(new URL(filename, appRoot).href), filename);
   }
   assert.equal(env.stores.get(env.cacheName).size, addresses.length);

@@ -698,6 +698,7 @@
 
   function answerStep(result) {
     player.retryReady = false;
+    player.revealArmed = false;
     const index = player.index;
     const previous = player.results[index];
     if (previous === 'correct' || previous === 'revealed') return renderPlayerBar();
@@ -719,6 +720,7 @@
     const form = document.querySelector('#player-stage .lesson-exercise');
     if (player.results[player.index] !== 'correct') player.results[player.index] = 'revealed';
     if (form) {
+      form.dataset.revealed = 'true';
       const solution = select('.lesson-solution', form);
       if (solution) solution.open = true;
       else if (form.dataset.kind === 'choice') select('input[data-correct]', form)?.closest('label')?.classList.add('is-answer');
@@ -736,7 +738,10 @@
     const solution = step.type === 'exercise' && /lesson-solution/.test(step.html);
     const back = player.index > 0 ? `<button class="player-back" type="button" data-player-back="1" aria-label="Paso anterior">${icon('left')}</button>` : '';
     const next = `<button class="button button-primary player-continue" type="button" data-player-next="1">${last ? 'Terminar' : 'Continuar'}</button>`;
-    const reveal = '<button type="button" class="player-link" data-player-reveal="1">Ver solución</button>';
+    const reveal = player.revealArmed
+      ? '<button type="button" class="player-link is-armed" data-player-reveal="1">Sí, ver solución</button>'
+      : '<button type="button" class="player-link" data-player-reveal="1">Ver solución</button>';
+    const armedNote = player.revealArmed ? '<span>Verás la respuesta y este reto no sumará XP.</span>' : '';
     let state = '';
     let verdict = '';
     let extra = '';
@@ -752,11 +757,12 @@
         verdict = '<strong>Así se resuelve.</strong>';
       } else if (result === 'retry' && !player.retryReady) {
         state = 'is-retry'; mood = 'animo';
-        verdict = '<strong>Casi.</strong><span>Lee la pista y vuelve a intentarlo.</span>';
+        verdict = `<strong>Casi.</strong>${armedNote || '<span>Lee la pista y vuelve a intentarlo.</span>'}`;
         extra = reveal;
         action = '<button class="button player-check" type="button" data-player-retry="1">Intentar de nuevo</button>';
       } else {
         mood = 'piensa';
+        verdict = armedNote;
         extra = reveal;
         action = '<button class="button button-primary player-check" type="button" data-player-check="1">Comprobar</button>';
       }
@@ -771,6 +777,7 @@
     const current = player.steps[player.index];
     if (step > 0 && current?.type === 'exercise' && !['correct', 'revealed'].includes(player.results[player.index])) return;
     player.retryReady = false;
+    player.revealArmed = false;
     player.index = Math.max(0, Math.min(player.steps.length, player.index + step));
     renderPlayerStep();
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -1356,7 +1363,13 @@
     if (save) { toggleSaved(save.dataset.save); return; }
     if (event.target.closest('[data-player-next]')) { movePlayer(1); return; }
     if (event.target.closest('[data-player-back]')) { movePlayer(-1); return; }
-    if (event.target.closest('[data-player-reveal]')) { revealStep(); return; }
+    if (event.target.closest('[data-player-reveal]')) {
+      // Primer toque: pide confirmación (un toque accidental no salta el reto). Segundo toque: revela.
+      if (!player?.revealArmed) { player.revealArmed = true; renderPlayerBar(); select('[data-player-reveal]')?.focus(); return; }
+      player.revealArmed = false;
+      revealStep();
+      return;
+    }
     if (event.target.closest('[data-player-check]')) { document.querySelector('#player-stage .lesson-exercise')?.requestSubmit(); return; }
     if (event.target.closest('[data-player-retry]')) {
       // Intentar de nuevo: se limpia la respuesta y vuelve «Comprobar»; la pista sigue abierta.
@@ -1366,6 +1379,7 @@
       if (text) text.value = '';
       if (form) form.dataset.state = '';
       player.retryReady = true;
+      player.revealArmed = false;
       renderPlayerBar();
       (text || form?.querySelector('input'))?.focus();
       return;

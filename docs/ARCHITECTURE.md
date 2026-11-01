@@ -9,7 +9,7 @@ mathbrain/
 ├── src/                     Código de la app (se edita aquí)
 │   ├── index.html           Estructura de todas las vistas
 │   ├── styles.css           Base y diseño general
-│   ├── space.css            Tema oscuro (fondo espacial)
+│   ├── space.css            Tema oscuro: colores base (fondo azul marino liso)
 │   ├── themes.css           Variables de cada tema
 │   ├── explore.css          Catálogo, cursos, lecciones, perfil
 │   ├── fresh.css            Tema claro (por defecto)
@@ -23,7 +23,6 @@ mathbrain/
 │   ├── library.js           Catálogo: simulaciones, ejercicios resueltos y búsqueda
 │   ├── mascot.js            El destello ámbar en SVG y sus estados de ánimo
 │   ├── app.js               Rutas, vistas, lecciones, progreso y perfil
-│   ├── space.js             Animación del fondo del tema oscuro
 │   ├── install.js           Instalación, modo sin conexión y actualizaciones
 │   ├── config.js            URL y clave publicable de Supabase
 │   ├── cloud.js             Cuenta y sincronización con Supabase
@@ -63,7 +62,7 @@ mathbrain/
 Orden de carga en `index.html`:
 
 1. `theme.js` (sin `defer`): aplica el tema guardado antes de pintar.
-2. Con `defer`, en orden: `courses.js` → `content.js` → `library.js` (une lecciones, simulaciones y ejercicios en `window.MATHBRAIN_LIBRARY`) → `mascot.js` → `config.js` → `vendor/supabase/supabase.js` → `cloud.js` (cuenta y sincronización, `window.ZUKA_CLOUD`) → `landing.js` (`window.ZUKA_MARKETING`) → `app.js` → `space.js` → `install.js`.
+2. Con `defer`, en orden: `courses.js` → `content.js` → `library.js` (une lecciones, simulaciones y ejercicios en `window.MATHBRAIN_LIBRARY`) → `mascot.js` → `config.js` → `vendor/supabase/supabase.js` → `cloud.js` (cuenta y sincronización, `window.ZUKA_CLOUD`) → `landing.js` (`window.ZUKA_MARKETING`) → `app.js` → `install.js`.
 
 `app.js` es un módulo autoejecutable que lee el estado guardado, dibuja la vista según la dirección y escucha `hashchange`.
 
@@ -118,7 +117,6 @@ Si se añade un archivo que la app necesita sin conexión, hay que agregarlo a `
 | `pwa.test.cjs` | Manifiesto, iconos, service worker, caché sin conexión y versión estable |
 | `install.test.cjs` | Flujo de instalación por plataforma |
 | `theme.test.cjs` | Tema claro por defecto y sincronización entre pestañas |
-| `space.test.cjs` | Fondo animado y movimiento reducido |
 | `cloud.test.cjs` | Cuenta y sincronización con un Supabase simulado: unión, envíos, sin conexión y errores |
 
 ## Despliegue

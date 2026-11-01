@@ -296,7 +296,7 @@ html[data-theme="light"] .profile-auth input:focus { outline: 2px solid var(--z-
 .welcome-option.is-featured { border-color: var(--z-brand); background: linear-gradient(150deg, var(--z-soft), var(--z-surface) 75%); }
 .welcome-option-icon, .access-gate-icon { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: 18px; border-radius: 14px; background: var(--z-soft); color: var(--z-brand-dark); }
 .welcome-option-icon .icon, .access-gate-icon .icon { width: 23px; height: 23px; }
-.welcome-tag { margin: 0 0 8px; color: var(--z-brand-dark); font-size: 10px; font-weight: 800; letter-spacing: .08em; }
+.welcome-tag { margin: 0 0 8px; color: var(--z-brand-dark); font-size: 12px; font-weight: 800; letter-spacing: .08em; }
 .welcome-option h2 { color: var(--z-text); font-size: 23px; font-weight: 800; letter-spacing: -.025em; }
 .welcome-option > p:not(.welcome-tag) { flex: 1; margin: 12px 0 24px; color: var(--z-muted); font-size: 14.5px; line-height: 1.7; }
 .welcome-option .button { gap: 10px; width: 100%; justify-content: center; margin-top: auto; }
@@ -341,7 +341,7 @@ html[data-theme="light"] .profile-auth input:focus { outline: 2px solid var(--z-
   .welcome-option h2 { font-size: 20px; }
   .welcome-option > p:not(.welcome-tag) { margin: 7px 0 12px; font-size: 13px; line-height: 1.5; }
   .welcome-option .button { min-height: 42px; padding: 10px 12px; font-size: 13px; }
-  .welcome-tag { margin-bottom: 5px; font-size: 9px; }
+  .welcome-tag { margin-bottom: 5px; font-size: 11px; }
   .welcome-signin { margin-top: 16px; font-size: 13px; }
   .explore-notice { display: grid; grid-template-columns: 22px minmax(0, 1fr); align-items: start; gap: 8px 10px; padding: 14px; }
   .explore-notice > a { grid-column: 2; justify-self: start; }

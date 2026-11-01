@@ -380,7 +380,14 @@ test('La lección se recorre paso a paso y los retos piden respuesta antes de co
   assert.doesNotMatch(app.node('#player-stage').innerHTML, /Tu turno/);
   next();
   for (let step = firstChallenge; step < lesson.steps.length; step += 1) {
-    if (lesson.steps[step].type === 'exercise') app.click(app.all('[data-player-reveal]').at(-1));
+    if (lesson.steps[step].type === 'exercise') {
+      // «Ver solución» pide confirmación: el primer toque no revela nada.
+      app.click(app.all('[data-player-reveal]').at(-1));
+      assert.match(app.node('#player-bar').innerHTML, /Sí, ver solución/);
+      assert.match(app.node('#player-bar').innerHTML, /no sumará XP/);
+      assert.doesNotMatch(app.node('#player-bar').innerHTML, /data-player-next/);
+      app.click(app.all('[data-player-reveal]').at(-1));
+    }
     next();
   }
   assert.match(app.node('#player-stage').innerHTML, /¡Lección completada!/);

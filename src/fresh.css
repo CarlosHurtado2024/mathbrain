@@ -90,7 +90,6 @@ html[data-theme="light"] body { background: #ffffff; color: var(--ink); font-fam
 html[data-theme="light"] body::before, html[data-theme="light"] body::after { display: none; }
 html[data-theme="light"] :is(h1, h2, h3, h4) { color: var(--fun-heading); font-weight: 700; letter-spacing: -.02em; }
 html[data-theme="light"] .eyebrow { color: var(--fun-violet-dark); font-weight: 700; letter-spacing: .08em; }
-html[data-theme="light"] :is(.space-background, .space-motion-toggle) { display: none !important; }
 
 /* Color de cada curso: tonos moderados para distinguirlos sin saturar. */
 html[data-theme="light"] .purple { --fun: #5a7bd8; --fun-dark: #2e56c4; --fun-soft: #edf1fb; --card-accent: #2e56c4; --card-bg: #edf1fb; --theme-accent: #2e56c4; --topic-wash: #edf1fb; }
@@ -98,7 +97,7 @@ html[data-theme="light"] .blue { --fun: #2f80ed; --fun-dark: var(--brand-accent)
 html[data-theme="light"] .sand { --fun: #d9822b; --fun-dark: #a85f17; --fun-soft: #fcf1e4; --card-accent: #a85f17; --card-bg: #fcf1e4; --theme-accent: #a85f17; --topic-wash: #fcf1e4; }
 html[data-theme="light"] .green { --fun: var(--brand-accent); --fun-dark: var(--brand-accent); --fun-soft: var(--brand-accent-soft); --card-accent: var(--brand-accent); --card-bg: var(--brand-accent-soft); --theme-accent: var(--brand-accent); --topic-wash: var(--brand-accent-soft); }
 html[data-theme="light"] .rose { --fun: #d14d7a; --fun-dark: #a8385e; --fun-soft: #fbecf1; --card-accent: #a8385e; --card-bg: #fbecf1; --theme-accent: #a8385e; --topic-wash: #fbecf1; }
-html[data-theme="light"] .slate { --fun: #1b9aaa; --fun-dark: #137684; --fun-soft: #e6f5f7; --card-accent: #137684; --card-bg: #e6f5f7; --theme-accent: #137684; --topic-wash: #e6f5f7; }
+html[data-theme="light"] .slate { --fun: #1b41aa; --fun-dark: #133184; --fun-soft: #e6ebf7; --card-accent: #133184; --card-bg: #e6ebf7; --theme-accent: #133184; --topic-wash: #e6ebf7; }
 html[data-theme="light"] .topic-dot.purple { background: #5a7bd8; }
 html[data-theme="light"] .topic-dot.blue { background: #2f80ed; }
 html[data-theme="light"] .topic-dot.sand { background: #d9822b; }
@@ -340,7 +339,7 @@ html[data-theme="light"] .player-card .lesson-exercise { background: none; borde
   .landing-feature-mascot { width: 76px; }
   .landing-cta { border-radius: 20px; padding: 34px 18px 30px; }
   html[data-theme="light"] .sidebar { background: #fff; border-top: 1px solid var(--line); border-right: 0; }
-  html[data-theme="light"] .main-nav a { border-radius: 0; font-size: 10px; white-space: normal; }
+  html[data-theme="light"] .main-nav a { border-radius: 0; font-size: 11px; white-space: normal; }
   html[data-theme="light"] .main-nav a.active { background: transparent; color: var(--fun-violet-dark); box-shadow: inset 0 2px var(--fun-violet); }
   html[data-theme="light"] .path-node-disc { width: 56px; height: 56px; }
   html[data-theme="light"] .path-node.is-current .path-node-disc { width: 64px; height: 64px; }

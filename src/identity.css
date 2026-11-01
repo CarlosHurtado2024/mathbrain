@@ -91,8 +91,8 @@ html[data-theme="dark"] {
   --z-surface: var(--brand-surface);
   --z-sidebar: var(--brand-canvas);
   --z-locked: var(--brand-inset);
-  --z-locked-text: var(--brand-disabled);
-  --z-success: var(--brand-accent);
+  --z-locked-text: var(--brand-tertiary);
+  --z-success: var(--brand-accent-text);
   --z-shadow: none;
   --z-radius: 16px;
   --m-bg: var(--brand-surface);
@@ -119,7 +119,6 @@ html[data-theme] .topic-dot:is(.purple, .blue, .rose, .green, .sand, .slate) { b
 
 html[data-theme] body { background: var(--brand-canvas); color: var(--brand-ink); font-family: var(--font-ui); }
 html[data-theme] body::before { opacity: .08; }
-html[data-theme] .space-background { opacity: .18; }
 html[data-theme] ::selection { background: var(--brand-primary); color: var(--brand-on-primary); }
 html[data-theme] :is(a, button, input, select, summary, [tabindex="0"]):focus-visible { outline: 3px solid var(--brand-primary); outline-offset: 3px; }
 :is(h1, h2, h3) { text-wrap: balance; }
@@ -133,8 +132,8 @@ html[data-theme] :is(.button-primary, .m-button.is-primary) { color: var(--brand
 html[data-theme] :is(.button-primary, .m-button.is-primary):hover { background: var(--brand-primary-hover); border-color: var(--brand-primary-hover); }
 html[data-theme] :is(.button-secondary, .button-outline, .m-button.is-outline) { color: var(--brand-primary); background: var(--brand-surface); border-color: var(--brand-primary-line); }
 html[data-theme] :is(.button-secondary, .button-outline, .m-button.is-outline):hover { background: var(--brand-primary-soft); }
-html[data-theme] :is(.button-success, .player-continue, .home-next-button, .m-button.is-success) { color: var(--brand-on-accent); background: var(--brand-accent); border-color: var(--brand-accent); }
-html[data-theme] :is(.button-success, .player-continue, .home-next-button, .m-button.is-success):hover { background: var(--brand-accent-hover); border-color: var(--brand-accent-hover); }
+html[data-theme] :is(.button-success, .home-next-button, .m-button.is-success) { color: var(--brand-on-accent); background: var(--brand-accent); border-color: var(--brand-accent); }
+html[data-theme] :is(.button-success, .home-next-button, .m-button.is-success):hover { background: var(--brand-accent-hover); border-color: var(--brand-accent-hover); }
 html[data-theme] :is(.button, .m-button):disabled { opacity: .5; transform: none; cursor: not-allowed; }
 html[data-theme] .m-button.is-small { min-height: 44px; padding: 10px 14px; font-size: 12px; }
 html[data-theme] .text-button { color: var(--brand-primary); }
@@ -166,7 +165,6 @@ html[data-theme] .theme-control option { color: var(--brand-ink); background: va
 html[data-theme] .stats-streak .icon { color: var(--brand-primary); fill: var(--brand-primary-soft); }
 html[data-theme] .stats-streak { color: var(--brand-primary); }
 html[data-theme] .stats-xp { color: var(--brand-secondary); }
-html[data-theme] .space-motion-toggle { color: var(--brand-primary); background: var(--brand-surface); border-color: var(--brand-line); box-shadow: none; }
 
 /* Catálogo, curso y perfil comparten la misma escala de superficies. */
 html[data-theme] :is(.content-card, .topic-tile, .path-card, .course-album, .reader, .related-panel, .empty-state, .profile-card, .course-about, .player-card, .zcard-link, .home-next, .zcourse-head, .access-gate) { color: var(--brand-ink); background: var(--brand-surface); border-color: var(--brand-line); box-shadow: none; }
