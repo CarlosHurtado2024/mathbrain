@@ -92,6 +92,7 @@ Esquema: [`supabase/migrations/`](../supabase/migrations/) (aplicado en el proye
 | `study_days` | `user_id`, `day` | `days` de `mathbrain-stats` (racha y semana) |
 | `unit_reviews` | `user_id`, `review_key`, `passed_at` | `reviews` de `mathbrain-stats` |
 | `saved_resources` | `user_id`, `resource_id`, `saved_at` | `mathbrain-saved` |
+| `lesson_sessions` | `user_id`, `lesson_id`, `block_index`, `block_count`, `state` (respuestas, XP y aciertos a la primera de esa pasada), `updated_at` | `zuka-lecciones-en-curso` |
 
 Las tablas de progreso usan la clave primaria `(user_id, …)`, así una lección o un día no se repiten.
 
@@ -104,6 +105,21 @@ Las tablas de progreso usan la clave primaria `(user_id, …)`, así una lecció
 | `reset_progress()` | «Borrar mi progreso»: vacía el progreso y deja el perfil |
 | `delete_account()` | «Eliminar mi cuenta»: borra la cuenta y todos sus datos |
 
-**Sincronización** (`src/cloud.js`). Al iniciar sesión, y cada vez que se abre la app con sesión, el progreso del dispositivo y el de la cuenta se unen en ambos sentidos. Con sesión, cada avance se envía al momento; sin conexión queda pendiente en `zuka-sync-pending` (`{ xp, full }`) y se envía al volver. La sesión de Supabase se guarda en `zuka-auth`.
+### Contenido
+
+La jerarquía curso → unidad → lección → bloques vive en `courses`, `units`, `lessons` y `lesson_blocks`. Se lee sin sesión con la clave publicable y solo lo publicado (`published`); la clave publicable no puede escribir. Se edita desde el panel de Supabase.
+
+| Tabla | Columnas principales |
+| --- | --- |
+| `courses` | `id`, `title`, `description`, `position`, `published` |
+| `units` | `id`, `course_id`, `position`, `title`, `summary`, `published` |
+| `lessons` | `id`, `course_id`, `unit_id`, `position`, `title`, `description`, `minutes`, `video`, `video_format`, `tags`, `key_idea`, `source` (`markdown` o `database`), `published` |
+| `lesson_blocks` | `lesson_id`, `position`, `type` (uno de los 14 tipos del motor), `html`, `data` (JSON del componente: `variant`, `title`, `src`, `steps`…) |
+
+Las lecciones escritas en `content/*.md` se copian a estas tablas con `select public.import_published_content();` en el SQL Editor, después de publicar: lee el `content.js` desplegado, reemplaza las lecciones `markdown` y sus bloques, y despublica las que ya no existen. Las lecciones creadas en la base de datos (`source = 'database'`) no se tocan. Una lección nueva aparece en la app si su unidad existe en `src/courses.js`; sus bloques se descargan la primera vez que se abre con conexión.
+
+En el dispositivo, `zuka-contenido-indice` guarda el último índice de lecciones y `zuka-contenido-bloques` solo los bloques que difieren del contenido compilado.
+
+**Sincronización** (`src/cloud.js`). Al iniciar sesión, y cada vez que se abre la app con sesión, el progreso del dispositivo y el de la cuenta se unen en ambos sentidos. Con las cuentas de correo en pausa, quien ya entró recibe una **sesión anónima** de Supabase (sin correo ni contraseña) y su progreso se sincroniza igual; requiere activar «Allow anonymous sign-ins» en Authentication → Sign In / Providers. Con sesión, cada avance se envía al momento; sin conexión queda pendiente en `zuka-sync-pending` (`{ xp, full }`) y se envía al volver. La sesión de Supabase se guarda en `zuka-auth`.
 
 Cambiar el esquema: crea un archivo nuevo en `supabase/migrations/` (no edites el que ya se aplicó) y ejecútalo en el SQL Editor.

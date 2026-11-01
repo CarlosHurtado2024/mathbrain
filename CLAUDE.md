@@ -15,7 +15,7 @@ Antes de cambiar algo, lee el documento de `docs/` que corresponda:
 | `docs/CONTENIDO.md` | Cómo escribir lecciones en Markdown y editar los programas |
 | `docs/ROADMAP.md` | Etapas del proyecto y lo que sigue |
 | `docs/PRUEBAS_ANDROID.md` | Probar la app en un celular Android |
-| `docs/SUPABASE.md` | Cuentas y base de datos en Supabase |
+| `docs/SUPABASE.md` | Cuentas, sesiones anónimas, base de datos y publicación del contenido |
 
 ## Comandos
 
@@ -40,7 +40,7 @@ Requiere Node.js 20 o superior. No hay dependencias de npm.
 8. **Pruebas:** `npm test` debe pasar antes de cada commit. Si cambias el comportamiento, añade o ajusta la prueba en `tests/`.
 9. **Git:** commits pequeños con mensaje claro. No hacer `push` sin que Carlos lo pida: cada push a `main` publica en Vercel.
 10. Trabajar por etapas (`docs/ROADMAP.md`): una funcionalidad a la vez, probarla en el celular y luego seguir.
-11. **Acceso y Supabase:** con `emailAccounts: false`, la bienvenida crea un perfil local y habilita todo el contenido; antes de entrar solo se prueba la primera lección de cada curso. Con `emailAccounts: true`, el acceso completo requiere sesión de correo y contraseña. En modo local no se inicializa el cliente de Supabase. Toda tabla nueva lleva Row Level Security y va en un archivo nuevo de `supabase/migrations/`. En `src/config.js` solo va la clave publicable, nunca la secreta.
+11. **Acceso y Supabase:** con `emailAccounts: false`, la bienvenida crea un perfil local y habilita todo el contenido; antes de entrar solo se prueba la primera lección de cada curso. Con `emailAccounts: true`, el acceso completo requiere sesión de correo y contraseña. En modo local, quien ya entró recibe una sesión anónima de Supabase (si el proyecto la permite) y su progreso se sincroniza; los visitantes de la portada no crean sesiones. El contenido (lecciones y bloques) se lee de Supabase con respaldo en `content.js`. Toda tabla nueva lleva Row Level Security y va en un archivo nuevo de `supabase/migrations/`. En `src/config.js` solo va la clave publicable, nunca la secreta.
 12. **Identidad:** negro y verde menta compartidos por landing y producto, con Manrope local. `src/identity.css` es la fuente de los colores; los nombres históricos de cursos no autorizan paletas independientes. Las visitas nuevas empiezan en oscuro; se respeta el tema claro guardado.
 
 ## Estructura

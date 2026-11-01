@@ -53,6 +53,20 @@ Zuka avanza por etapas pequeñas: cada una se termina, se prueba en el celular y
 - Tema claro/oscuro y menú Inicio, Cursos, Entrenamiento, Tutorías y Perfil.
 - Cuatro parciales de práctica por materia y simulacros por unidad usando el contenido publicado.
 
+## ✅ Plataforma modular · Fase 1: motor de lecciones por bloques
+
+- Curso → unidad → lección → bloques en Supabase, con las 51 lecciones migradas.
+- `lesson-engine.js`: un componente por tipo de bloque; el reproductor ya no depende de los tipos.
+- Las lecciones se configuran desde la base de datos y conservan respaldo sin conexión.
+- Cada lección se retoma en el bloque exacto, en el dispositivo y en `lesson_sessions` (sesión anónima).
+
+## 🔜 Plataforma modular · Fases siguientes
+
+- Fase 2: sistema de ejercicios extensible (12 tipos, pistas progresivas, intentos, retroalimentación específica y registro de desempeño).
+- Fase 3: motores de visualización (Manim, p5.js, JSXGraph, Three.js) como bloques `simulation`, `interactive_graph` y `visual_proof`.
+- Fase 4: unidades de microaprendizaje con secuencia flexible, `assessment` y `spaced_review`.
+- Fase 5: rutas, metas diarias opcionales, habilidades, retos semanales, logros de dominio y recomendaciones de repaso.
+
 ## 🔜 Etapa 2 · Contenido completo
 
 - Videos de todas las lecciones de Fundamentos de Matemáticas (YouTube «No listado»).

@@ -69,6 +69,20 @@ Para que los correos lleguen en español, edita las plantillas en **Authenticati
 4. Abre Zuka en otro dispositivo, inicia sesión y comprueba que llega el progreso.
 5. Cierra sesión, entra en **Iniciar sesión → ¿Olvidaste tu contraseña?** y comprueba que el enlace permite guardar una contraseña nueva.
 
+## 1c. Sesiones anónimas (progreso sin correo)
+
+Con `emailAccounts: false`, la app crea una sesión anónima para quien ya entró deslizando, y guarda su progreso y la posición de cada lección en la base de datos. Actívalas en **Authentication → Sign In / Providers → Allow anonymous sign-ins**. Mientras estén desactivadas, el progreso sigue solo en el dispositivo y la app no muestra errores. Se recomienda activar también la protección contra abuso (CAPTCHA) y revisar el límite de inicios anónimos por IP.
+
+## 1d. Publicar contenido en la base de datos
+
+Después de cada despliegue con lecciones nuevas o editadas en `content/`, ejecuta en el SQL Editor:
+
+```sql
+select public.import_published_content();
+```
+
+Devuelve cuántas lecciones Markdown quedaron publicadas. Las lecciones y bloques creados directamente en las tablas (`source = 'database'`) no se tocan.
+
 ## Cómo funciona
 
 - `src/config.js` tiene la URL y la **clave publicable** (`sb_publishable_…`). Esa clave está hecha para ir en el navegador: lo que protege los datos es Row Level Security, que deja a cada persona leer y cambiar solo sus filas. **Nunca** pongas en la app la clave secreta (`sb_secret_…`) ni la `service_role`.

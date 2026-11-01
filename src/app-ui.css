@@ -225,3 +225,10 @@ html[data-theme] .player-card .lesson-exercise:not([data-state="correct"]):not([
 .home-rename a { color: var(--brand-primary); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 .onboarding-brand { position: absolute; z-index: 2; top: calc(20px + env(safe-area-inset-top)); left: 22px; display: flex; align-items: center; gap: 10px; margin: 0; color: var(--brand-ink); font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
 .onboarding-brand img { border-radius: 10px; }
+
+/* Motor de lecciones: el bloque «paso a paso» muestra un paso a la vez. */
+.block-steps { display: grid; gap: 14px; margin: 18px 0 0; padding-left: 1.4em; }
+.block-steps > li { padding-left: 4px; }
+.block-steps > li:focus { outline: none; }
+.block-steps > li:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 4px; border-radius: 6px; }
+.block-steps-next { margin-top: 18px; }

@@ -8,8 +8,8 @@ const source = fs.readFileSync(path.join(__dirname, '../src/cloud.js'), 'utf8');
 const USER = { id: 'u-1', email: 'ana@ejemplo.com' };
 
 // Supabase falso en memoria: tablas por usuario, funciones RPC y un auth mínimo.
-function fakeSupabase(initial = {}, { confirmEmail = true, initialSession = null } = {}) {
-  const db = { profiles: [], lesson_progress: [], saved_resources: [], study_days: [], unit_reviews: [], ...initial };
+function fakeSupabase(initial = {}, { confirmEmail = true, initialSession = null, anonymous = true } = {}) {
+  const db = { profiles: [], lesson_progress: [], saved_resources: [], study_days: [], unit_reviews: [], lesson_sessions: [], ...initial };
   const calls = [];
   let authListener = null;
   let online = true;
@@ -17,6 +17,7 @@ function fakeSupabase(initial = {}, { confirmEmail = true, initialSession = null
     constructor(table) { this.table = table; this.filters = []; this.action = 'select'; }
     select() { if (this.action === 'select') this.action = 'select'; return this; }
     eq(column, value) { this.filters.push([column, value]); return this; }
+    in(column, values) { this.filters.push([column, values, 'in']); return this; }
     order() { return this; }
     limit() { return this; }
     maybeSingle() { this.single = true; return this; }
@@ -28,14 +29,18 @@ function fakeSupabase(initial = {}, { confirmEmail = true, initialSession = null
       if (!online) return { data: null, error: { message: 'Failed to fetch' } };
       calls.push({ table: this.table, action: this.action, rows: this.rows, values: this.values, filters: this.filters });
       const table = db[this.table];
-      const matches = row => this.filters.every(([column, value]) => row[column] === value);
+      const matches = row => this.filters.every(([column, value, kind]) => kind === 'in' ? value.includes(row[column]) : row[column] === value);
       if (this.action === 'select') {
         const rows = table.filter(matches);
         return { data: this.single ? rows[0] || null : rows, error: null };
       }
       if (this.action === 'upsert' || this.action === 'insert') {
         const keys = (this.options?.onConflict || 'id').split(',');
-        for (const row of this.rows) if (!table.some(existing => keys.every(key => existing[key] === row[key]))) table.push({ ...row });
+        for (const row of this.rows) {
+          const existing = table.find(entry => keys.every(key => entry[key] === row[key]));
+          if (!existing) table.push({ ...row });
+          else if (!this.options?.ignoreDuplicates) Object.assign(existing, row);
+        }
         return { data: null, error: null };
       }
       if (this.action === 'update') { table.filter(matches).forEach(row => Object.assign(row, this.values)); return { data: null, error: null }; }
@@ -67,6 +72,12 @@ function fakeSupabase(initial = {}, { confirmEmail = true, initialSession = null
       signInWithPassword: async ({ email, password }) => {
         calls.push({ signin: { email, password } });
         return email === USER.email && password === 'correcta-123' ? (authListener('SIGNED_IN', { user: USER }), { error: null }) : { error: { code: 'invalid_credentials', message: 'Invalid login credentials' } };
+      },
+      signInAnonymously: async options => {
+        calls.push({ anonymous: options });
+        if (!anonymous) return { data: null, error: { code: 'anonymous_provider_disabled', message: 'Anonymous sign-ins are disabled' } };
+        authListener('SIGNED_IN', { user: { ...USER, email: '', is_anonymous: true } });
+        return { data: {}, error: null };
       },
       signOut: async () => { authListener('SIGNED_OUT', null); return { error: null }; },
       resetPasswordForEmail: async (email, options) => { calls.push({ reset: { email, ...options } }); return { error: null }; },
@@ -266,22 +277,57 @@ test('Sin Supabase la app sigue funcionando: la cuenta no está disponible y no 
   assert.equal(env.read('zuka-sync-pending'), null);
 });
 
-test('Con cuentas en pausa no se crea el cliente ni se sincroniza una sesión anterior', async () => {
-  const supabase = fakeSupabase({}, { initialSession: { user: USER } });
+test('Con cuentas en pausa, quien ya entró recibe una sesión anónima y su progreso llega a la base de datos', async () => {
+  const supabase = fakeSupabase();
   const env = environment({ emailAccounts: false, supabase, storage: {
+    'zuka-ingreso': '2026-11-01T10:00:00.000Z',
     'mathbrain-profile': { name: 'Ana', goal: 3 },
-    'mathbrain-progress': ['probabilidad-1'],
-    'zuka-sync-pending': { xp: 10, full: true }
+    'mathbrain-progress': ['probabilidad-1']
   } });
   await settle();
-  await env.cloud.record('lesson', { id: 'probabilidad-2', done: true });
+  assert.equal(env.clientsCreated, 1);
+  assert.equal(env.cloud.state.available, false, 'La interfaz de cuentas de correo sigue oculta');
+  assert.equal(env.cloud.state.anonymous, true);
+  assert.deepEqual(JSON.parse(JSON.stringify(supabase.calls.find(call => call.anonymous).anonymous)), { options: { data: { display_name: 'Ana' } } });
+  assert.equal(env.cloud.state.user.id, USER.id);
   await env.cloud.syncNow();
-  assert.equal(env.clientsCreated, 0);
-  assert.equal(env.cloud.state.ready, true);
-  assert.equal(env.cloud.state.available, false);
+  assert.deepEqual(supabase.db.lesson_progress.map(row => row.lesson_id), ['probabilidad-1']);
+  await env.cloud.record('lesson', { id: 'probabilidad-2', done: true });
+  assert.deepEqual(supabase.db.lesson_progress.map(row => row.lesson_id), ['probabilidad-1', 'probabilidad-2']);
+});
+
+test('Con cuentas en pausa no se crea una sesión anónima antes de entrar, y si Supabase no la permite todo sigue en el dispositivo', async () => {
+  const visitor = fakeSupabase();
+  const env = environment({ emailAccounts: false, supabase: visitor });
+  await settle();
+  assert.equal(visitor.calls.length, 0, 'Un visitante de la portada no crea usuarios');
   assert.equal(env.cloud.state.user, null);
-  assert.equal(supabase.calls.length, 0);
-  assert.equal(env.read('mathbrain-profile').name, 'Ana');
-  assert.deepEqual(env.read('mathbrain-progress'), ['probabilidad-1']);
-  assert.deepEqual(env.read('zuka-sync-pending'), { xp: 10, full: true });
+  const disabled = fakeSupabase({}, { anonymous: false });
+  const local = environment({ emailAccounts: false, supabase: disabled, storage: { 'zuka-ingreso': 'sí', 'mathbrain-progress': ['probabilidad-1'] } });
+  await settle();
+  assert.equal(local.cloud.state.user, null);
+  assert.equal(local.cloud.state.status, 'local');
+  await local.cloud.record('lesson', { id: 'probabilidad-2', done: true });
+  assert.equal(disabled.calls.filter(call => call.table).length, 0);
+  assert.deepEqual(local.read('mathbrain-progress'), ['probabilidad-1']);
+});
+
+test('Las lecciones a medias se unen por la pasada más reciente y viajan a la base de datos', async () => {
+  const supabase = fakeSupabase({ lesson_sessions: [
+    { user_id: USER.id, lesson_id: 'calculo-integral-2', block_index: 2, block_count: 8, state: { results: {}, gains: {}, xp: 0, firstTry: 0 }, updated_at: '2026-11-01T09:00:00.000Z' },
+    { user_id: USER.id, lesson_id: 'probabilidad-1', block_index: 5, block_count: 9, state: { results: {}, gains: {}, xp: 10, firstTry: 1 }, updated_at: '2026-11-01T09:00:00.000Z' }
+  ] }, { initialSession: { user: USER } });
+  const env = environment({ supabase, storage: {
+    'mathbrain-progress': ['probabilidad-1'],
+    'zuka-lecciones-en-curso': { 'calculo-integral-2': { index: 4, count: 8, results: { 3: 'correct' }, gains: { 3: 10 }, xp: 10, firstTry: 1, at: '2026-11-01T10:00:00.000Z' } }
+  } });
+  await settle();
+  await env.cloud.syncNow();
+  assert.deepEqual(Object.keys(env.read('zuka-lecciones-en-curso')), ['calculo-integral-2'], 'Una lección completada no se retoma');
+  assert.equal(env.read('zuka-lecciones-en-curso')['calculo-integral-2'].index, 4, 'Gana la pasada más reciente');
+  assert.deepEqual(supabase.db.lesson_sessions.map(row => [row.lesson_id, row.block_index]), [['calculo-integral-2', 4]]);
+  await env.cloud.record('session', { id: 'calculo-integral-2', index: 5, count: 8, results: {}, gains: {}, xp: 10, firstTry: 1, at: '2026-11-01T10:05:00.000Z' });
+  assert.equal(supabase.db.lesson_sessions[0].block_index, 5);
+  await env.cloud.record('session', { id: 'calculo-integral-2', clear: true });
+  assert.equal(supabase.db.lesson_sessions.length, 0);
 });

@@ -5,9 +5,9 @@
 (() => {
   'use strict';
 
-  const KEYS = { progress: 'mathbrain-progress', stats: 'mathbrain-stats', saved: 'mathbrain-saved', recent: 'mathbrain-recent', profile: 'mathbrain-profile', pending: 'zuka-sync-pending' };
+  const KEYS = { progress: 'mathbrain-progress', stats: 'mathbrain-stats', saved: 'mathbrain-saved', recent: 'mathbrain-recent', profile: 'mathbrain-profile', pending: 'zuka-sync-pending', sessions: 'zuka-lecciones-en-curso' };
   const GOALS = [0, 2, 3, 5, 7];
-  const state = { available: false, ready: false, user: null, status: 'idle', lastSync: null, message: '', recovery: false };
+  const state = { available: false, ready: false, user: null, status: 'idle', lastSync: null, message: '', recovery: false, anonymous: false };
   let client = null;
   let syncing = null;
   let pending = readJson(KEYS.pending, null) || { xp: 0, full: false };
@@ -55,6 +55,17 @@
     };
   }
 
+  // Lecciones a medias: por cada lección gana la pasada más reciente. Las lecciones ya completadas no se retoman.
+  const time = session => Date.parse(session?.at || '') || 0;
+  function mergeSessions(local, remote, completed = []) {
+    const merged = { ...remote };
+    for (const [id, session] of Object.entries(local)) if (!merged[id] || time(session) > time(merged[id])) merged[id] = session;
+    for (const id of completed) delete merged[id];
+    return merged;
+  }
+
+  const sessionRow = (id, session) => ({ lesson_id: id, block_index: session.index, block_count: session.count, state: { results: session.results || {}, gains: session.gains || {}, xp: session.xp || 0, firstTry: session.firstTry || 0 }, updated_at: session.at });
+
   function readLocal() {
     const stats = readJson(KEYS.stats, {}) || {};
     const profile = readJson(KEYS.profile, {}) || {};
@@ -98,12 +109,13 @@
   }
 
   async function readRemote() {
-    const [profile, progress, saved, days, reviews] = await Promise.all([
+    const [profile, progress, saved, days, reviews, sessions] = await Promise.all([
       client.from('profiles').select('display_name, weekly_goal, xp').eq('id', state.user.id).maybeSingle(),
       client.from('lesson_progress').select('lesson_id'),
       client.from('saved_resources').select('resource_id'),
       client.from('study_days').select('day').order('day', { ascending: false }).limit(120),
-      client.from('unit_reviews').select('review_key')
+      client.from('unit_reviews').select('review_key'),
+      client.from('lesson_sessions').select('lesson_id, block_index, block_count, state, updated_at')
     ]).then(results => results.map(fail));
     return {
       exists: Boolean(profile.data),
@@ -113,8 +125,20 @@
       progress: (progress.data || []).map(row => row.lesson_id),
       saved: (saved.data || []).map(row => row.resource_id),
       days: (days.data || []).map(row => row.day),
-      reviews: (reviews.data || []).map(row => row.review_key)
+      reviews: (reviews.data || []).map(row => row.review_key),
+      sessions: Object.fromEntries((sessions.data || []).map(row => [row.lesson_id, { index: row.block_index, count: row.block_count, ...row.state, at: row.updated_at }]))
     };
+  }
+
+  // Une las lecciones a medias del dispositivo y de la base de datos, y sube las que la base no tiene al día.
+  async function syncSessions(remote, completed) {
+    const local = readJson(KEYS.sessions, {}) || {};
+    const merged = mergeSessions(local, remote.sessions, completed);
+    writeJson(KEYS.sessions, merged);
+    const newer = Object.entries(merged).filter(([id, session]) => time(session) > time(remote.sessions[id]));
+    const stale = Object.keys(remote.sessions).filter(id => !merged[id]);
+    if (newer.length) fail(await client.from('lesson_sessions').upsert(newer.map(([id, session]) => ({ user_id: state.user.id, ...sessionRow(id, session) })), { onConflict: 'user_id,lesson_id' }));
+    if (stale.length) fail(await client.from('lesson_sessions').delete().in('lesson_id', stale));
   }
 
   const missing = (items, existing) => items.filter(item => !existing.includes(item));
@@ -152,6 +176,7 @@
         const merged = mergeState(readLocal(), remote);
         writeLocal(merged);
         await pushMerged(merged, remote);
+        await syncSessions(remote, merged.progress);
         pending.full = false;
         savePending();
         state.lastSync = Date.now();
@@ -176,6 +201,7 @@
     if (kind === 'saved') return fail(await (data.on ? upsert('saved_resources', { resource_id: data.id }, 'user_id,resource_id') : client.from('saved_resources').delete().eq('resource_id', data.id)));
     if (kind === 'day') return fail(await upsert('study_days', { day: data.day }, 'user_id,day'));
     if (kind === 'review') return fail(await upsert('unit_reviews', { review_key: data.key }, 'user_id,review_key'));
+    if (kind === 'session') return fail(await (data.clear ? client.from('lesson_sessions').delete().eq('lesson_id', data.id) : client.from('lesson_sessions').upsert({ user_id, ...sessionRow(data.id, data) }, { onConflict: 'user_id,lesson_id' })));
     if (kind === 'profile') return fail(await client.from('profiles').update({ display_name: data.name, weekly_goal: data.goal }).eq('id', user_id));
     if (kind === 'xp') {
       fail(await client.rpc('add_xp', { amount: data.amount }));
@@ -211,6 +237,7 @@
     if (code === 'invalid_credentials' || /invalid login credentials/i.test(message)) return 'El correo o la contraseña no coinciden.';
     if (code === 'email_not_confirmed' || /not confirmed/i.test(message)) return 'Primero confirma tu correo con el enlace que te enviamos.';
     if (code === 'user_already_exists' || /already registered/i.test(message)) return 'Ya hay una cuenta con ese correo. Inicia sesión.';
+    if (code === 'anonymous_provider_disabled') return 'Tu progreso se guarda en este dispositivo.';
     if (code === 'same_password') return 'La nueva contraseña debe ser distinta de la anterior.';
     if (code === 'weak_password' || /password should|weak password/i.test(message)) return 'Usa una contraseña más segura, de al menos 8 caracteres.';
     if (/rate_limit/.test(code) || /rate limit|too many/i.test(message)) return 'Demasiados intentos seguidos. Espera unos minutos.';
@@ -281,12 +308,42 @@
     if (user && (changed || event === 'INITIAL_SESSION')) syncNow();
   }
 
+  // Sin cuentas de correo, quien ya entró a Zuka recibe una sesión anónima de Supabase: sin correo ni
+  // contraseña, su progreso queda también en la base de datos. Se pide una sola vez por visita; si el
+  // proyecto no permite sesiones anónimas, el progreso sigue solo en el dispositivo.
+  let anonymousTried = false;
+  function entered() {
+    try { return Boolean(localStorage.getItem('zuka-ingreso')); } catch { return false; }
+  }
+
+  async function ensureSession() {
+    if (!client || state.user || anonymousTried || !entered()) return;
+    anonymousTried = true;
+    const { error } = await client.auth.signInAnonymously({ options: { data: { display_name: readLocal().name } } });
+    if (error) { state.message = describe(error); setStatus('local'); }
+  }
+
+  function initAnonymous(config) {
+    client = window.supabase.createClient(config.supabaseUrl, config.supabaseKey, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: 'zuka-auth' }
+    });
+    state.anonymous = true;
+    state.ready = true;
+    client.auth.onAuthStateChange((event, session) => { setTimeout(() => handleAuth(event, session), 0); });
+    client.auth.getSession().then(({ data }) => {
+      if (data.session) handleAuth('INITIAL_SESSION', data.session);
+      else return ensureSession();
+    }).catch(() => {});
+    window.addEventListener('online', () => { if (state.user && (pending.full || pending.xp)) syncNow(); else ensureSession().catch(() => {}); });
+  }
+
   function init() {
     const config = window.ZUKA_CONFIG || {};
-    if (config.emailAccounts !== true || !window.supabase?.createClient || !config.supabaseUrl || !config.supabaseKey) {
+    if (!window.supabase?.createClient || !config.supabaseUrl || !config.supabaseKey) {
       state.ready = true;
       return;
     }
+    if (config.emailAccounts !== true) return initAnonymous(config);
     client = window.supabase.createClient(config.supabaseUrl, config.supabaseKey, {
       auth: { flowType: 'pkce', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'zuka-auth' }
     });
@@ -308,6 +365,6 @@
     window.addEventListener('online', () => { if (state.user && (pending.full || pending.xp)) syncNow(); });
   }
 
-  window.ZUKA_CLOUD = { state, record, syncNow, signUp, signIn, signOut, requestPasswordReset, updatePassword, resetProgress, deleteAccount, describe, mergeState, streakFrom };
+  window.ZUKA_CLOUD = { state, record, syncNow, ensureSession: () => ensureSession().catch(() => {}), signUp, signIn, signOut, requestPasswordReset, updatePassword, resetProgress, deleteAccount, describe, mergeState, mergeSessions, streakFrom };
   init();
 })();

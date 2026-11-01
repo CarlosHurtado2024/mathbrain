@@ -4,6 +4,9 @@
   const library = window.MATHBRAIN_LIBRARY;
   const courses = window.MATHBRAIN_COURSES;
   const marketing = window.ZUKA_MARKETING;
+  // Motor de bloques (src/lesson-engine.js) y fuente del contenido (src/content-source.js).
+  const engine = window.ZUKA_ENGINE;
+  const contentSource = window.ZUKA_CONTENT || { blocks: lesson => engine.playable(engine.fromLesson(lesson)), refreshLesson: async () => null };
   const select = (selector, root = document) => root.querySelector(selector);
   const selectAll = (selector, root = document) => [...root.querySelectorAll(selector)];
   const escape = value => String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
@@ -135,6 +138,7 @@
     const profile = loadProfile();
     if (!profile.name) storeList('mathbrain-profile', { name: 'Estudiante', goal: profile.goal });
     rememberAuthDestination('');
+    window.ZUKA_CLOUD?.ensureSession?.();
     const target = safeAuthDestination(destination) || 'inicio';
     history.replaceState(null, '', `#${target}`);
     lastRoutedHash = null;
@@ -445,7 +449,7 @@
   }
 
   function trainingExams(course) {
-    const exercises = courseLessons(course).flatMap(lesson => (lesson.steps || []).filter(step => step.type === 'exercise').map(step => ({ lesson, step })));
+    const exercises = courseLessons(course).flatMap(lesson => (lesson.steps || []).filter(step => engine.graded(engine.normalize(step))).map(step => ({ lesson, step })));
     return ['Primer parcial', 'Segundo parcial', 'Tercer parcial', 'Cuarto parcial'].map((title, index) => ({
       title,
       exercises: exercises.slice(Math.floor(index * exercises.length / 4), Math.floor((index + 1) * exercises.length / 4))
@@ -535,32 +539,14 @@
     return `<aside class="detail-aside"><div class="related-panel"><h2>Conecta esta idea</h2><p>Otra forma de entender el mismo tema.</p>${related.map(candidate => `<a class="related-link" href="#contenido/${candidate.id}"><small>${library.formats[candidate.type].title}</small><strong>${escape(candidate.title)} <span aria-hidden="true">↗</span></strong></a>`).join('')}<a class="related-link" href="#curso/${course.id}"><small>Curso</small><strong>${escape(course.title)} →</strong></a></div><p class="prerequisite"><strong>Un buen punto de partida</strong>${escape(course.prerequisite)}</p></aside>`;
   }
 
-  function videoSource(value) {
-    if (!value) return null;
-    let url;
-    try { url = new URL(value, location.href); } catch { return null; }
-    if (!['http:', 'https:'].includes(url.protocol)) return null;
-    let videoId;
-    if (['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtube-nocookie.com', 'www.youtube-nocookie.com'].includes(url.hostname)) videoId = url.searchParams.get('v') || url.pathname.match(/^\/(?:embed|shorts)\/([\w-]+)/)?.[1];
-    if (url.hostname === 'youtu.be') videoId = url.pathname.slice(1);
-    if (videoId && /^[\w-]{11}$/.test(videoId)) return { type: 'iframe', src: `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&playsinline=1&cc_load_policy=1&cc_lang_pref=es&hl=es` };
-    if (['vimeo.com', 'www.vimeo.com', 'player.vimeo.com'].includes(url.hostname)) {
-      const match = url.pathname.match(/(?:\/video)?\/(\d+)/);
-      if (match) return { type: 'iframe', src: `https://player.vimeo.com/video/${match[1]}` };
-    }
-    return /\.(mp4|webm)$/i.test(url.pathname) ? { type: 'video', src: url.href } : null;
-  }
-
   function renderResource(resource, parameters = new URLSearchParams()) {
     recent = [resource.id, ...recent.filter(id => id !== resource.id)].slice(0, 8);
     storeList('mathbrain-recent', recent);
     const format = library.formats[resource.type];
-    const source = videoSource(resource.video);
-    const vertical = resource.videoFormat === 'vertical' || /\/shorts\//.test(resource.video || '');
-    const video = !source ? '' : `<div class="video-stage${vertical ? ' is-vertical' : ''}">${source.type === 'iframe' ? `<iframe title="${escape(resource.title)}" src="${escape(source.src)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>` : `<video controls playsinline preload="metadata" aria-label="${escape(resource.title)}"><source src="${escape(source.src)}"></video>`}</div>`;
+    const video = engine.videoHtml(resource.video, { title: resource.title, vertical: resource.videoFormat === 'vertical' });
     const course = courses.find(candidate => candidate.id === resource.courseId);
     // Las lecciones se recorren paso a paso; «?vista=lectura» las muestra completas en una sola página.
-    if (resource.type === 'explanation' && course) return parameters.get('vista') === 'lectura' ? renderLesson(resource, course, video) : renderPlayer(resource, course, video);
+    if (resource.type === 'explanation' && course) return parameters.get('vista') === 'lectura' ? renderLesson(resource, course, video) : renderPlayer(resource, course);
     currentLessonId = null;
     let body;
     if (resource.type === 'simulation') {
@@ -786,20 +772,65 @@
 
   function startPlayer(state) {
     player = { index: 0, results: {}, gains: {}, xp: 0, firstTry: 0, ...state };
+    player.steps = player.steps.map(engine.normalize);
     select('#detail-view').innerHTML = `<section class="lesson-player ${player.color}" id="lesson-player" aria-labelledby="detail-title"><header class="player-top"><a class="player-close" href="${player.exit}" aria-label="${player.training ? 'Salir y volver a Entrenamiento' : 'Salir y volver al curso'}">${icon('close')}</a><div class="player-meter" id="player-meter"></div><span class="player-xp" id="player-xp" aria-live="polite"></span></header><div class="player-heading"><h1 id="detail-title" tabindex="-1">${escape(player.title)}</h1>${player.eyebrow ? `<p class="detail-context">${escape(player.eyebrow)}</p>` : ''}${player.reading ? `<a class="player-reading" href="${player.reading}">${icon('book')}Ver toda la lección en una página</a>` : ''}</div><div class="player-stage" id="player-stage"></div><div class="player-bar" id="player-bar"></div></section>`;
     renderPlayerStep();
+    if (player.resumed) toast(`Retomas donde quedaste: paso ${player.resumed + 1} de ${player.steps.length}.`);
   }
 
-  function renderPlayer(resource, course, video) {
+  // La lección se arma con los bloques disponibles ya (los últimos de la base de datos o los compilados)
+  // y retoma el bloque donde quedó la persona. Después se piden los bloques actuales a la base de datos:
+  // si cambiaron y todavía no ha avanzado, se muestran de inmediato; si no, quedan para la próxima vez.
+  function renderPlayer(resource, course) {
     currentLessonId = null;
     const { module, label } = lessonPosition(course, resource);
     document.title = `${resource.title} · ${course.title} | Zuka`;
-    startPlayer({ kind: 'lesson', resource, course, color: resource.color, title: resource.title, eyebrow: `${module.kicker.toUpperCase()} · LECCIÓN ${label}`, exit: `#curso/${course.id}`, reading: `#contenido/${resource.id}?vista=lectura`, steps: [...(video ? [{ type: 'video', html: `<h2>Mira la clase</h2>${video}` }] : []), ...resource.steps] });
+    const blocks = contentSource.blocks(resource);
+    const lesson = { kind: 'lesson', resource, course, color: resource.color, title: resource.title, eyebrow: `${module.kicker.toUpperCase()} · LECCIÓN ${label}`, exit: `#curso/${course.id}`, reading: blocks.length ? `#contenido/${resource.id}?vista=lectura` : '' };
+    if (blocks.length) startPlayer({ ...lesson, steps: blocks, ...resumeState(resource.id, blocks.length) });
+    else select('#detail-view').innerHTML = `<section class="lesson-player ${resource.color}" id="lesson-player" aria-labelledby="detail-title"><div class="player-heading"><h1 id="detail-title" tabindex="-1">${escape(resource.title)}</h1></div><div class="player-stage" id="player-stage"><div class="player-card" aria-live="polite">${mascot.say('piensa', 'Estoy trayendo esta lección. La primera vez necesita conexión a internet.')}</div></div></section>`;
+    contentSource.refreshLesson(resource).then(fresh => {
+      if (!fresh?.length || location.hash.slice(1).split('?')[0] !== `contenido/${resource.id}`) return;
+      if (!blocks.length) return renderPlayer(resource, course);
+      const untouched = player?.resource === resource && player.index === 0 && !Object.keys(player.results).length && !player.finished;
+      if (untouched && JSON.stringify(fresh) !== JSON.stringify(player.steps)) { player.steps = fresh; renderPlayerStep(); }
+    }).catch(() => {});
+  }
+
+  // Dónde quedó cada lección: bloque, respuestas y XP de esa pasada. Se guarda en el dispositivo y, con
+  // sesión, en Supabase (lesson_sessions), para retomarla exactamente ahí en este u otro dispositivo.
+  const SESSIONS_KEY = 'zuka-lecciones-en-curso';
+  const readSessions = () => { try { return JSON.parse(localStorage.getItem(SESSIONS_KEY) || '{}') || {}; } catch { return {}; } };
+  const writeSessions = sessions => { try { localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions)); } catch { /* Se conserva solo durante la visita. */ } };
+
+  function resumeState(id, count) {
+    const saved = readSessions()[id];
+    if (!saved || !Number.isInteger(saved.index) || saved.index <= 0) return {};
+    // Si la lección cambió de tamaño, se retoma en el mismo punto sin las respuestas de la versión anterior.
+    const index = Math.min(saved.index, count - 1);
+    const kept = saved.count === count;
+    return { index, resumed: index, results: kept ? saved.results || {} : {}, gains: kept ? saved.gains || {} : {}, xp: kept ? saved.xp || 0 : 0, firstTry: kept ? saved.firstTry || 0 : 0 };
+  }
+
+  function saveSession() {
+    if (player?.kind !== 'lesson' || player.finished) return;
+    const id = player.resource.id;
+    const session = { index: player.index, count: player.steps.length, results: player.results, gains: player.gains, xp: player.xp, firstTry: player.firstTry, at: new Date().toISOString() };
+    writeSessions({ ...readSessions(), [id]: session });
+    cloudRecord('session', { id, ...session });
+  }
+
+  function clearSession(id) {
+    const sessions = readSessions();
+    if (!sessions[id]) return;
+    delete sessions[id];
+    writeSessions(sessions);
+    cloudRecord('session', { id, clear: true });
   }
 
   // Repaso del nivel: un reto de cada lección del módulo, para comprobar lo aprendido antes de seguir.
   function reviewSteps(module) {
-    return module.lessons.map(({ lesson }) => (lesson.steps || []).find(step => step.type === 'exercise')).filter(Boolean).slice(0, 8)
+    return module.lessons.map(({ lesson }) => (lesson.steps || []).find(step => engine.graded(engine.normalize(step)))).filter(Boolean).slice(0, 8)
       .map(step => ({ type: 'exercise', html: step.html.replace(/^(?:<h2>[\s\S]*?<\/h2>)+/, '') }));
   }
 
@@ -814,7 +845,7 @@
 
   function playerMeter() {
     const total = player.steps.length;
-    return `<ol class="player-segments" role="progressbar" aria-label="${player.training ? 'Avance del simulacro' : 'Avance de la lección'}" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${Math.min(player.index, total)}">${player.steps.map((step, index) => `<li class="${index < player.index ? 'is-done' : index === player.index ? 'is-current' : ''}${step.type === 'exercise' ? ' is-challenge' : ''}"></li>`).join('')}</ol>`;
+    return `<ol class="player-segments" role="progressbar" aria-label="${player.training ? 'Avance del simulacro' : 'Avance de la lección'}" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${Math.min(player.index, total)}">${player.steps.map((step, index) => `<li class="${index < player.index ? 'is-done' : index === player.index ? 'is-current' : ''}${engine.graded(step) ? ' is-challenge' : ''}"></li>`).join('')}</ol>`;
   }
 
   function renderPlayerStep() {
@@ -822,10 +853,13 @@
     select('#player-meter').innerHTML = playerMeter();
     select('#player-xp').textContent = player.xp ? `+${player.xp} XP` : '';
     // Un video vertical (9:16) se ve a pantalla completa en el celular: la lección pasa a modo inmersivo.
-    select('#lesson-player')?.classList.toggle('is-immersive', step?.type === 'video' && /video-stage is-vertical/.test(step.html));
+    select('#lesson-player')?.classList.toggle('is-immersive', Boolean(step && engine.immersive(step)));
     if (!step) return finishPlayer();
-    const labels = { exercise: 'Tu turno', idea: 'Idea clave', example: 'Ejemplo', note: 'Atención', video: 'Video', intro: 'Repaso' };
-    select('#player-stage').innerHTML = `<article class="player-card reader-body lesson-content step-${step.type}" id="player-card" tabindex="-1">${labels[step.type] && !(player.training && step.type === 'intro') ? `<p class="player-step-label">${labels[step.type]}</p>` : ''}${step.html}</article>`;
+    // El motor elige el componente según el tipo de bloque; el reproductor solo pone el marco.
+    const label = player.training && step.type === 'intro' ? '' : engine.label(step);
+    const variant = step.data?.variant ? ` is-${escape(step.data.variant)}` : '';
+    select('#player-stage').innerHTML = `<article class="player-card reader-body lesson-content step-${step.type}${variant}" id="player-card" tabindex="-1">${label ? `<p class="player-step-label">${label}</p>` : ''}${engine.render(step, { title: player.title })}</article>`;
+    engine.mount(step, select('#player-card'), { title: player.title });
     const form = document.querySelector('#player-stage .lesson-exercise');
     form?.addEventListener('submit', event => {
       event.preventDefault();
@@ -852,6 +886,7 @@
     } else {
       player.results[index] = 'retry';
     }
+    saveSession();
     renderPlayerBar();
   }
 
@@ -865,6 +900,7 @@
       else if (form.dataset.kind === 'choice') select('input[data-correct]', form)?.closest('label')?.classList.add('is-answer');
       else select('.answer-feedback', form).textContent = `La respuesta es ${form.dataset.answer}.`;
     }
+    saveSession();
     renderPlayerBar();
   }
 
@@ -874,7 +910,8 @@
     const step = player.steps[player.index];
     const result = player.results[player.index];
     const last = player.index === player.steps.length - 1;
-    const solution = step.type === 'exercise' && /lesson-solution/.test(step.html);
+    const graded = engine.graded(step);
+    const solution = graded && /lesson-solution/.test(step.html);
     const back = player.index > 0 ? `<button class="player-back" type="button" data-player-back="1" aria-label="Paso anterior">${icon('left')}</button>` : '';
     const next = `<button class="button button-primary player-continue" type="button" data-player-next="1">${last ? 'Terminar' : 'Continuar'}</button>`;
     const reveal = player.revealArmed
@@ -886,7 +923,7 @@
     let extra = '';
     let action = next;
     let mood = 'feliz';
-    if (step.type === 'exercise') {
+    if (graded) {
       if (result === 'correct') {
         state = 'is-correct'; mood = 'celebra';
         verdict = `<strong>¡Correcto!</strong><span class="player-gain">+${player.gains[player.index]} XP</span>`;
@@ -914,10 +951,11 @@
   function movePlayer(step) {
     if (!player) return;
     const current = player.steps[player.index];
-    if (step > 0 && current?.type === 'exercise' && !['correct', 'revealed'].includes(player.results[player.index])) return;
+    if (step > 0 && current && engine.graded(current) && !['correct', 'revealed'].includes(player.results[player.index])) return;
     player.retryReady = false;
     player.revealArmed = false;
     player.index = Math.max(0, Math.min(player.steps.length, player.index + step));
+    if (player.index < player.steps.length) saveSession();
     renderPlayerStep();
     window.scrollTo({ top: 0, behavior: 'instant' });
     (select('#player-card') || select('#detail-title'))?.focus({ preventScroll: true });
@@ -925,7 +963,7 @@
 
   // Pantalla final: sencilla. Qué se practicó, el avance del curso y un solo botón para seguir.
   function finishPlayer() {
-    const challenges = player.steps.filter(step => step.type === 'exercise').length;
+    const challenges = player.steps.filter(engine.graded).length;
     let title;
     let detail;
     let destination;
@@ -934,6 +972,7 @@
     if (player.kind === 'lesson') {
       const { resource, course } = player;
       const firstTime = !completed.has(resource.id);
+      clearSession(resource.id);
       setCompleted(resource.id, true, false);
       if (firstTime) { player.xp += 20; addXp(20); }
       recordStudyDay();
@@ -971,7 +1010,9 @@
 
   // Cuenta en Supabase: src/cloud.js. La exploración y el perfil local también funcionan sin ese módulo.
   const cloud = () => emailAccounts() ? window.ZUKA_CLOUD : null;
-  const cloudRecord = (kind, data) => { cloud()?.record(kind, data); };
+  // El progreso se sincroniza con cualquier sesión: la de correo o, sin cuentas de correo, la anónima.
+  const synced = () => window.ZUKA_CLOUD?.state.user ? window.ZUKA_CLOUD : null;
+  const cloudRecord = (kind, data) => { synced()?.record(kind, data); };
   let authMode = 'signup';
   let authNotice = '';
   let accountId = cloud()?.state.user?.id || null;
@@ -1110,7 +1151,7 @@
   }
 
   // Perfil del estudiante (#perfil). Todo se calcula con los datos guardados en este dispositivo (y unidos con la cuenta, si hay sesión).
-  const storageKeys = ['mathbrain-progress', 'mathbrain-stats', 'mathbrain-saved', 'mathbrain-recent', 'mathbrain-profile', 'mathbrain-theme'];
+  const storageKeys = ['mathbrain-progress', 'mathbrain-stats', 'mathbrain-saved', 'mathbrain-recent', 'mathbrain-profile', 'mathbrain-theme', 'zuka-lecciones-en-curso'];
 
   function loadProfile() {
     try {
@@ -1188,7 +1229,7 @@
       + `<section class="profile-card" aria-labelledby="profile-week-title"><div class="profile-card-heading"><h2 id="profile-week-title">Últimos 7 días</h2><p>${studiedWeek ? `Estudiaste ${plural(studiedWeek, 'día', 'días')}${profile.goal ? ` de tu meta de ${profile.goal}` : ' de 7'}.` : 'Completa una lección y aparecerá aquí.'}</p></div><ol class="profile-week">${week.map(day => `<li class="${day.done ? 'is-done' : ''}${day.today ? ' is-today' : ''}"><span aria-hidden="true">${day.done ? icon('check') : ''}</span><small aria-hidden="true">${escape(day.short)}</small><span class="sr-only">${escape(day.long)}: ${day.done ? 'estudiaste' : 'sin estudio'}</span></li>`).join('')}</ol></section>`
       + `<section class="profile-card" aria-labelledby="profile-courses-title"><div class="profile-card-heading"><h2 id="profile-courses-title">Tus cursos</h2><p>${progress.some(item => item.progress.done) ? 'Tu avance en cada ruta.' : 'Todavía no empiezas ningún curso. Elige uno y da el primer paso.'}</p></div><ul class="profile-courses">${progress.map(({ course, progress: courseState }) => `<li class="${course.color}"><span class="profile-course-symbol" aria-hidden="true">${courseSymbol(course)}</span><div><a href="#curso/${course.id}"><strong>${escape(course.title)}</strong></a>${progressBar(courseState)}</div><a class="text-button" href="#contenido/${courseState.next.id}">${courseState.done === courseState.total ? 'Repasar' : courseState.done ? 'Continuar' : 'Empezar'}${icon('right')}</a></li>`).join('')}</ul></section>`
       + `<section class="profile-card" aria-labelledby="profile-badges-title"><div class="profile-card-heading"><h2 id="profile-badges-title">Logros</h2><p>${achievements().filter(([, , earned]) => earned).length} de ${achievements().length} conseguidos.</p></div><ul class="profile-badges">${achievements().map(([name, description, earned]) => `<li class="${earned ? 'is-earned' : ''}"><span class="profile-badge-icon" aria-hidden="true">${icon(earned ? 'star' : 'lock')}</span><strong>${name}</strong><small>${description}</small><span class="sr-only">${earned ? 'Conseguido' : 'Pendiente'}</span></li>`).join('')}</ul></section>`
-      + `<section class="profile-card profile-data" aria-labelledby="profile-data-title"><div class="profile-card-heading"><h2 id="profile-data-title">Tus datos</h2><p>${cloud()?.state.user ? 'Tu progreso se guarda en este dispositivo y en tu cuenta. También puedes descargar una copia.' : 'Sin cuenta, tu progreso se guarda solo en este dispositivo. Descarga una copia para pasarla a otro celular o computador.'}</p></div><div class="profile-actions"><button type="button" class="button button-secondary" data-profile-export="1">${icon('download')}Descargar copia</button><label class="button button-secondary profile-import">${icon('book')}Restaurar copia<input class="sr-only" type="file" accept=".json,application/json" data-profile-import="1"></label><button type="button" class="text-button profile-reset" data-profile-reset="1">Borrar mi progreso</button></div></section>`
+      + `<section class="profile-card profile-data" aria-labelledby="profile-data-title"><div class="profile-card-heading"><h2 id="profile-data-title">Tus datos</h2><p>${cloud()?.state.user ? 'Tu progreso se guarda en este dispositivo y en tu cuenta. También puedes descargar una copia.' : synced() ? 'Tu progreso se guarda en este dispositivo y en Zuka, sin correo ni contraseña. También puedes descargar una copia.' : 'Sin cuenta, tu progreso se guarda solo en este dispositivo. Descarga una copia para pasarla a otro celular o computador.'}</p></div><div class="profile-actions"><button type="button" class="button button-secondary" data-profile-export="1">${icon('download')}Descargar copia</button><label class="button button-secondary profile-import">${icon('book')}Restaurar copia<input class="sr-only" type="file" accept=".json,application/json" data-profile-import="1"></label><button type="button" class="text-button profile-reset" data-profile-reset="1">Borrar mi progreso</button></div></section>`
       + `</section>`;
     document.title = 'Tu perfil | Zuka';
   }
@@ -1222,11 +1263,12 @@
   }
 
   async function resetProgress() {
-    const signedIn = Boolean(cloud()?.state.user);
-    if (!window.confirm(`Se borrarán tus lecciones completadas, tu racha, tus XP y tus guardados ${signedIn ? 'en este dispositivo y en tu cuenta' : 'en este dispositivo'}. ¿Continuar?`)) return;
+    const service = synced();
+    const signedIn = Boolean(service);
+    if (!window.confirm(`Se borrarán tus lecciones completadas, tu racha, tus XP y tus guardados ${signedIn ? (cloud() ? 'en este dispositivo y en tu cuenta' : 'en este dispositivo y en Zuka') : 'en este dispositivo'}. ¿Continuar?`)) return;
     if (signedIn) {
-      try { await cloud().resetProgress(); }
-      catch (error) { toast(cloud().describe(error)); return; }
+      try { await service.resetProgress(); }
+      catch (error) { toast(service.describe(error)); return; }
     }
     try { for (const key of storageKeys.filter(key => key !== 'mathbrain-theme')) localStorage.removeItem(key); } catch { /* Sin almacenamiento no hay nada que borrar. */ }
     location.reload();

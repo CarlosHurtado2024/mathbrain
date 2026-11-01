@@ -134,7 +134,7 @@ function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = regi
     setTimeout(callback) { timers.set(++timerId, callback); return timerId; },
     clearTimeout(id) { timers.delete(id); }
   });
-  for (const filename of ['courses.js', 'content.js', 'library.js', 'mascot.js', 'landing.js']) vm.runInContext(fs.readFileSync(path.join(directory, filename), 'utf8'), context);
+  for (const filename of ['courses.js', 'content.js', 'lesson-engine.js', 'content-source.js', 'library.js', 'mascot.js', 'landing.js']) vm.runInContext(fs.readFileSync(path.join(directory, filename), 'utf8'), context);
   prepareLibrary(window.MATHBRAIN_LIBRARY, window.MATHBRAIN_COURSES);
   vm.runInContext(source, context);
   return {
@@ -1086,4 +1086,87 @@ test('Tutorías permanece dentro de la app y ofrece el contacto acordado', () =>
   assert.match(html, /Te ayudamos con tus exámenes virtuales/);
   assert.match(html, /https:\/\/wa\.me\/573243546355\?text=/);
   assert.equal(app.node('[data-nav="tutorias"]').getAttribute('aria-current'), 'page');
+});
+
+// ── Motor de lecciones por bloques ─────────────────────────────────────────────────────────────
+const bundledLessons = (() => {
+  const context = vm.createContext({ window: {} });
+  vm.runInContext(fs.readFileSync(path.join(directory, 'content.js'), 'utf8'), context);
+  return context.window.MATHBRAIN_CONTENT;
+})();
+const recordingCloud = records => ({ ...registeredCloud(), record: async (kind, data) => { records.push([kind, JSON.parse(JSON.stringify(data))]); } });
+
+test('La lección se retoma en el bloque donde quedó y cada avance se guarda en el dispositivo y en la base de datos', () => {
+  const lesson = bundledLessons.find(entry => entry.id === 'fundamentos-matematicas-6');
+  const count = lesson.steps.length + (lesson.video ? 1 : 0);
+  const records = [];
+  const app = environment('#contenido/fundamentos-matematicas-6', () => {}, recordingCloud(records), { emailAccounts: true }, {
+    'zuka-lecciones-en-curso': JSON.stringify({ 'fundamentos-matematicas-6': { index: 2, count, results: {}, gains: {}, xp: 0, firstTry: 0, at: '2026-11-01T10:00:00.000Z' } })
+  });
+  const segments = [...app.node('#player-meter').innerHTML.matchAll(/<li class="([^"]*)"/g)].map(match => match[1]);
+  assert.match(segments[2], /is-current/);
+  assert.match(segments[1], /is-done/);
+  assert.equal(app.node('#toast').textContent, `Retomas donde quedaste: paso 3 de ${count}.`);
+  app.click(app.all('[data-player-next]').at(-1));
+  const saved = JSON.parse(app.stored.get('zuka-lecciones-en-curso'))['fundamentos-matematicas-6'];
+  assert.equal(saved.index, 3);
+  assert.equal(saved.count, count);
+  assert.equal(records.at(-1)[0], 'session');
+  assert.equal(records.at(-1)[1].index, 3);
+  // Al terminar, la lección deja de estar a medias en ambos lados.
+  for (let guard = 0; guard < 40 && !/¡Lección completada!/.test(app.node('#player-stage').innerHTML); guard += 1) {
+    if (app.all('[data-player-reveal]').length) { app.click(app.all('[data-player-reveal]').at(-1)); app.click(app.all('[data-player-reveal]').at(-1)); }
+    app.click(app.all('[data-player-next]').at(-1));
+  }
+  assert.match(app.node('#player-stage').innerHTML, /¡Lección completada!/);
+  assert.equal(JSON.parse(app.stored.get('zuka-lecciones-en-curso'))['fundamentos-matematicas-6'], undefined);
+  assert.deepEqual(records.find(([kind, data]) => kind === 'session' && data.clear), ['session', { id: 'fundamentos-matematicas-6', clear: true }]);
+});
+
+test('Una sesión de una versión anterior de la lección se retoma en el mismo punto sin respuestas viejas', () => {
+  const app = environment('#contenido/fundamentos-matematicas-6', () => {}, registeredCloud(), { emailAccounts: true }, {
+    'zuka-lecciones-en-curso': JSON.stringify({ 'fundamentos-matematicas-6': { index: 99, count: 120, results: { 1: 'correct' }, gains: { 1: 10 }, xp: 10, firstTry: 1, at: '2026-11-01T10:00:00.000Z' } })
+  });
+  const segments = [...app.node('#player-meter').innerHTML.matchAll(/<li class="([^"]*)"/g)].map(match => match[1]);
+  assert.match(segments.at(-1), /is-current/, 'El índice se limita al último bloque');
+  assert.equal(app.node('#player-xp').textContent, '');
+});
+
+test('Los bloques traídos de la base de datos se dibujan con el componente de su tipo', () => {
+  const app = environment('#contenido/fundamentos-matematicas-6', () => {}, registeredCloud(), { emailAccounts: true }, {
+    'zuka-contenido-bloques': JSON.stringify({ 'fundamentos-matematicas-6': [
+      { type: 'challenge', html: '<p>¿Cuánto vale 2 elevado a 10?</p>', data: {} },
+      { type: 'step_by_step', html: '', data: { title: 'Duplica diez veces', steps: [{ html: '<p>2, 4, 8, 16</p>' }, { html: '<p>512, 1024</p>' }] } },
+      { type: 'interactive_graph', html: '', data: {} },
+      { type: 'formula', html: '<p>a^m · a^n = a^(m+n)</p>', data: {} },
+      { type: 'concept', html: '<p>La base se multiplica por sí misma.</p>', data: { variant: 'key' } }
+    ] })
+  });
+  assert.equal((app.node('#player-meter').innerHTML.match(/<li /g) || []).length, 4, 'Un bloque sin componente ni contenido no se muestra');
+  assert.match(app.node('#player-stage').innerHTML, /<p class="player-step-label">Reto inicial<\/p><p>¿Cuánto vale 2 elevado a 10\?<\/p>/);
+  app.click(app.all('[data-player-next]').at(-1));
+  const steps = app.node('#player-stage').innerHTML;
+  assert.match(steps, /Paso a paso[\s\S]*<h2>Duplica diez veces<\/h2><ol class="block-steps" data-block-steps><li><p>2, 4, 8, 16<\/p><\/li><li hidden><p>512, 1024<\/p><\/li><\/ol>/);
+  assert.match(steps, /data-block-step-next/);
+  app.click(app.all('[data-player-next]').at(-1));
+  assert.match(app.node('#player-stage').innerHTML, /<p class="player-step-label">Fórmula<\/p>/);
+  app.click(app.all('[data-player-next]').at(-1));
+  assert.match(app.node('#player-stage').innerHTML, /step-concept is-key[\s\S]*<p class="player-step-label">Idea clave<\/p>/);
+});
+
+test('El índice de la base de datos cambia títulos, orden y añade lecciones sin crear páginas nuevas', () => {
+  const course = bundledLessons.filter(lesson => lesson.courseId === 'probabilidad');
+  const rows = course.map((lesson, position) => ({ id: lesson.id, course_id: 'probabilidad', position: position < 1 ? position : position + 1, title: position === 0 ? 'El azar, con números' : lesson.title, description: lesson.description, minutes: lesson.minutes, video: lesson.video, video_format: null, tags: lesson.tags, key_idea: lesson.key, units: { title: lesson.unit } }));
+  rows.push({ id: 'probabilidad-db-1', course_id: 'probabilidad', position: 1, title: 'Lección creada en la base de datos', description: 'Solo existe en Supabase.', minutes: 4, video: null, video_format: null, tags: '', key_idea: '', units: { title: course[0].unit } });
+  const storage = { 'zuka-contenido-indice': JSON.stringify(rows) };
+  const app = environment('#curso/probabilidad', () => {}, registeredCloud(), { emailAccounts: true }, storage);
+  const html = app.node('#detail-view').innerHTML;
+  assert.match(html, /El azar, con números/);
+  assert.ok(html.indexOf('#contenido/probabilidad-1"') < html.indexOf('#contenido/probabilidad-db-1"'));
+  assert.ok(html.indexOf('#contenido/probabilidad-db-1"') < html.indexOf('#contenido/probabilidad-2"'));
+  app.navigate('#contenido/probabilidad-db-1');
+  assert.match(app.node('#detail-view').innerHTML, /La primera vez necesita conexión/);
+  const cached = environment('#contenido/probabilidad-db-1', () => {}, registeredCloud(), { emailAccounts: true }, { ...storage, 'zuka-contenido-bloques': JSON.stringify({ 'probabilidad-db-1': [{ type: 'concept', html: '<p>Contenido escrito en Supabase.</p>', data: {} }, { type: 'summary', html: '<p>Resumen.</p>', data: {} }] }) });
+  assert.match(cached.node('#player-stage').innerHTML, /Contenido escrito en Supabase/);
+  assert.equal((cached.node('#player-meter').innerHTML.match(/<li /g) || []).length, 2);
 });
