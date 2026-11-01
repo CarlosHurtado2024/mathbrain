@@ -72,7 +72,9 @@
     return index;
   }
 
-  const same = (first, second) => JSON.stringify(first) === JSON.stringify(second);
+  // Postgres (jsonb) reordena las claves de los objetos: se comparan con las claves ordenadas.
+  const canonical = value => Array.isArray(value) ? `[${value.map(canonical).join(',')}]` : value && typeof value === 'object' ? `{${Object.keys(value).filter(key => value[key] !== undefined).sort().map(key => `${JSON.stringify(key)}:${canonical(value[key])}`).join(',')}}` : JSON.stringify(value);
+  const same = (first, second) => canonical(first) === canonical(second);
 
   function rememberBlocks(id, blocks) {
     const lesson = bundled.get(id);
@@ -99,8 +101,18 @@
     return engine.playable(fresh);
   }
 
+  // Limpieza: quita del dispositivo las copias idénticas al contenido compilado (por ejemplo, las que se
+  // guardaron cuando la comparación dependía del orden de las claves).
+  function pruneCache() {
+    const cache = readJson(BLOCKS_KEY);
+    if (!cache || typeof cache !== 'object') return;
+    const kept = Object.fromEntries(Object.entries(cache).filter(([id, stored]) => !bundled.has(id) || !same(stored, engine.fromLesson(bundled.get(id)))));
+    if (Object.keys(kept).length !== Object.keys(cache).length) writeJson(BLOCKS_KEY, kept);
+  }
+
+  pruneCache();
   applyIndex(readJson(INDEX_KEY));
-  window.ZUKA_CONTENT = { blocks, refreshLesson, refreshIndex: () => refreshIndex().catch(() => null), applyIndex };
+  window.ZUKA_CONTENT = { blocks, refreshLesson, refreshIndex: () => refreshIndex().catch(() => null), applyIndex, same };
   if (document.readyState === 'complete') refreshIndex().catch(() => null);
   else window.addEventListener('load', () => { refreshIndex().catch(() => null); }, { once: true });
 })();

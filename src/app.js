@@ -797,7 +797,7 @@
       if (!fresh?.length || location.hash.slice(1).split('?')[0] !== `contenido/${resource.id}`) return;
       if (!blocks.length) return renderPlayer(resource, course);
       const untouched = player?.resource === resource && player.index === 0 && !Object.keys(player.results).length && !player.finished;
-      if (untouched && JSON.stringify(fresh) !== JSON.stringify(player.steps)) { player.steps = fresh; renderPlayerStep(); }
+      if (untouched && !(contentSource.same || ((first, second) => JSON.stringify(first) === JSON.stringify(second)))(fresh, player.steps)) { player.steps = fresh; renderPlayerStep(); }
     }).catch(() => {});
   }
 

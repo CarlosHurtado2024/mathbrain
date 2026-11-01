@@ -1170,3 +1170,11 @@ test('El índice de la base de datos cambia títulos, orden y añade lecciones s
   assert.match(cached.node('#player-stage').innerHTML, /Contenido escrito en Supabase/);
   assert.equal((cached.node('#player-meter').innerHTML.match(/<li /g) || []).length, 2);
 });
+
+test('Las copias de Supabase idénticas al contenido compilado se descartan aunque cambie el orden de las claves', () => {
+  const lesson = bundledLessons.find(entry => entry.id === 'fundamentos-matematicas-6');
+  const reorder = value => Array.isArray(value) ? value.map(reorder) : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).reverse().map(([key, item]) => [key, reorder(item)])) : value;
+  const stored = reorder(lesson.steps.map(step => ({ type: step.type === 'idea' || step.type === 'note' ? 'concept' : step.type === 'example' ? 'worked_example' : step.type, html: step.html, data: { ...(step.data || {}), ...(step.type === 'idea' ? { variant: 'key' } : step.type === 'note' ? { variant: 'note' } : {}) } })));
+  const app = environment('#explorar', () => {}, registeredCloud(), { emailAccounts: true }, { 'zuka-contenido-bloques': JSON.stringify({ 'fundamentos-matematicas-6': stored, 'leccion-solo-en-supabase': [{ type: 'concept', html: '<p>x</p>', data: {} }] }) });
+  assert.deepEqual(Object.keys(JSON.parse(app.stored.get('zuka-contenido-bloques'))), ['leccion-solo-en-supabase']);
+});
