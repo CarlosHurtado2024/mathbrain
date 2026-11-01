@@ -74,12 +74,12 @@ Los controles se construyen con HTML nativo. Las acciones tienen estados de repo
 
 ## Mascota y logo
 
-Zuka es un destello de cuatro puntas suaves, ámbar, con expresión amable y una pequeña plataforma cobalto. Se dibuja en SVG en `src/mascot.js`; conserva `MATHBRAIN_MASCOT.svg(estado)` y `MATHBRAIN_MASCOT.say(estado, html)`. Los estados son `saluda`, `feliz`, `piensa`, `animo` y `celebra`. Cada SVG utiliza identificadores de gradiente independientes y escapa sus etiquetas accesibles.
+Zuka es un destello ámbar con la silueta del logo, dos trazos para los ojos y un detalle cobalto según el estado. La figura prescinde de boca, mejillas y pedestal. Se dibuja en SVG en `src/mascot.js`; conserva `MATHBRAIN_MASCOT.svg(estado)` y `MATHBRAIN_MASCOT.say(estado, html)`. Los estados son `saluda`, `feliz`, `piensa`, `animo` y `celebra`. Cada SVG utiliza identificadores de gradiente independientes y escapa sus etiquetas accesibles.
 
 El logo integra el destello ámbar y una Z azul marino sobre una base cobalto. `src/assets/mark.svg` sirve de logo y favicon. `src/assets/icons/app-icon.svg` genera los PNG de 192 y 512 px, el adaptable de Android y el de Apple mediante `node scripts/generate-icons.cjs`, con `sharp` disponible. Los PNG son opacos y el icono adaptable conserva su margen de seguridad.
 
 ## Comportamiento que debe conservarse
 
-La landing presenta programas, escuelas, visión y acompañamiento. Los visitantes pueden explorar y probar la primera lección de cada curso; una cuenta con correo y contraseña habilita todas las lecciones. El rediseño conserva rutas, contacto, progreso, claves `mathbrain-*`, sincronización e instalación PWA. No se añaden cifras, reseñas o resultados inventados.
+La landing presenta programas, escuelas, visión y acompañamiento. La bienvenida permite deslizar, tocar o usar el teclado para crear un perfil local y acceder a todas las lecciones. Antes de entrar se prueba la primera lección de cada curso; las cuentas de correo quedan disponibles mediante emailAccounts, en pausa por defecto. El rediseño conserva rutas, contacto, progreso, claves `mathbrain-*`, sincronización e instalación PWA. No se añaden cifras, reseñas o resultados inventados.
 
 La revisión visual debe cubrir 375 px, tableta y escritorio, ambos temas, formularios, filtros, estados de práctica y final de lección, sin desplazamiento horizontal. Los assets de identidad y la fuente deben estar en el shell del service worker.

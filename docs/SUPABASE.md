@@ -1,5 +1,9 @@
 # Configurar Supabase
 
+**Estado actual:** `emailAccounts: false` en `src/config.js` mantiene las cuentas en pausa. La persona entra mediante la bienvenida, recibe un perfil local editable y puede estudiar todo el contenido. El cliente de Supabase no se inicializa, no restaura sesiones ni sincroniza datos; se conservan el progreso y las sesiones guardadas para poder reactivar la función más adelante.
+
+Para volver a utilizar las cuentas, cambia a `emailAccounts: true` y recompila. La entrada local anterior no sustituye una sesión de correo. Los apartados siguientes describen ese modo de cuentas; esta pausa no cambia proveedores, tablas ni políticas de la base de datos.
+
 Zuka usa [Supabase](https://supabase.com) para las cuentas de los estudiantes y para guardar su progreso en la nube. El registro y el inicio de sesión se hacen únicamente con **correo electrónico y contraseña**. Sin cuenta se puede explorar el catálogo y probar la primera lección de cada curso; una sesión activa habilita todas las lecciones, repasos, simulaciones y ejercicios.
 
 Proyecto: `https://bzzzufyjhzjqawwrduom.supabase.co`

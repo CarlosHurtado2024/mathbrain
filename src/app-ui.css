@@ -123,3 +123,43 @@ html[data-theme] .profile-stats li:nth-child(4) .icon { color: var(--brand-prima
 /* La solución de la tarjeta espera al primer intento (o a que se pida verla): así no se salta el reto sin querer. */
 html[data-theme] .player-card .lesson-exercise:not([data-state="correct"]):not([data-state="incorrect"]):not([data-revealed]) .lesson-solution { display: none; }
 .player-link.is-armed { background: var(--brand-accent); color: var(--brand-on-accent); }
+
+/* ---------- Bienvenida: deslizar para empezar ---------- */
+.onboarding { position: relative; display: grid; grid-template-rows: minmax(250px, 1fr) auto; min-height: 100vh; min-height: 100dvh; background: var(--brand-primary-soft); }
+.onboarding-art { position: relative; display: grid; place-items: end center; overflow: hidden; padding-top: 24px; }
+.onboarding-arcs { position: absolute; left: 50%; bottom: -12px; width: min(640px, 158%); transform: translateX(-50%); }
+.onboarding-mascot { position: relative; width: min(230px, 60vw); margin-bottom: 30px; }
+.onboarding-mascot svg { display: block; width: 100%; height: auto; }
+.onboarding-sheet { position: relative; z-index: 1; display: grid; gap: 14px; justify-items: center; margin-top: -26px; padding: 32px 22px calc(26px + env(safe-area-inset-bottom)); border-radius: 30px 30px 0 0; background: var(--brand-surface); text-align: center; box-shadow: 0 -10px 30px -22px rgb(23 32 58 / .45); }
+.onboarding-sheet h1 { max-width: 13ch; color: var(--brand-ink); font-size: clamp(32px, 9vw, 46px); font-weight: 800; letter-spacing: -.035em; line-height: 1.08; text-wrap: balance; }
+.onboarding-sheet h1:focus { outline: none; }
+.onboarding-sheet p { max-width: 34ch; color: var(--brand-secondary); font-size: 15.5px; line-height: 1.55; }
+.onboarding-sheet p strong { color: var(--brand-ink); }
+.slide-start { --slide-progress: 0; position: relative; display: flex; align-items: center; width: min(100%, 360px); height: 68px; margin-top: 10px; padding: 6px; border-radius: 999px; background: var(--brand-inset); overflow: hidden; }
+.slide-start::before { content: ''; position: absolute; top: 6px; bottom: 6px; left: 6px; width: calc(56px + (100% - 68px) * var(--slide-progress)); border-radius: 999px; background: var(--brand-primary-soft); }
+.slide-thumb { position: relative; z-index: 2; display: grid; place-items: center; flex-shrink: 0; width: 56px; height: 56px; border-radius: 50%; background: var(--brand-primary); color: var(--brand-on-primary); box-shadow: 0 6px 14px -6px rgb(47 91 234 / .6); touch-action: none; cursor: grab; transition: transform .28s cubic-bezier(.23, 1, .32, 1); }
+.slide-start.is-dragging .slide-thumb { transition: none; cursor: grabbing; }
+.slide-thumb .icon { width: 24px; height: 24px; stroke-width: 2.2; }
+.slide-label { position: absolute; inset: 0; display: grid; place-items: center; padding-left: 44px; color: var(--brand-ink); font-size: 16px; font-weight: 700; opacity: calc(1 - var(--slide-progress) * 1.6); pointer-events: none; }
+.slide-chevrons { position: absolute; right: 20px; display: flex; color: var(--brand-secondary); pointer-events: none; }
+.slide-chevrons .icon { width: 16px; height: 16px; margin-left: -6px; stroke-width: 2.4; animation: slide-hint 1.6s ease-in-out infinite; }
+.slide-chevrons .icon:nth-child(2) { animation-delay: .18s; }
+.slide-chevrons .icon:nth-child(3) { animation-delay: .36s; }
+@keyframes slide-hint { 0%, 100% { opacity: .2; } 50% { opacity: .85; } }
+.onboarding-more { color: var(--brand-primary); font-size: 14px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+@media (min-width: 900px) {
+  .onboarding { grid-template-columns: 1.1fr 1fr; grid-template-rows: none; }
+  .onboarding-art { place-items: center; padding: 0; }
+  .onboarding-arcs { bottom: 18%; }
+  .onboarding-mascot { width: 220px; margin: 0 0 4%; }
+  .onboarding-sheet { align-content: center; justify-items: start; margin: 0; padding: 56px clamp(40px, 6vw, 88px); border-radius: 0; text-align: left; box-shadow: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slide-chevrons .icon { animation: none; opacity: .5; }
+  .slide-thumb { transition: none; }
+}
+
+.home-rename { margin-top: 2px !important; font-size: 14px !important; }
+.home-rename a { color: var(--brand-primary); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.onboarding-brand { position: absolute; z-index: 2; top: calc(20px + env(safe-area-inset-top)); left: 22px; display: flex; align-items: center; gap: 10px; margin: 0; color: var(--brand-ink); font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+.onboarding-brand img { border-radius: 10px; }

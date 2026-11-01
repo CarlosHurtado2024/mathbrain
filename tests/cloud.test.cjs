@@ -76,14 +76,15 @@ function fakeSupabase(initial = {}, { confirmEmail = true, initialSession = null
   return { db, calls, client, setOnline: value => { online = value; }, signIn: () => authListener('SIGNED_IN', { user: USER }), recoverPassword: () => authListener('PASSWORD_RECOVERY', { user: USER }) };
 }
 
-function environment({ supabase = fakeSupabase(), storage = {} } = {}) {
+function environment({ supabase = fakeSupabase(), storage = {}, emailAccounts = true } = {}) {
   const stored = new Map(Object.entries(storage).map(([key, value]) => [key, JSON.stringify(value)]));
   const events = [];
   const listeners = {};
   const navigator = { onLine: true };
+  let clientsCreated = 0;
   const window = {
-    ZUKA_CONFIG: { supabaseUrl: 'https://ejemplo.supabase.co', supabaseKey: 'sb_publishable_prueba' },
-    supabase: supabase && { createClient: () => supabase.client },
+    ZUKA_CONFIG: { supabaseUrl: 'https://ejemplo.supabase.co', supabaseKey: 'sb_publishable_prueba', emailAccounts },
+    supabase: supabase && { createClient: () => { clientsCreated++; return supabase.client; } },
     dispatchEvent: event => events.push(event.detail.reason),
     addEventListener: (name, callback) => { listeners[name] = callback; }
   };
@@ -96,7 +97,7 @@ function environment({ supabase = fakeSupabase(), storage = {} } = {}) {
   });
   vm.runInContext(source, context);
   const read = key => JSON.parse(stored.get(key) ?? 'null');
-  return { cloud: window.ZUKA_CLOUD, supabase, events, navigator, listeners, read };
+  return { cloud: window.ZUKA_CLOUD, supabase, events, navigator, listeners, read, get clientsCreated() { return clientsCreated; } };
 }
 
 const settle = () => new Promise(resolve => setTimeout(resolve, 5));
@@ -263,4 +264,24 @@ test('Sin Supabase la app sigue funcionando: la cuenta no está disponible y no 
   assert.equal(env.cloud.state.ready, true);
   await env.cloud.record('lesson', { id: 'probabilidad-1', done: true });
   assert.equal(env.read('zuka-sync-pending'), null);
+});
+
+test('Con cuentas en pausa no se crea el cliente ni se sincroniza una sesión anterior', async () => {
+  const supabase = fakeSupabase({}, { initialSession: { user: USER } });
+  const env = environment({ emailAccounts: false, supabase, storage: {
+    'mathbrain-profile': { name: 'Ana', goal: 3 },
+    'mathbrain-progress': ['probabilidad-1'],
+    'zuka-sync-pending': { xp: 10, full: true }
+  } });
+  await settle();
+  await env.cloud.record('lesson', { id: 'probabilidad-2', done: true });
+  await env.cloud.syncNow();
+  assert.equal(env.clientsCreated, 0);
+  assert.equal(env.cloud.state.ready, true);
+  assert.equal(env.cloud.state.available, false);
+  assert.equal(env.cloud.state.user, null);
+  assert.equal(supabase.calls.length, 0);
+  assert.equal(env.read('mathbrain-profile').name, 'Ana');
+  assert.deepEqual(env.read('mathbrain-progress'), ['probabilidad-1']);
+  assert.deepEqual(env.read('zuka-sync-pending'), { xp: 10, full: true });
 });

@@ -1,41 +1,38 @@
-// Zuka es un destello ámbar: el pequeño impulso que acompaña cada paso del aprendizaje.
-// Conserva los cinco estados y la API de la mascota para lecciones, perfil y mensajes.
+// Zuka es un destello ámbar con la silueta del logo: una figura sobria, sin boca, mejillas ni pedestal.
+// Su ánimo se lee en los ojos (dos trazos) y en un único detalle en cobalto. Conserva la API de la mascota.
 (() => {
   'use strict';
 
   const moods = ['saluda', 'feliz', 'piensa', 'animo', 'celebra'];
   let drawing = 0;
   const escapeAttribute = value => String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
-  const spark = (x, y, size) => `<path transform="translate(${x} ${y}) scale(${size})" d="M0-6Q1-1 6 0 1 1 0 6-1 1-6 0-1-1 0-6Z"/>`;
+  const ink = '#2b1a00';
+  const accent = '#2f5bea';
 
   function svg(mood = 'feliz', { label = 'Zuka, tu impulso para aprender' } = {}) {
     const state = moods.includes(mood) ? mood : 'feliz';
     const id = `zuka-spark-${++drawing}`;
-    const ink = '#3a2400';
+    const open = (x, y) => `<rect x="${x - 2.75}" y="${y - 6}" width="5.5" height="12" rx="2.75" fill="${ink}"/>`;
+    const smile = (x, y) => `<path d="M${x - 5} ${y + 1.5}q5-6 10 0" stroke="${ink}" stroke-width="4" stroke-linecap="round"/>`;
     const eyes = {
-      saluda: '<ellipse cx="62" cy="69" rx="3.5" ry="4.5"/><ellipse cx="94" cy="69" rx="3.5" ry="4.5"/>',
-      feliz: '<path d="M57 70q5-7 10 0m22 0q5-7 10 0"/>',
-      piensa: '<ellipse cx="64" cy="69" rx="3.5" ry="4.5"/><ellipse cx="96" cy="69" rx="3.5" ry="4.5"/><path d="m88 58 12-3"/>',
-      animo: '<ellipse cx="62" cy="69" rx="3.5" ry="4.5"/><path d="M89 70q5-7 10 0"/>',
-      celebra: '<path d="m56 69 6-5 6 5m20 0 6-5 6 5"/>'
+      saluda: open(49, 58) + open(71, 58),
+      feliz: smile(49, 57) + smile(71, 57),
+      piensa: open(52, 55) + open(74, 55),
+      animo: open(49, 58) + smile(71, 57),
+      celebra: smile(49, 57) + smile(71, 57)
     }[state];
-    const mouth = state === 'piensa'
-      ? '<path d="M73 87q6-3 12 0"/>'
-      : state === 'celebra'
-        ? `<path d="M66 84q12 20 24 0Z" fill="${ink}" stroke="none"/><path d="M73 93q5-4 10 0" stroke="#f2cb8d"/>`
-        : '<path d="M65 83q13 13 26 0"/>';
-    const extras = state === 'celebra'
-      ? `<g fill="#f59e0b">${spark(23, 35, 1)}${spark(137, 22, .8)}${spark(134, 101, .65)}${spark(28, 110, .65)}</g>`
-      : state === 'piensa'
-        ? '<path d="M124 33c0-8 12-9 12-1 0 5-6 5-6 10m0 7v1" fill="none" stroke="#2f5bea" stroke-width="3" stroke-linecap="round"/>'
-        : `<g fill="#2f5bea">${spark(132, 36, .7)}</g>`;
-    return `<svg xmlns="http://www.w3.org/2000/svg" class="zuka-spark" data-mood="${state}" viewBox="0 0 160 168" fill="none" role="img" aria-label="${escapeAttribute(label)}">`
-      + `<defs><linearGradient id="${id}" x1="69" y1="26" x2="93" y2="124" gradientUnits="userSpaceOnUse"><stop stop-color="#ffb21e"/><stop offset="1" stop-color="#ffd25c"/></linearGradient></defs>`
-      + `<ellipse cx="80" cy="151" rx="52" ry="11" fill="#2f5bea" opacity=".09"/><ellipse cx="80" cy="147" rx="37" ry="10" fill="#2f5bea"/><ellipse cx="80" cy="144" rx="30" ry="7" fill="#c7d5ff"/><ellipse cx="80" cy="143" rx="22" ry="4" stroke="#ebf0ff" stroke-width="2"/>${extras}`
-      + `<g class="zuka-spark-body"><path d="M78 22c14 0 18 16 27 24s27 13 27 28-17 20-26 29-13 26-28 26-19-17-28-26-26-14-26-29 18-20 27-28 13-24 27-24Z" fill="url(#${id})"/>`
-      + `<path d="M48 55c9-8 14-23 27-26" stroke="#ffe8c4" stroke-width="4" stroke-linecap="round" opacity=".6"/>`
-      + `<g stroke="${ink}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">${eyes}${mouth}</g>`
-      + '<ellipse cx="52" cy="82" rx="6" ry="3" fill="#aa7115" opacity=".18"/><ellipse cx="105" cy="82" rx="6" ry="3" fill="#aa7115" opacity=".18"/></g></svg>';
+    const detail = {
+      saluda: `<path d="M96 30q5 3 6 9" stroke="${accent}" stroke-width="3.5" stroke-linecap="round"/>`,
+      feliz: '',
+      piensa: `<circle cx="96" cy="31" r="2.6" fill="${accent}"/><circle cx="103" cy="24" r="2.1" fill="${accent}"/><circle cx="108.5" cy="17.5" r="1.6" fill="${accent}"/>`,
+      animo: `<path d="m95 34 6-6 6 6" stroke="${accent}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>`,
+      celebra: `<g stroke="${accent}" stroke-width="3.5" stroke-linecap="round"><path d="M60 3v6"/><path d="m34 11 4 4.5"/><path d="m86 11-4 4.5"/></g>`
+    }[state];
+    return `<svg xmlns="http://www.w3.org/2000/svg" class="zuka-spark" data-mood="${state}" viewBox="0 0 120 120" fill="none" role="img" aria-label="${escapeAttribute(label)}">`
+      + `<defs><linearGradient id="${id}" x1="30" y1="14" x2="92" y2="104" gradientUnits="userSpaceOnUse"><stop stop-color="#ffc83d"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs>`
+      + `<ellipse cx="60" cy="112" rx="28" ry="3.5" fill="#17203a" opacity=".1"/>${detail}`
+      + `<g class="zuka-spark-body"><path transform="translate(-2.5 -6.5) scale(1.25)" d="M50 14c10 0 12 11 18 17s18 9 18 19-12 12-18 18-8 18-18 18-12-12-18-18-18-8-18-18 12-13 18-19 8-17 18-17Z" fill="url(#${id})"/>`
+      + `<path d="M44 26c-4 5-9 9-15 13" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".45"/>${eyes}</g></svg>`;
   }
 
   function say(mood, html, className = '') {

@@ -8,7 +8,7 @@ Estado: ✅ hecho · 🔜 planificado (ver `ROADMAP.md`).
 
 | Id | Requisito | Estado |
 | --- | --- | --- |
-| RF-00 | Landing con propósito, programas y opciones de explorar, registrarse con correo y contraseña o iniciar sesión; sin cuenta solo se accede a la primera lección de cada curso | ✅ |
+| RF-00 | Bienvenida con deslizamiento, toque o teclado; crea un perfil local y permite acceder a todo. Antes de entrar se explora la primera lección de cada curso; los programas están en #conoce | ✅ |
 | RF-01 | Catálogo de ingeniería agrupado por escuelas de Matemáticas, Física, Estadística y Programación, con filtros y datos reales de los cursos en plataforma | ✅ |
 | RF-02 | Página de curso con camino de niveles: lecciones completadas, actual y siguientes | ✅ |
 | RF-03 | Programa del curso: objetivos, habilidades, requisitos y módulos; descargable en texto | ✅ |
@@ -49,8 +49,8 @@ Estado: ✅ hecho · 🔜 planificado (ver `ROADMAP.md`).
 | RF-23 | Copia de seguridad del progreso (descargar y restaurar) y borrado | ✅ |
 | RF-24 | Guardados («Mi biblioteca») y contenidos recientes | ✅ |
 | RF-25 | Meta semanal opcional y logros | ✅ |
-| RF-26 | Cuenta con correo electrónico y contraseña para acceder a todo el contenido, y sincronización entre dispositivos con Supabase; el acceso completo requiere sesión activa | ✅ |
-| RF-27 | Recuperar contraseña, cerrar sesión y eliminar la cuenta con todos sus datos | ✅ |
+| RF-26 | Cuentas de correo y sincronización disponibles al activar emailAccounts; en pausa por defecto, con acceso completo mediante perfil local | ✅ |
+| RF-27 | Con cuentas activadas: recuperar contraseña, cerrar sesión y eliminar la cuenta con todos sus datos | ✅ |
 
 ### App instalable
 
@@ -69,7 +69,7 @@ Estado: ✅ hecho · 🔜 planificado (ver `ROADMAP.md`).
 | RNF-01 | **Mobile first:** usable desde 320 px de ancho sin desplazamiento horizontal; barra de navegación inferior en el celular. |
 | RNF-02 | **Rendimiento:** la primera carga en 4G debe mostrar el inicio en menos de 3 s; las visitas siguientes cargan desde la caché. |
 | RNF-03 | **Accesibilidad:** WCAG 2.1 AA: contraste, foco visible, etiquetas, MathML para lectores de pantalla, `prefers-reduced-motion`. |
-| RNF-04 | **Privacidad:** la cuenta es opcional; sin ella nada sale del dispositivo. Con cuenta solo se guardan el correo, el nombre visible y el progreso, protegidos por Row Level Security. Sin rastreadores. |
+| RNF-04 | **Privacidad:** en modo local no se crea el cliente de Supabase ni se envía el progreso. Al activar las cuentas solo se guardan el correo, el nombre visible y el progreso, protegidos por Row Level Security. Sin rastreadores. |
 | RNF-05 | **Sin frameworks:** HTML, CSS y JavaScript; las librerías del navegador (supabase-js) van copiadas en `src/vendor/`. Node.js solo para compilar y probar. |
 | RNF-06 | **Idioma:** toda la interfaz y el contenido en español. |
 | RNF-07 | **Calidad:** `npm test` en verde antes de cada commit; el contenido no compila si una fórmula o un ejercicio tiene errores. |

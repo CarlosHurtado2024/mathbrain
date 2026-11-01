@@ -34,9 +34,17 @@
   let artworkSequence = 0;
   let lastRoutedHash = null;
 
-  // La sesión de Supabase habilita todo el contenido. El visitante puede probar la primera lección de cada curso.
-  const hasAccount = () => Boolean(window.ZUKA_CLOUD?.state.user);
-  const accountPending = () => Boolean(window.ZUKA_CLOUD?.state.available && !window.ZUKA_CLOUD.state.ready);
+  // Entrar es deslizar en la bienvenida: la persona recibe un perfil local y accede a todo el contenido.
+  // Antes de entrar se puede explorar y probar la primera lección de cada curso.
+  // El registro con correo (Supabase) queda en pausa; se reactiva con emailAccounts: true en config.js.
+  const emailAccounts = () => window.ZUKA_CONFIG?.emailAccounts === true;
+  let enteredThisVisit = false;
+  let onboardingDestination = '';
+  let onboardingShown = false;
+  let onboardingTimer = null;
+  const hasEntered = () => { if (enteredThisVisit) return true; try { return Boolean(localStorage.getItem('zuka-ingreso')); } catch { return false; } };
+  const hasAccount = () => emailAccounts() ? Boolean(window.ZUKA_CLOUD?.state.user) : hasEntered();
+  const accountPending = () => emailAccounts() && Boolean(window.ZUKA_CLOUD?.state.available && !window.ZUKA_CLOUD.state.ready);
   const canStudy = resource => hasAccount() || Boolean(resource?.type === 'explanation' && courses.some(course => courseLessons(course)[0]?.id === resource.id));
   const contentDestination = resource => `contenido/${resource.id}`;
 
@@ -44,21 +52,113 @@
     const parameters = new URLSearchParams();
     if (mode === 'reset') parameters.set('modo', 'reset');
     if (destination) parameters.set('continuar', destination);
-    return `#${mode === 'signup' ? 'registro' : 'ingresar'}${parameters.size ? `?${parameters}` : ''}`;
+    const base = !emailAccounts() ? 'ingreso' : mode === 'signup' ? 'registro' : 'ingresar';
+    return `#${base}${parameters.size ? `?${parameters}` : ''}`;
   }
 
   const studyHref = resource => canStudy(resource) ? `#${contentDestination(resource)}` : authHref('signup', contentDestination(resource));
 
+  // Bienvenida sin registro: la mascota, una frase y «Desliza para empezar». El botón también responde a un toque,
+  // Enter o Espacio, así el gesto nunca es la única forma de entrar.
+  function onboardingHtml(headingId, context = '') {
+    const arc = (radius, segments) => segments.map(([start, length, color]) => `<path d="M${160 - radius} 230a${radius} ${radius} 0 0 1 ${radius * 2} 0" pathLength="100" stroke="${color}" stroke-width="22" stroke-linecap="round" stroke-dasharray="${length} 200" stroke-dashoffset="${-start}"/>`).join('');
+    return `<section class="onboarding" aria-labelledby="${headingId}">`
+      + `<p class="onboarding-brand"><img src="assets/mark.svg" alt="" width="36" height="36"><span>Zuka</span></p><div class="onboarding-art" aria-hidden="true"><svg class="onboarding-arcs" viewBox="0 0 320 240" fill="none">${arc(146, [[0, 30, '#bfe3f5'], [36, 28, '#fbd58a'], [70, 30, '#c7d5ff']])}${arc(110, [[0, 44, '#fbc8b0'], [52, 48, '#2f5bea']])}${arc(74, [[0, 58, '#f59e0b'], [66, 34, '#0284c7']])}</svg><span class="onboarding-mascot">${mascot.svg('saluda')}</span></div>`
+      + `<div class="onboarding-sheet"><h1 id="${headingId}" tabindex="-1">Aprende matemáticas a tu ritmo</h1>`
+      + `<p>${context ? `<strong>${escape(context)}</strong> te espera. ` : ''}Lecciones cortas, retos con respuesta inmediata y un camino claro. Sin registro: desliza y empieza.</p>`
+      + `<div class="slide-start" data-slide-start="1"><button type="button" class="slide-thumb" data-slide-thumb="1" aria-label="Desliza para empezar">${icon('right')}</button><span class="slide-label" aria-hidden="true">Desliza para empezar</span><span class="slide-chevrons" aria-hidden="true">${icon('right')}${icon('right')}${icon('right')}</span></div>`
+      + `<a class="onboarding-more" href="#conoce">Conoce los programas de Zuka</a></div></section>`;
+  }
+
+  // El pulgar sigue al dedo; al soltarlo pasado el 80 % del recorrido, entra. Si no, vuelve a su sitio.
+  function bindSlideStart(destination) {
+    const track = select('[data-slide-start]');
+    const thumb = select('[data-slide-thumb]');
+    onboardingDestination = destination;
+    if (!track || !thumb || typeof thumb.setPointerCapture !== 'function') return;
+    let startX = 0;
+    let offset = 0;
+    let dragging = false;
+    let pointerId = null;
+    const max = () => Math.max(1, track.clientWidth - thumb.offsetWidth - 12);
+    const place = x => {
+      offset = Math.max(0, Math.min(max(), x));
+      thumb.style.transform = `translateX(${offset}px)`;
+      track.style.setProperty('--slide-progress', String(offset / max()));
+    };
+    thumb.addEventListener('pointerdown', event => {
+      if (dragging || track.dataset.done || event.isPrimary === false || event.button !== 0) return;
+      delete track.dataset.dragged;
+      dragging = true;
+      pointerId = event.pointerId;
+      startX = event.clientX - offset;
+      thumb.setPointerCapture(event.pointerId);
+      track.classList.add('is-dragging');
+    });
+    thumb.addEventListener('pointermove', event => {
+      if (!dragging || event.pointerId !== pointerId) return;
+      if (Math.abs(event.clientX - startX) > 6) track.dataset.dragged = '1';
+      place(event.clientX - startX);
+    });
+    const release = event => {
+      if (!dragging || event.pointerId !== pointerId) return;
+      dragging = false;
+      pointerId = null;
+      track.classList.remove('is-dragging');
+      if (offset >= max() * .8) {
+        track.dataset.done = '1';
+        place(max());
+        onboardingTimer = setTimeout(() => {
+          onboardingTimer = null;
+          enterZuka(destination);
+        }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 240);
+      } else place(0);
+    };
+    thumb.addEventListener('pointerup', release);
+    const cancel = event => {
+      if (!dragging || event.pointerId !== pointerId) return;
+      dragging = false;
+      pointerId = null;
+      track.classList.remove('is-dragging');
+      delete track.dataset.dragged;
+      place(0);
+    };
+    thumb.addEventListener('pointercancel', cancel);
+    thumb.addEventListener('lostpointercapture', cancel);
+  }
+
+  // Entrar: perfil local por defecto («Estudiante», editable en Perfil) y vuelta a donde iba la persona.
+  function enterZuka(destination = '') {
+    enteredThisVisit = true;
+    try { localStorage.setItem('zuka-ingreso', new Date().toISOString()); } catch { /* Se recuerda durante esta visita. */ }
+    const profile = loadProfile();
+    if (!profile.name) storeList('mathbrain-profile', { name: 'Estudiante', goal: profile.goal });
+    rememberAuthDestination('');
+    const target = safeAuthDestination(destination);
+    history.replaceState(null, '', `#${target}`);
+    lastRoutedHash = null;
+    route();
+  }
+
   function renderWelcome() {
-    select('#today-panel').innerHTML = marketing.home(false);
-    document.body?.classList.toggle('marketing-mode', true);
-    document.title = 'Zuka — Tus sueños merecen un camino';
+    if (emailAccounts()) {
+      select('#today-panel').innerHTML = marketing.home(false);
+      document.title = 'Zuka — Tus sueños merecen un camino';
+      return;
+    }
+    select('#today-panel').innerHTML = onboardingHtml('home-title');
+    bindSlideStart('');
+    onboardingShown = true;
+    document.title = 'Bienvenida | Zuka';
   }
 
   function renderMarketingPage(destination) {
     const program = marketing.programs.find(item => destination === `programa/${item.id}`);
     const school = marketing.schools.find(item => destination === `escuela/${item.id}`);
-    if (program) {
+    if (destination === 'conoce') {
+      select('#detail-view').innerHTML = marketing.home(hasAccount());
+      document.title = 'Zuka — Tus sueños merecen un camino';
+    } else if (program) {
       select('#detail-view').innerHTML = marketing.programPage(program, hasAccount());
       document.title = `${program.title} | Zuka`;
     } else if (school) {
@@ -72,6 +172,13 @@
 
   function renderAccessGate(title, destination) {
     currentLessonId = null;
+    if (!accountPending() && !emailAccounts()) {
+      select('#detail-view').innerHTML = onboardingHtml('detail-title', title);
+      bindSlideStart(destination);
+      onboardingShown = true;
+      document.title = 'Desliza para empezar | Zuka';
+      return;
+    }
     if (accountPending()) {
       select('#detail-view').innerHTML = '<section class="access-gate" aria-labelledby="detail-title"><p class="eyebrow">TU CUENTA</p><h1 id="detail-title" tabindex="-1">Comprobando tu sesión…</h1><p role="status">Enseguida podrás continuar.</p></section>';
       return;
@@ -229,7 +336,7 @@
   function card(resource) {
     const format = library.formats[resource.type];
     const locked = !canStudy(resource);
-    return `<article class="content-card ${resource.color}${locked ? ' requires-account' : ''}"><a href="${studyHref(resource)}" class="card-art" tabindex="-1" aria-hidden="true">${artwork(resource)}<span class="art-label">ZUKA / EXPLORA LAS IDEAS</span><span class="art-type">${icon(format.icon)}${format.title}</span><span class="card-open">${locked ? icon('lock') : '↗'}</span></a>${saveButton(resource)}<div class="card-copy"><p class="card-topic">${topicName(resource.topic)}</p><h3><a href="${studyHref(resource)}">${escape(resource.title)}</a></h3><p>${escape(resource.description)}</p>${!hasAccount() ? `<p class="content-access">${icon(locked ? 'lock' : 'play')}${locked ? 'Disponible al crear tu cuenta' : 'Primera lección · acceso libre'}</p>` : ''}<div class="card-meta"><span class="level-indicator ${resource.level === 'Inicial' ? 'initial' : ''}" aria-hidden="true"><i></i><i></i><i></i></span>${resource.level}<span>${resource.type === 'exercise' ? `${resource.steps.length} pasos` : resource.type === 'simulation' ? 'Interactiva' : resource.practice ? 'Lectura y práctica' : 'Lectura'}</span></div></div></article>`;
+    return `<article class="content-card ${resource.color}${locked ? ' requires-account' : ''}"><a href="${studyHref(resource)}" class="card-art" tabindex="-1" aria-hidden="true">${artwork(resource)}<span class="art-label">ZUKA / EXPLORA LAS IDEAS</span><span class="art-type">${icon(format.icon)}${format.title}</span><span class="card-open">${locked ? icon('lock') : '↗'}</span></a>${saveButton(resource)}<div class="card-copy"><p class="card-topic">${topicName(resource.topic)}</p><h3><a href="${studyHref(resource)}">${escape(resource.title)}</a></h3><p>${escape(resource.description)}</p>${!hasAccount() ? `<p class="content-access">${icon(locked ? 'lock' : 'play')}${locked ? (emailAccounts() ? 'Disponible al crear tu cuenta' : 'Se abre al empezar, sin registro') : 'Primera lección · acceso libre'}</p>` : ''}<div class="card-meta"><span class="level-indicator ${resource.level === 'Inicial' ? 'initial' : ''}" aria-hidden="true"><i></i><i></i><i></i></span>${resource.level}<span>${resource.type === 'exercise' ? `${resource.steps.length} pasos` : resource.type === 'simulation' ? 'Interactiva' : resource.practice ? 'Lectura y práctica' : 'Lectura'}</span></div></div></article>`;
   }
 
   function courseSymbol(course) {
@@ -302,7 +409,7 @@
     const goal = weeklyGoal();
     const title = completed.size ? `${greeting()}${name ? `, ${escape(name)}` : ''}` : `¡Hola${name ? `, ${escape(name)}` : ''}!`;
     select('#today-panel').innerHTML = `<div class="home-dash home-spotlight">`
-      + `<header class="home-top"><h1 id="home-title" tabindex="-1">${title}</h1><p>${completed.size ? 'Elige un curso y sigue donde lo dejaste.' : 'Elige un curso para empezar. Cada lección toma unos minutos.'}</p>${goal.target ? `<p class="home-goal">${icon('check')}Meta semanal: ${goal.done} de ${goal.target} días${goal.done >= goal.target ? ' · ¡cumplida!' : ''}</p>` : ''}</header>`
+      + `<header class="home-top"><h1 id="home-title" tabindex="-1">${title}</h1><p>${completed.size ? 'Elige un curso y sigue donde lo dejaste.' : 'Elige un curso para empezar. Cada lección toma unos minutos.'}</p>${name === 'Estudiante' ? '<p class="home-rename"><a href="#perfil">Cambia tu nombre o apodo</a></p>' : ''}${goal.target ? `<p class="home-goal">${icon('check')}Meta semanal: ${goal.done} de ${goal.target} días${goal.done >= goal.target ? ' · ¡cumplida!' : ''}</p>` : ''}</header>`
       + `<section class="spotlight" aria-roledescription="carrusel" aria-label="Tus cursos"><div class="spotlight-track" id="spotlight-track">${ordered.map((course, index) => homeSlide(course, index === 0)).join('')}</div>`
       + `<div class="spotlight-dots" role="group" aria-label="Elegir curso">${ordered.map((course, index) => `<button type="button" class="spotlight-dot${index ? '' : ' is-active'}" data-spotlight="${index}" aria-label="Ver ${escape(course.title)}"${index ? '' : ' aria-current="true"'}></button>`).join('')}</div></section>`
       + `<p class="home-explore">¿Buscas otro tema? <a href="#explorar">Explora todos los cursos</a></p></div>`;
@@ -318,7 +425,7 @@
     const unit = courseModules(course).find(module => module.lessons.some(({ lesson }) => lesson.id === next.id));
     const finished = progress.done === progress.total;
     const status = finished ? 'COMPLETADO' : progress.done ? 'EN CURSO' : current ? 'RECOMENDADO' : '';
-    const pedestal = '<svg viewBox="0 0 80 40" aria-hidden="true"><ellipse cx="40" cy="26" rx="34" ry="11" fill="currentColor" opacity=".18"/><ellipse cx="40" cy="22" rx="27" ry="8" fill="currentColor" opacity=".3"/></svg>';
+    const pedestal = '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="17" fill="none" stroke="currentColor" stroke-width="3" opacity=".35"/></svg>';
     return `<article class="spotlight-slide ${course.color}" aria-roledescription="diapositiva" aria-labelledby="slide-${course.id}">`
       + `<h2 id="slide-${course.id}">${escape(course.title)}</h2><p class="spotlight-level">${escape((unit?.kicker || course.label).toUpperCase())}${status ? ` · ${status}` : ''}</p>`
       + `<div class="spotlight-art" aria-hidden="true">${artwork(course, true)}<span class="spotlight-symbol">${courseSymbol(course)}</span></div>`
@@ -543,7 +650,7 @@
     const total = module.lessons.length;
     const node = (status, href, disc, label, title, extra = '') => {
       const inner = `<span class="znode-disc" aria-hidden="true">${disc}</span><span class="znode-text"><small>${label}</small><strong>${title}</strong></span>`;
-      const statusText = { done: 'Completada', locked: 'Crea tu cuenta para acceder', current: 'Lección actual' }[status];
+      const statusText = { done: 'Completada', locked: emailAccounts() ? 'Crea tu cuenta para acceder' : 'Desliza para empezar y acceder', current: 'Lección actual' }[status];
       const body = `<a class="znode-link" href="${href}">${inner}${statusText ? `<span class="sr-only">${statusText}</span>` : ''}</a>`;
       return `<li class="znode is-${status}">${body}${extra}</li>`;
     };
@@ -571,7 +678,7 @@
     const finished = progress.done === progress.total;
     const unitWord = /^Unidad/.test(course.modules?.[0]?.title || '') ? ['unidad', 'unidades'] : ['módulo', 'módulos'];
     select('#detail-view').innerHTML = `<nav class="breadcrumbs" aria-label="Ruta de navegación"><a href="#">Inicio</a><span aria-hidden="true">/</span><a href="#explorar">Explorar</a><span aria-hidden="true">/</span><span>Curso</span></nav>`
-      + `<div class="zcourse ${course.color}"><header class="zcourse-head"><span class="zcourse-icon" aria-hidden="true">${courseSymbol(course)}</span><div class="zcourse-copy"><p class="eyebrow">${escape(course.label)} · NIVEL ${course.level.toUpperCase()}</p><h1 id="detail-title" tabindex="-1">${escape(course.title)}</h1><p class="zcourse-description">${escape(course.description)}</p><p class="zcourse-meta"><span>${plural(modules.length, ...unitWord)}</span><span>${plural(progress.total, 'lección', 'lecciones')}</span><span>${plural(exercises, 'reto', 'retos')}</span><span>≈ ${studyHours(course)} h</span></p>${started ? progressBar(progress) : ''}</div><a class="button button-primary zcourse-start" href="${studyHref(progress.next)}">${icon(canStudy(progress.next) ? 'play' : 'lock')}${!canStudy(progress.next) ? 'Crear cuenta para continuar' : started ? (finished ? 'Repasar el curso' : 'Continuar el curso') : 'Empezar el curso'}</a></header>`
+      + `<div class="zcourse ${course.color}"><header class="zcourse-head"><span class="zcourse-icon" aria-hidden="true">${courseSymbol(course)}</span><div class="zcourse-copy"><p class="eyebrow">${escape(course.label)} · NIVEL ${course.level.toUpperCase()}</p><h1 id="detail-title" tabindex="-1">${escape(course.title)}</h1><p class="zcourse-description">${escape(course.description)}</p><p class="zcourse-meta"><span>${plural(modules.length, ...unitWord)}</span><span>${plural(progress.total, 'lección', 'lecciones')}</span><span>${plural(exercises, 'reto', 'retos')}</span><span>≈ ${studyHours(course)} h</span></p>${started ? progressBar(progress) : ''}</div><a class="button button-primary zcourse-start" href="${studyHref(progress.next)}">${icon(canStudy(progress.next) ? 'play' : 'lock')}${!canStudy(progress.next) ? (emailAccounts() ? 'Crear cuenta para continuar' : 'Empezar gratis para continuar') : started ? (finished ? 'Repasar el curso' : 'Continuar el curso') : 'Empezar el curso'}</a></header>`
       + `<div class="zcourse-path"><h2 class="sr-only">Hay ${plural(modules.length, 'módulo', 'módulos')} en este curso</h2>${modules.map(module => pathUnit(course, module, state)).join('')}</div>`
       + `<section class="course-about" aria-labelledby="about-course-title"><h2 id="about-course-title">Sobre este curso</h2><p>${escape(course.intro)}</p>${course.outcomes?.length ? `<h3>Lo que aprenderás</h3><ul class="course-outcomes">${course.outcomes.map(outcome => `<li>${icon('check')}<span>${escape(outcome)}</span></li>`).join('')}</ul>` : ''}${course.skills?.length ? `<h3>Habilidades que desarrollarás</h3><ul class="course-skills">${course.skills.map(skill => `<li>${escape(skill)}</li>`).join('')}</ul>` : ''}<p class="prerequisite"><strong>Antes de empezar</strong>${escape(course.prerequisite)}</p><div class="course-about-foot"><div class="course-instructor"><img src="${instructor.photo}" alt="" width="40" height="40" loading="lazy" decoding="async"><span><small>Impartido por</small><strong>${instructor.name}</strong></span></div><button class="text-button" type="button" data-download="${course.id}">${icon('download')}Descargar programa</button></div></section></div>`;
     document.title = `${course.title} | Zuka`;
@@ -594,7 +701,7 @@
     const previous = lessons[index - 1];
     const next = lessons[index + 1];
     const done = completed.has(lesson.id);
-    return `<nav class="lesson-pager" aria-label="Lecciones del curso">${previous ? `<a class="pager-link" href="${studyHref(previous)}">${icon('left')}<span><small>Anterior</small><strong>${escape(previous.title)}</strong></span></a>` : `<a class="pager-link" href="#curso/${course.id}">${icon('left')}<span><small>Inicio</small><strong>Página del curso</strong></span></a>`}<button class="button ${done ? 'button-secondary' : 'button-primary'} pager-complete" type="button" data-complete="${lesson.id}" aria-pressed="${done}">${icon('check')}${done ? 'Completada' : 'Marcar como completada'}</button>${next ? `<a class="pager-link pager-next" href="${studyHref(next)}" data-complete-on-leave="${lesson.id}"><span><small>${canStudy(next) ? 'Siguiente' : 'Crea tu cuenta para continuar'}</small><strong>${escape(next.title)}</strong></span>${icon(canStudy(next) ? 'right' : 'lock')}</a>` : `<a class="pager-link pager-next" href="#curso/${course.id}" data-complete-on-leave="${lesson.id}"><span><small>Última lección</small><strong>Terminar y volver al curso</strong></span>${icon('right')}</a>`}</nav>`;
+    return `<nav class="lesson-pager" aria-label="Lecciones del curso">${previous ? `<a class="pager-link" href="${studyHref(previous)}">${icon('left')}<span><small>Anterior</small><strong>${escape(previous.title)}</strong></span></a>` : `<a class="pager-link" href="#curso/${course.id}">${icon('left')}<span><small>Inicio</small><strong>Página del curso</strong></span></a>`}<button class="button ${done ? 'button-secondary' : 'button-primary'} pager-complete" type="button" data-complete="${lesson.id}" aria-pressed="${done}">${icon('check')}${done ? 'Completada' : 'Marcar como completada'}</button>${next ? `<a class="pager-link pager-next" href="${studyHref(next)}" data-complete-on-leave="${lesson.id}"><span><small>${canStudy(next) ? 'Siguiente' : emailAccounts() ? 'Crea tu cuenta para continuar' : 'Desliza para empezar y continuar'}</small><strong>${escape(next.title)}</strong></span>${icon(canStudy(next) ? 'right' : 'lock')}</a>` : `<a class="pager-link pager-next" href="#curso/${course.id}" data-complete-on-leave="${lesson.id}"><span><small>Última lección</small><strong>Terminar y volver al curso</strong></span>${icon('right')}</a>`}</nav>`;
   }
 
   function refreshLessonProgress() {
@@ -805,7 +912,7 @@
       title = progress.done === progress.total ? '¡Curso completado!' : '¡Lección completada!';
       detail = `<p class="player-end-skill">Practicaste <strong>${escape(resource.title)}</strong></p>${progressBar(progress)}`;
       destination = next ? studyHref(next) : `#curso/${course.id}`;
-      if (!hasAccount()) detail += '<p class="player-end-register">¡Ya diste el primer paso! Crea tu cuenta gratuita para seguir con todas las lecciones y conservar tu progreso.</p>';
+      if (!hasAccount()) detail += `<p class="player-end-register">${emailAccounts() ? '¡Ya diste el primer paso! Crea tu cuenta gratuita para seguir con todas las lecciones y conservar tu progreso.' : '¡Ya diste el primer paso! Desliza para empezar, sin registro, y sigue con todas las lecciones.'}</p>`;
       secondary = next ? `<a class="text-button" href="#curso/${course.id}">Volver al camino</a>` : '';
     } else {
       const { course, module } = player;
@@ -826,12 +933,12 @@
     const reward = player.xp ? `<p class="player-end-xp"><span>XP ganados</span><strong>+${player.xp} XP</strong></p>` : '';
     const accuracy = player.firstTry ? `<p class="player-end-accuracy">${player.firstTry} de ${challenges} ${challenges === 1 ? 'reto' : 'retos'} a la primera</p>` : '';
     select('#player-stage').innerHTML = `<div class="player-end" id="player-card" tabindex="-1"><span class="player-end-mascot" aria-hidden="true">${mascot.svg(mood)}</span><h1 class="player-end-title">${title}</h1>${reward}${detail}${accuracy}</div>`;
-    select('#player-bar').innerHTML = `<div class="player-bar-inner is-finished"><div class="player-actions player-end-actions"><a class="button button-primary button-success button-big" href="${destination}">${!hasAccount() ? 'Crear cuenta y continuar' : 'Continuar'}${icon('right')}</a>${secondary}</div></div>`;
+    select('#player-bar').innerHTML = `<div class="player-bar-inner is-finished"><div class="player-actions player-end-actions"><a class="button button-primary button-success button-big" href="${destination}">${!hasAccount() ? 'Empezar y continuar' : 'Continuar'}${icon('right')}</a>${secondary}</div></div>`;
     player.finished = true;
   }
 
   // Cuenta en Supabase: src/cloud.js. La exploración y el perfil local también funcionan sin ese módulo.
-  const cloud = () => window.ZUKA_CLOUD;
+  const cloud = () => emailAccounts() ? window.ZUKA_CLOUD : null;
   const cloudRecord = (kind, data) => { cloud()?.record(kind, data); };
   let authMode = 'signup';
   let authNotice = '';
@@ -852,7 +959,7 @@
   }
 
   function continueAfterAuth() {
-    if (!hasAccount() || cloud().state.recovery || accountPending()) return false;
+    if (!hasAccount() || cloud()?.state.recovery || accountPending()) return false;
     if (page !== 'acceso' && !authDestination) return false;
     const destination = authDestination;
     rememberAuthDestination('');
@@ -865,6 +972,14 @@
 
   function renderAuthPage() {
     if (continueAfterAuth()) return;
+    if (!emailAccounts()) {
+      if (hasAccount()) { history.replaceState(null, '', '#perfil'); lastRoutedHash = null; route(); return; }
+      select('#detail-view').innerHTML = onboardingHtml('detail-title');
+      bindSlideStart(authDestination);
+      onboardingShown = true;
+      document.title = 'Desliza para empezar | Zuka';
+      return;
+    }
     const title = authMode === 'signup' ? 'Crea tu cuenta y sigue aprendiendo' : authMode === 'reset' ? 'Recupera tu contraseña' : 'Qué bueno tenerte de vuelta';
     select('#detail-view').innerHTML = `<section class="auth-page" aria-labelledby="detail-title"><header class="auth-page-heading"><span class="auth-page-mascot" aria-hidden="true">${mascot.svg('saluda')}</span><p class="eyebrow">TU CAMINO EN ZUKA</p><h1 id="detail-title" tabindex="-1">${title}</h1><p>Todos los cursos, lecciones y repasos con una sola cuenta gratuita.</p></header>${accountCard()}<p class="welcome-signin"><a href="#explorar">Seguir explorando la plataforma</a></p></section>`;
     document.title = `${authMode === 'signup' ? 'Crear cuenta' : authMode === 'reset' ? 'Recuperar contraseña' : 'Iniciar sesión'} | Zuka`;
@@ -894,6 +1009,7 @@
   }
 
   function accountCard() {
+    if (!emailAccounts()) return '';
     const service = cloud();
     const heading = '<div class="profile-card-heading"><h2 id="profile-account-title">Tu cuenta</h2>';
     if (!service?.state.available) return `<section class="profile-card profile-account" aria-labelledby="profile-account-title">${heading}<p>Las cuentas no están disponibles en este momento. Tu progreso sigue guardado en este dispositivo.</p></div></section>`;
@@ -1100,14 +1216,16 @@
     const legacy = legacyHash(location.hash);
     if (legacy) history.replaceState(null, '', legacy);
     if (shouldFocus && lastRoutedHash === location.hash) return;
+    if (onboardingTimer !== null) { clearTimeout(onboardingTimer); onboardingTimer = null; }
     lastRoutedHash = location.hash;
+    onboardingShown = false;
     const [rawPath, rawParameters = ''] = location.hash.slice(1).split('?');
     let destination;
     try { destination = decodeURIComponent(rawPath); } catch { destination = 'invalid'; }
     const parameters = new URLSearchParams(rawParameters);
     filters = { query: (parameters.get('q') || '').slice(0, 160), type: library.formats[parameters.get('tipo')] ? parameters.get('tipo') : 'all', topic: library.topics.some(topic => topic.id === parameters.get('tema')) ? parameters.get('tema') : 'all', level: ['Inicial', 'Intermedio'].includes(parameters.get('nivel')) ? parameters.get('nivel') : 'all' };
     courseFilters = { topic: library.topics.some(topic => topic.id === parameters.get('curso_tema')) ? parameters.get('curso_tema') : 'all', level: ['Inicial', 'Intermedio'].includes(parameters.get('curso_nivel')) ? parameters.get('curso_nivel') : 'all' };
-    page = !destination || destination === 'inicio' ? 'inicio' : destination === 'biblioteca' ? 'biblioteca' : destination === 'nosotros' ? 'nosotros' : destination === 'perfil' ? 'perfil' : ['programas', 'escuelas'].includes(destination) || /^(?:programa|escuela)\/[\w-]+$/.test(destination) ? 'oferta' : ['registro', 'ingresar'].includes(destination) ? 'acceso' : ['explorar', 'cursos', 'enfoque', 'simulaciones', 'ejercicios'].includes(destination) ? 'explorar' : 'detalle';
+    page = !destination || destination === 'inicio' ? 'inicio' : destination === 'biblioteca' ? 'biblioteca' : destination === 'nosotros' ? 'nosotros' : destination === 'perfil' ? 'perfil' : ['programas', 'escuelas', 'conoce'].includes(destination) || /^(?:programa|escuela)\/[\w-]+$/.test(destination) ? 'oferta' : ['registro', 'ingresar', 'ingreso'].includes(destination) ? 'acceso' : ['explorar', 'cursos', 'enfoque', 'simulaciones', 'ejercicios'].includes(destination) ? 'explorar' : 'detalle';
     if (page === 'acceso') {
       authMode = destination === 'registro' ? 'signup' : parameters.get('modo') === 'reset' ? 'reset' : 'signin';
       if (parameters.has('continuar')) rememberAuthDestination(parameters.get('continuar'));
@@ -1125,7 +1243,9 @@
     select('.discovery').hidden = !['explorar', 'biblioteca'].includes(page);
     select('#detail-view').hidden = !['detalle', 'perfil', 'acceso', 'oferta'].includes(page);
     select('#about-view').hidden = page !== 'nosotros';
-    select('#explore-notice').hidden = hasAccount() || !(['cursos', 'explorar', 'biblioteca'].includes(page) || (page === 'detalle' && /^curso\/[\w-]+$/.test(destination)));
+    const exploreNotice = select('#explore-notice');
+    exploreNotice.innerHTML = `${icon('lock')}<p><strong>Estás explorando.</strong> Prueba la primera lección de cada curso. ${emailAccounts() ? '<a href="#registro">Crea tu cuenta gratis</a> para acceder a todo.' : '<a href="#ingreso">Desliza para empezar</a>: es gratis, sin registro, y accedes a todo.'}</p>${emailAccounts() ? '<a class="text-button" href="#ingresar">Iniciar sesión</a>' : ''}`;
+    exploreNotice.hidden = hasAccount() || !(['cursos', 'explorar', 'biblioteca'].includes(page) || (page === 'detalle' && /^curso\/[\w-]+$/.test(destination)));
     select('#content-search').value = filters.query;
     player = null;
     if (page === 'detalle') {
@@ -1161,7 +1281,8 @@
     }
     // Durante una lección paso a paso, la interfaz se concentra en la lección, como en una app de aprendizaje.
     document.body?.classList.toggle('lesson-mode', Boolean(player));
-    document.body?.classList.toggle('marketing-mode', page === 'oferta' || page === 'nosotros' || (page === 'inicio' && !hasAccount()));
+    document.body?.classList.toggle('marketing-mode', page === 'oferta' || page === 'nosotros' || (page === 'inicio' && !hasAccount()) || onboardingShown);
+    document.body?.classList.toggle('onboarding-mode', onboardingShown);
     updateStatsChip();
     const activeNav = page === 'acceso' ? 'perfil' : page === 'cursos' || (page === 'detalle' && destination.startsWith('curso/')) ? 'explorar' : page === 'explorar' ? filters.type === 'simulation' ? 'simulaciones' : filters.type === 'exercise' ? 'ejercicios' : 'explorar' : page;
     selectAll('[data-nav]').forEach(link => {
@@ -1398,6 +1519,13 @@
       outlineOpen = !outlineOpen;
       select('#player-outline')?.classList.toggle('is-open', outlineOpen);
       select('[data-outline-toggle]')?.setAttribute('aria-expanded', String(outlineOpen));
+      return;
+    }
+    if (event.target.closest('[data-slide-thumb]')) {
+      const track = select('[data-slide-start]');
+      if (track?.dataset.done) return;
+      if (track?.dataset.dragged) { delete track.dataset.dragged; if (event.detail !== 0) return; }
+      enterZuka(onboardingDestination);
       return;
     }
     if (event.target.closest('[data-profile-export]')) { exportProgress(); return; }

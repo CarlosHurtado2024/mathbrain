@@ -38,6 +38,14 @@ Zuka avanza por etapas pequeñas: cada una se termina, se prueba en el celular y
 - Catálogo con categorías en fila y cursos conectados; perfil con inicial y cifras en tarjetas.
 - Pulido con Impeccable (crítica 25/40): fuera el fondo espacial animado del tema oscuro (tapaba «Continuar»); «Ver solución» pide confirmación y no salta el reto por accidente; contrastes AA, sin restos de verde azulado y textos funcionales de 11 px o más. Pendiente (P2): progreso y accesibilidad del carrusel, y lecciones con pasos más cortos y retroalimentación que diagnostica errores típicos.
 
+## ✅ Etapa 1.4 · Entrada local sin registro
+
+- Bienvenida con mascota y entrada mediante deslizamiento, toque o teclado.
+- Perfil local «Estudiante», editable, con acceso completo y conservación del progreso.
+- Landing comercial en `#conoce`; enlaces de lecciones y repasos conservan su destino al entrar.
+- Cuentas en pausa mediante `emailAccounts: false`: sin inicializar el cliente de Supabase.
+- Gestos cancelables y cancelación de la entrada pendiente al visitar otra página.
+
 ## 🔜 Etapa 2 · Contenido completo
 
 - Videos de todas las lecciones de Fundamentos de Matemáticas (YouTube «No listado»).
@@ -55,7 +63,7 @@ Zuka avanza por etapas pequeñas: cada una se termina, se prueba en el celular y
 - Más logros, siempre discretos y ligados al aprendizaje.
 - Recordatorios locales en la app instalada, si el navegador lo permite.
 
-## ✅ Etapa 4 · Cuentas y sincronización (base)
+## ✅ Etapa 4 · Cuentas y sincronización (base, en pausa por configuración)
 
 - Bienvenida para explorar o crear una cuenta con correo y contraseña: primera lección de cada curso sin cuenta; todo el contenido con sesión activa. Registro, acceso y recuperación tienen pantallas propias, además de la gestión de cuenta en el Perfil.
 - Base de datos con Row Level Security: perfil, lecciones, días de estudio, repasos y guardados (`supabase/migrations/`).

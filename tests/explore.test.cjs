@@ -14,7 +14,7 @@ function registeredCloud() {
 
 const guestCloud = () => ({ ...registeredCloud(), state: { ...registeredCloud().state, user: null } });
 
-function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = registeredCloud()) {
+function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = registeredCloud(), config = { emailAccounts: true }, storage = {}) {
   const target = extra => {
     const listeners = new Map();
     return Object.assign({
@@ -67,6 +67,15 @@ function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = regi
         return dataMatch && attributeValues.has(dataMatch[1]) ? node : null;
       }
     });
+    if (attributeValues.has('data-slide-start')) {
+      node.clientWidth = 320;
+      node.style = { setProperty(name, value) { this[name] = value; } };
+    }
+    if (attributeValues.has('data-slide-thumb')) {
+      node.offsetWidth = 56;
+      node.style = {};
+      node.setPointerCapture = id => { node.pointerId = id; };
+    }
     let content = '';
     Object.defineProperty(node, 'innerHTML', {
       get() { return content; },
@@ -93,7 +102,7 @@ function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = regi
     location.hash = address;
     location.href = `http://localhost/${address}`;
   }]));
-  const window = target({ location, ZUKA_CLOUD: cloud, scrollTo() {}, matchMedia: () => ({ matches: false }) });
+  const window = target({ location, ZUKA_CLOUD: cloud, ZUKA_CONFIG: config, scrollTo() {}, matchMedia: () => ({ matches: false }) });
   document = target({
     body: staticElements.find(node => node.tagName === 'BODY'),
     activeElement: { tagName: 'BODY' },
@@ -111,15 +120,17 @@ function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = regi
     },
     getElementById(id) { return elements.get(id) || null; }
   });
-  const stored = new Map();
+  const stored = new Map(Object.entries(storage));
   const session = new Map();
+  const timers = new Map();
+  let timerId = 0;
   const context = vm.createContext({
     window, document, history, location, URL, URLSearchParams, Intl,
     localStorage: { getItem: key => stored.get(key) ?? null, setItem: (key, value) => stored.set(key, value) },
     sessionStorage: { getItem: key => session.get(key) ?? null, setItem: (key, value) => session.set(key, value), removeItem: key => session.delete(key) },
     requestAnimationFrame: callback => callback(),
-    setTimeout: () => 1,
-    clearTimeout() {}
+    setTimeout(callback) { timers.set(++timerId, callback); return timerId; },
+    clearTimeout(id) { timers.delete(id); }
   });
   for (const filename of ['courses.js', 'content.js', 'library.js', 'mascot.js', 'landing.js']) vm.runInContext(fs.readFileSync(path.join(directory, filename), 'utf8'), context);
   prepareLibrary(window.MATHBRAIN_LIBRARY, window.MATHBRAIN_COURSES);
@@ -131,6 +142,11 @@ function environment(hash = '#explorar', prepareLibrary = () => {}, cloud = regi
     library: window.MATHBRAIN_LIBRARY,
     node: selector => document.querySelector(selector),
     all: selector => document.querySelectorAll(selector),
+    flushTimers() {
+      const callbacks = [...timers.values()];
+      timers.clear();
+      callbacks.forEach(callback => callback());
+    },
     navigate(address, event = 'hashchange') {
       location.hash = address;
       location.href = `http://localhost/${address}`;
@@ -507,7 +523,7 @@ test('El perfil resume el progreso, guarda el nombre y saluda con él en el inic
 
 test('El perfil ofrece registro e inicio solo con correo y contraseña, incluso si Google está activo en Supabase', () => {
   const cloud = { state: { available: true, ready: true, user: null, message: '', providers: { google: true } } };
-  const app = environment('#perfil', undefined, cloud);
+  const app = environment('#perfil', undefined, cloud, { emailAccounts: true });
   assert.equal(app.node('#auth-email').getAttribute('type'), 'email');
   assert.equal(app.node('#auth-email').getAttribute('autocomplete'), 'email');
   assert.equal(app.node('#auth-password').getAttribute('type'), 'password');
@@ -536,7 +552,7 @@ test('El formulario registra con correo y contraseña y pide confirmar el correo
     state: { available: true, ready: true, user: null, message: '' },
     signUp: async (email, password) => { requests.push({ email, password }); return { needsConfirmation: true }; }
   };
-  const app = environment('#perfil', undefined, cloud);
+  const app = environment('#perfil', undefined, cloud, { emailAccounts: true });
   app.node('#auth-email').value = '  ana@ejemplo.com  ';
   app.node('#auth-password').value = 'segura-123';
   app.document.emit('submit', { target: app.all('[data-auth-form="signup"]').at(-1) });
@@ -552,7 +568,7 @@ test('El formulario valida el correo y la longitud de la contraseña antes de re
     state: { available: true, ready: true, user: null, message: '' },
     signUp: async () => { requests += 1; return { needsConfirmation: true }; }
   };
-  const app = environment('#perfil', undefined, cloud);
+  const app = environment('#perfil', undefined, cloud, { emailAccounts: true });
   app.node('#auth-email').value = 'correo-invalido';
   app.node('#auth-password').value = 'segura-123';
   const form = app.all('[data-auth-form="signup"]').at(-1);
@@ -565,76 +581,186 @@ test('El formulario valida el correo y la longitud de la contraseña antes de re
   assert.equal(requests, 0);
 });
 
-test('La bienvenida ofrece explorar, crear una cuenta por correo y entrar con una cuenta existente', () => {
-  const app = environment('#', undefined, guestCloud());
+test('La bienvenida pide solo deslizar: crea un perfil por defecto y abre todo el contenido', () => {
+  const app = environment('#', undefined, guestCloud(), { emailAccounts: false });
   const html = app.node('#today-panel').innerHTML;
-  assert.match(html, /href="#explorar">Explorar la plataforma/);
-  assert.match(html, /href="#registro">Crear mi cuenta/);
-  assert.match(html, /href="#ingresar">Inicia sesión/);
-    assert.match(html, /primera lección de cada curso/);
-  assert.equal(app.node('#explore-notice').hidden, true);
-  app.navigate('#explorar');
-  assertCourses(app, app.courses.length);
-  assert.equal(app.node('#explore-notice').hidden, false);
+  assert.match(html, /<h1 id="home-title" tabindex="-1">Aprende matemáticas a tu ritmo<\/h1>/);
+  assert.match(html, /Sin registro: desliza y empieza\./);
+  assert.match(html, /<button type="button" class="slide-thumb" data-slide-thumb="1" aria-label="Desliza para empezar">/);
+  assert.match(html, /href="#conoce">Conoce los programas de Zuka/);
+  assert.doesNotMatch(html, /#registro|#ingresar|correo/);
+  assert.equal(app.document.body.classList.contains('onboarding-mode'), true);
+  assert.equal(app.document.body.classList.contains('marketing-mode'), true);
+  // Un toque (o Enter) en el pulgar equivale a deslizar.
+  app.click(app.all('[data-slide-thumb]').at(-1));
+  assert.ok(app.stored.get('zuka-ingreso'));
+  assert.equal(JSON.parse(app.stored.get('mathbrain-profile')).name, 'Estudiante');
+  assert.equal(app.location.hash, '#');
+  assert.equal(app.document.body.classList.contains('onboarding-mode'), false);
+  assert.match(app.node('#today-panel').innerHTML, /class="button spotlight-start" href="#contenido\/fundamentos-matematicas-1">Empezar</);
+  // El perfil por defecto se cambia en Perfil y no muestra registro por correo.
+  app.navigate('#perfil');
+  assert.match(app.node('#detail-view').innerHTML, /Hola, Estudiante/);
+  assert.doesNotMatch(app.node('#detail-view').innerHTML, /data-auth-form|Tu cuenta/);
+  // Las rutas antiguas de registro llevan al inicio una vez dentro.
   app.navigate('#registro');
-  assert.equal(app.all('[data-auth-form="signup"]').length, 1);
-  assert.equal(app.node('#auth-email').getAttribute('type'), 'email');
-  assert.equal(app.node('#auth-password').getAttribute('minlength'), '8');
-  assert.doesNotMatch(app.node('#detail-view').innerHTML, /Google/);
+  assert.equal(app.location.hash, '#');
+});
+
+test('Una lección bloqueada lleva a la bienvenida y, tras deslizar, a esa lección', () => {
+  const app = environment('#contenido/probabilidad-2?vista=lectura', undefined, guestCloud(), { emailAccounts: false });
+  assert.match(app.node('#detail-view').innerHTML, /<strong>Combinaciones y permutaciones<\/strong> te espera\./);
+  assert.equal(app.document.body.classList.contains('onboarding-mode'), true);
+  app.click(app.all('[data-slide-thumb]').at(-1));
+  assert.equal(app.location.hash, '#contenido/probabilidad-2?vista=lectura');
+  assert.match(app.node('#detail-view').innerHTML, /class="reader-body lesson-content"/);
+  app.navigate('#explorar');
+  assert.equal(app.node('#explore-notice').hidden, true);
+});
+
+test('Cancelar un deslizamiento completo no entra y permite volver a usar el botón', () => {
+  const app = environment('#', undefined, null, { emailAccounts: false });
+  const thumb = app.all('[data-slide-thumb]').at(-1);
+  thumb.emit('pointerdown', { pointerId: 1, button: 0, clientX: 20 });
+  thumb.emit('pointermove', { pointerId: 1, clientX: 300 });
+  thumb.emit('pointercancel', { pointerId: 1 });
+  app.flushTimers();
+  assert.equal(app.stored.has('zuka-ingreso'), false);
+  assert.equal(app.document.body.classList.contains('onboarding-mode'), true);
+  app.click(thumb);
+  assert.equal(app.stored.has('zuka-ingreso'), true);
+});
+
+test('Un deslizamiento incompleto no bloquea el acceso posterior con teclado', () => {
+  const app = environment('#', undefined, null, { emailAccounts: false });
+  const thumb = app.all('[data-slide-thumb]').at(-1);
+  thumb.emit('pointerdown', { pointerId: 1, button: 0, clientX: 20 });
+  thumb.emit('pointermove', { pointerId: 1, clientX: 80 });
+  thumb.emit('pointerup', { pointerId: 1 });
+  app.flushTimers();
+  assert.equal(app.stored.has('zuka-ingreso'), false);
+  app.document.emit('click', { target: thumb, detail: 0 });
+  assert.equal(app.stored.has('zuka-ingreso'), true);
+});
+
+test('Solo el puntero activo completa el gesto y la entrada se ejecuta una vez', () => {
+  const app = environment('#', undefined, null, { emailAccounts: false });
+  const thumb = app.all('[data-slide-thumb]').at(-1);
+  thumb.emit('pointerdown', { pointerId: 1, button: 0, clientX: 20 });
+  thumb.emit('pointermove', { pointerId: 2, clientX: 300 });
+  thumb.emit('pointerup', { pointerId: 2 });
+  app.flushTimers();
+  assert.equal(app.stored.has('zuka-ingreso'), false);
+  thumb.emit('pointermove', { pointerId: 1, clientX: 300 });
+  thumb.emit('pointerup', { pointerId: 1 });
+  app.click(thumb);
+  assert.equal(app.stored.has('zuka-ingreso'), false);
+  app.flushTimers();
+  assert.equal(app.stored.has('zuka-ingreso'), true);
+  assert.equal(app.historyCalls.length, 1);
+});
+
+test('Visitar los programas cancela una entrada que todavía está animándose', () => {
+  const app = environment('#', undefined, null, { emailAccounts: false });
+  const thumb = app.all('[data-slide-thumb]').at(-1);
+  thumb.emit('pointerdown', { pointerId: 1, button: 0, clientX: 20 });
+  thumb.emit('pointermove', { pointerId: 1, clientX: 300 });
+  thumb.emit('pointerup', { pointerId: 1 });
+  app.navigate('#conoce');
+  app.flushTimers();
+  assert.equal(app.location.hash, '#conoce');
+  assert.equal(app.stored.has('zuka-ingreso'), false);
+  assert.match(app.node('#detail-view').innerHTML, /Tus sueños/);
+  assert.doesNotMatch(app.node('#detail-view').innerHTML, /href="#registro"|href="#ingresar"/);
+});
+
+test('El perfil local funciona sin Supabase y conserva el nombre y el progreso al volver', () => {
+  const app = environment('#', undefined, null, { emailAccounts: false }, {
+    'mathbrain-profile': JSON.stringify({ name: 'Ana', goal: 3 }),
+    'mathbrain-progress': JSON.stringify(['probabilidad-1'])
+  });
+  app.click(app.all('[data-slide-thumb]').at(-1));
+  assert.equal(JSON.parse(app.stored.get('mathbrain-profile')).name, 'Ana');
+  assert.deepEqual(JSON.parse(app.stored.get('mathbrain-progress')), ['probabilidad-1']);
+  app.navigate('#registro');
+  assert.equal(app.location.hash, '#');
+  const reopened = environment('#contenido/probabilidad-2', undefined, null, { emailAccounts: false }, Object.fromEntries(app.stored));
+  assert.match(reopened.node('#detail-view').innerHTML, /id="lesson-player"/);
+  assert.equal(reopened.document.body.classList.contains('onboarding-mode'), false);
+});
+
+test('El modo local no espera ni utiliza una sesión de correo anterior', () => {
+  const cloud = registeredCloud();
+  cloud.state.ready = false;
+  const app = environment('#', undefined, cloud, { emailAccounts: false });
+  assert.match(app.node('#today-panel').innerHTML, /data-slide-thumb="1"/);
+  app.click(app.all('[data-slide-thumb]').at(-1));
+  app.navigate('#perfil');
+  assert.doesNotMatch(app.node('#detail-view').innerHTML, /data-auth-form|Tu cuenta|Comprobando tu sesión/);
+});
+
+test('Reactivar las cuentas exige una sesión aunque exista una entrada local anterior', () => {
+  const app = environment('#contenido/probabilidad-2', undefined, guestCloud(), { emailAccounts: true }, { 'zuka-ingreso': '2026-11-01T12:00:00.000Z' });
+  assert.match(app.node('#detail-view').innerHTML, /Crea tu cuenta para continuar/);
+  assert.doesNotMatch(app.node('#detail-view').innerHTML, /id="lesson-player"/);
+  app.navigate('#');
+  assert.match(app.node('#today-panel').innerHTML, /href="#registro"/);
+  assert.match(app.node('#today-panel').innerHTML, /href="#ingresar"/);
+  assert.doesNotMatch(app.node('#today-panel').innerHTML, /data-slide-thumb="1"/);
 });
 
 test('Al explorar solo la primera lección de cada curso abre el reproductor y la lectura', () => {
-  const app = environment('#explorar', undefined, guestCloud());
+  const app = environment('#explorar', undefined, guestCloud(), { emailAccounts: false });
   for (const course of app.courses) {
     const first = app.library.resources.find(resource => resource.courseId === course.id && resource.type === 'explanation');
     app.navigate(`#contenido/${first.id}`);
     assert.match(app.node('#detail-view').innerHTML, /id="lesson-player"/, first.id);
     app.navigate(`#contenido/${first.id}?vista=lectura`);
     assert.match(app.node('#detail-view').innerHTML, /class="reader-body lesson-content"/, first.id);
-    assert.match(app.node('#detail-view').innerHTML, /Crea tu cuenta para continuar/);
+    assert.match(app.node('#detail-view').innerHTML, /Desliza para empezar y continuar/);
     assert.doesNotMatch(app.node('#detail-view').innerHTML, new RegExp(`href="#contenido/${course.id}-2"`));
   }
 });
 
 test('Los enlaces directos, la lectura, los alias y los repasos no evitan el registro', () => {
-  const app = environment('#explorar', undefined, guestCloud());
+  const app = environment('#explorar', undefined, guestCloud(), { emailAccounts: false });
   const firstIds = new Set(app.courses.map(course => app.library.resources.find(resource => resource.courseId === course.id && resource.type === 'explanation').id));
   for (const resource of app.library.resources.filter(resource => !firstIds.has(resource.id))) {
     for (const suffix of ['', '?vista=lectura']) {
       app.navigate(`#contenido/${resource.id}${suffix}`);
       const html = app.node('#detail-view').innerHTML;
-      assert.match(html, /Crea tu cuenta para continuar/, resource.id);
+      assert.match(html, /data-slide-start="1"/, resource.id);
       assert.doesNotMatch(html, /id="lesson-player"|class="reader-body lesson-content"|<iframe|<video|simulation-controls/, resource.id);
     }
   }
   for (const address of ['#curso/fundamentos-matematicas/2', '#contenido/algebra-2', '#repaso/probabilidad/1']) {
     app.navigate(address);
-    assert.match(app.node('#detail-view').innerHTML, /Crea tu cuenta para continuar/, address);
+    assert.match(app.node('#detail-view').innerHTML, /data-slide-start="1"/, address);
   }
 });
 
 test('Los temarios y el buscador muestran qué contenido requiere cuenta', () => {
-  const app = environment('#curso/fundamentos-matematicas', undefined, guestCloud());
+  const app = environment('#curso/fundamentos-matematicas', undefined, guestCloud(), { emailAccounts: false });
   const html = app.node('#detail-view').innerHTML;
   assert.match(html, /href="#contenido\/fundamentos-matematicas-1"/);
   assert.doesNotMatch(html, /href="#contenido\/fundamentos-matematicas-2"/);
-  assert.match(html, /href="#registro\?continuar=contenido%2Ffundamentos-matematicas-2"/);
+  assert.match(html, /href="#ingreso\?continuar=contenido%2Ffundamentos-matematicas-2"/);
   assert.equal((html.match(/class="znode is-locked"/g) || []).length, 30 + 5);
   app.navigate('#explorar?vista=contenidos');
   const catalog = app.node('#catalog-content').innerHTML;
   assert.match(catalog, /Primera lección · acceso libre/);
-  assert.match(catalog, /Disponible al crear tu cuenta/);
+  assert.match(catalog, /Se abre al empezar, sin registro/);
   assert.doesNotMatch(catalog, /href="#contenido\/sim-derivada"/);
   app.navigate('#explorar?q=derivadas');
-  assert.match(app.node('#catalog-content').innerHTML, /#registro\?continuar=contenido%2Fsim-derivada/);
+  assert.match(app.node('#catalog-content').innerHTML, /#ingreso\?continuar=contenido%2Fsim-derivada/);
 });
 
 test('El progreso previo del visitante no desbloquea más lecciones', () => {
-  const app = environment('#contenido/probabilidad-1?vista=lectura', undefined, guestCloud());
+  const app = environment('#contenido/probabilidad-1?vista=lectura', undefined, guestCloud(), { emailAccounts: false });
   app.click(app.all('[data-complete="probabilidad-1"]').at(-1));
   assert.deepEqual(JSON.parse(app.stored.get('mathbrain-progress')), ['probabilidad-1']);
   app.navigate('#contenido/probabilidad-2');
-  assert.match(app.node('#detail-view').innerHTML, /Crea tu cuenta para continuar/);
+  assert.match(app.node('#detail-view').innerHTML, /data-slide-start="1"/);
   app.navigate('#curso/probabilidad');
   assert.match(app.node('#detail-view').innerHTML, /class="znode is-locked"/);
 });
@@ -644,7 +770,7 @@ test('Con sesión se puede entrar a cualquier lección, simulación, ejercicio y
   assert.equal(app.node('#explore-notice').hidden, true);
   for (const resource of app.library.resources) {
     app.navigate(`#contenido/${resource.id}?vista=lectura`);
-    assert.doesNotMatch(app.node('#detail-view').innerHTML, /Crea tu cuenta para continuar/, resource.id);
+    assert.doesNotMatch(app.node('#detail-view').innerHTML, /data-slide-start="1"/, resource.id);
     assert.match(app.node('#detail-view').innerHTML, /id="detail-title"/, resource.id);
   }
   app.navigate('#repaso/fundamentos-matematicas/5');
@@ -680,7 +806,7 @@ test('Cerrar sesión durante una lección restringida vuelve a pedir una cuenta 
 test('El registro conserva la lección elegida y solo la desbloquea al iniciar sesión', async () => {
   const cloud = guestCloud();
   cloud.signUp = async () => ({ needsConfirmation: true });
-  const app = environment('#registro?continuar=contenido%2Fprobabilidad-2%3Fvista%3Dlectura', undefined, cloud);
+  const app = environment('#registro?continuar=contenido%2Fprobabilidad-2%3Fvista%3Dlectura', undefined, cloud, { emailAccounts: true });
   app.node('#auth-email').value = 'ana@ejemplo.com';
   app.node('#auth-password').value = 'segura-123';
   app.document.emit('submit', { target: app.all('[data-auth-form="signup"]').at(-1) });
@@ -699,7 +825,7 @@ test('El registro conserva la lección elegida y solo la desbloquea al iniciar s
 test('La recuperación de contraseña no redirige hasta guardar la contraseña y los destinos externos se ignoran', () => {
   const cloud = registeredCloud();
   cloud.state.recovery = true;
-  const app = environment('#ingresar?continuar=contenido%2Fprobabilidad-2', undefined, cloud);
+  const app = environment('#ingresar?continuar=contenido%2Fprobabilidad-2', undefined, cloud, { emailAccounts: true });
   assert.equal(app.all('[data-auth-form="recovery"]').length, 1);
   cloud.state.recovery = false;
   app.emitCloud();
@@ -710,17 +836,17 @@ test('La recuperación de contraseña no redirige hasta guardar la contraseña y
 });
 
 test('Sin Supabase se puede explorar la primera lección pero no se habilita todo el contenido', () => {
-  const app = environment('#', undefined, null);
-  assert.match(app.node('#today-panel').innerHTML, /Explorar la plataforma/);
+  const app = environment('#', undefined, null, { emailAccounts: false });
+  assert.match(app.node('#today-panel').innerHTML, /data-slide-thumb="1"/);
   app.navigate('#contenido/probabilidad-1');
   assert.match(app.node('#detail-view').innerHTML, /id="lesson-player"/);
   app.navigate('#contenido/probabilidad-2');
-  assert.match(app.node('#detail-view').innerHTML, /Crea tu cuenta para continuar/);
+  assert.match(app.node('#detail-view').innerHTML, /data-slide-start="1"/);
 });
 
 test('La landing presenta el propósito, los seis servicios y las cuatro escuelas', () => {
-  const app = environment('#', undefined, guestCloud());
-  const html = app.node('#today-panel').innerHTML;
+  const app = environment('#conoce', undefined, guestCloud());
+  const html = app.node('#detail-view').innerHTML;
   assert.match(html, /Tus sueños/);
   assert.match(html, /merecen/);
   assert.match(html, /ingresar a la universidad/);
@@ -832,10 +958,10 @@ test('Las páginas públicas conservan el panel del estudiante y el acceso limit
   app.navigate('#');
   assert.equal(app.document.body.classList.contains('marketing-mode'), false);
   assert.match(app.node('#today-panel').innerHTML, /class="button spotlight-start" href="#contenido\/fundamentos-matematicas-1">Empezar</);
-  const guest = environment('#programa/ingenieria', undefined, guestCloud());
+  const guest = environment('#programa/ingenieria', undefined, guestCloud(), { emailAccounts: false });
   guest.navigate('#contenido/calculo-diferencial-2');
-  assert.equal(guest.document.body.classList.contains('marketing-mode'), false);
-  assert.match(guest.node('#detail-view').innerHTML, /Crea tu cuenta para continuar/);
+  assert.equal(guest.document.body.classList.contains('onboarding-mode'), true);
+  assert.match(guest.node('#detail-view').innerHTML, /data-slide-start="1"/);
   guest.navigate('#contenido/calculo-diferencial-1');
   assert.match(guest.node('#detail-view').innerHTML, /id="lesson-player"/);
 });

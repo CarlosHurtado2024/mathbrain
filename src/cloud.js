@@ -283,7 +283,7 @@
 
   function init() {
     const config = window.ZUKA_CONFIG || {};
-    if (!window.supabase?.createClient || !config.supabaseUrl || !config.supabaseKey) {
+    if (config.emailAccounts !== true || !window.supabase?.createClient || !config.supabaseUrl || !config.supabaseKey) {
       state.ready = true;
       return;
     }

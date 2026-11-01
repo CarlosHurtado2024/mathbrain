@@ -72,7 +72,8 @@ Orden de carga en `index.html`:
 
 | Dirección | Vista |
 | --- | --- |
-| `#` o `#inicio` | Sin sesión: landing de programas y servicios, con acceso para explorar o registrarse. Con sesión: panel de aprendizaje |
+| `#` o `#inicio` | Modo local: bienvenida o panel después de entrar. Con cuentas activadas: landing o panel según la sesión |
+| `#conoce` | Landing de programas, escuelas y servicios |
 | `#programas`, `#programa/<id>` | Oferta y detalle de PreICFES, preuniversitario, preingeniero, ingeniería, tutorías y asesorías |
 | `#escuelas`, `#escuela/<id>` | Escuelas de Matemáticas, Física, Estadística y Programación, y sus cursos |
 | `#explorar`, `#cursos` | Catálogo de cursos |
@@ -80,7 +81,8 @@ Orden de carga en `index.html`:
 | `#simulaciones`, `#ejercicios` | Contenidos de ese formato |
 | `#biblioteca` | Guardados |
 | `#perfil` | Perfil del estudiante |
-| `#registro`, `#ingresar` | Registro con correo y contraseña, inicio de sesión y recuperación de contraseña |
+| `#ingreso` | Bienvenida de entrada local con retorno a la lección solicitada |
+| `#registro`, `#ingresar` | Cuentas si emailAccounts está activo; en modo local conservan el destino y llevan a la bienvenida o al panel |
 | `#nosotros` | Visión y objetivo de Zuka: ingreso, permanencia y culminación de los estudios |
 | `#curso/<id>` | Camino de niveles del curso |
 | `#contenido/<id>` | Lección paso a paso, simulación o ejercicio resuelto |
@@ -89,9 +91,11 @@ Orden de carga en `index.html`:
 
 Los enlaces antiguos de Álgebra y Trigonometría redirigen a Fundamentos de Matemáticas (`legacyHash` en `app.js`).
 
-`app.js` comprueba la sesión antes de abrir contenido: sin cuenta permite la primera lección de cada curso y sus retos; las demás lecciones, simulaciones, ejercicios independientes y repasos piden registro o acceso. La misma comprobación se aplica a enlaces directos, lectura y alias antiguos. Con sesión no hay bloqueos por progreso. Al cerrar sesión se vuelve a evaluar la vista activa, incluso dentro de una lección. Durante la restauración inicial se muestra un estado de espera.
+`app.js` decide el acceso según `emailAccounts` en `src/config.js`. Con el valor actual `false`, la persona entra mediante la bienvenida y se guarda la marca `zuka-ingreso`; su perfil y progreso siguen usando las claves `mathbrain-*`. Antes de entrar puede probar la primera lección de cada curso. Con el valor `true`, el acceso completo requiere una sesión de correo; la marca local no la sustituye. La misma comprobación se aplica a enlaces directos, lectura y alias antiguos. En ambos modos el acceso completo no depende del progreso. En el modo de cuentas, al cerrar sesión se vuelve a evaluar la vista activa, incluso dentro de una lección. Durante la restauración inicial se muestra un estado de espera.
 
-Las pantallas de cuenta aceptan `continuar` con una ruta interna; `sessionStorage` conserva el destino durante la confirmación de correo. El contenido sigue empaquetado en archivos estáticos y en la caché offline; el control descrito limita la navegación y no convierte esos archivos en privados (ver `SUPABASE.md`).
+La bienvenida permite deslizar, tocar el botón o usar el teclado. Cancelar el gesto no entra, y cambiar de página cancela una entrada pendiente.
+
+Las pantallas de cuenta y la bienvenida aceptan `continuar` con una ruta interna; `sessionStorage` conserva el destino durante la confirmación de correo. El contenido sigue empaquetado en archivos estáticos y en la caché offline; el control descrito limita la navegación y no convierte esos archivos en privados (ver `SUPABASE.md`).
 
 ## PWA
 
