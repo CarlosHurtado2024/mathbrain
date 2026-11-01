@@ -57,6 +57,25 @@ También verás otras notaciones para la misma idea: $f'(x)$, $\dfrac{dy}{dx}$ y
 Para que exista la derivada en un punto, la función tiene que ser continua allí, pero la continuidad no basta. La función $f(x) = |x|$ es continua en $0$ y, sin embargo, no tiene derivada en ese punto: por la izquierda las pendientes valen $-1$ y por la derecha valen $1$.
 :::
 
+:::visual
+{
+  "engine": "manim",
+  "src": "assets/videos/derivada-secantes.mp4",
+  "captions": "assets/videos/derivada-secantes.vtt",
+  "poster": "assets/videos/derivada-secantes.jpg",
+  "title": "De la secante a la tangente"
+}
+:::
+
+:::visual
+{
+  "engine": "jsxgraph",
+  "scene": "derivative-tangent",
+  "text": "Ahora hazlo tú: reduce $h$ y observa cómo la pendiente de la secante se acerca a la derivada en $P$.",
+  "caption": "La derivada es el límite de las pendientes de las secantes cuando $h \\to 0$."
+}
+:::
+
 ## Practica
 
 :::ejercicio

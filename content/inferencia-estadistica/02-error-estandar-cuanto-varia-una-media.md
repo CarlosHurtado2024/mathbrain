@@ -20,6 +20,15 @@ Bajo independencia y varianza finita, el error estándar de la media es σ/√n.
 Si la desviación estándar poblacional es 12 y n = 36, el error estándar de la media es 12/√36 = 2. Con n = 144 pasa a ser 1, bajo los mismos supuestos.
 :::
 
+:::visual
+{
+  "engine": "p5",
+  "scene": "random-walk",
+  "text": "La raíz cuadrada aparece siempre que se suman pasos al azar. Un caminante que da $n$ pasos de $\\pm 1$ termina, en promedio, a una distancia cercana a $\\sqrt{n}$: la suma crece como $\\sqrt{n}$ y, al dividir entre $n$, la media varía como $\\frac{1}{\\sqrt{n}}$.",
+  "caption": "La misma raíz explica por qué cuadruplicar la muestra solo reduce el error a la mitad."
+}
+:::
+
 ## Practica
 
 :::ejercicio

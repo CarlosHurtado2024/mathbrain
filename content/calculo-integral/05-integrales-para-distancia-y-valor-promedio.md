@@ -20,6 +20,15 @@ La integral de la velocidad da el desplazamiento. La distancia recorrida se obti
 Si v(t) = 2t m/s entre t = 0 y t = 3 s, el desplazamiento es [t²] de 0 a 3 = 9 m. Como la velocidad no es negativa, la distancia también es 9 m.
 :::
 
+:::visual
+{
+  "engine": "three",
+  "scene": "revolution",
+  "text": "Las integrales también miden volúmenes. Si la curva $y = \\sqrt{x}$ gira alrededor del eje $x$, cada corte es un círculo de área $\\pi x$ y el volumen es $\\pi \\int_0^4 x\\,dx = 8\\pi$.",
+  "caption": "Mueve el giro y observa cómo el área de cada corte se acumula en un volumen."
+}
+:::
+
 ## Practica
 
 :::ejercicio

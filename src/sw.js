@@ -5,7 +5,7 @@ const CACHE_NAME = 'mathbrain-shell-dev';
 const APP_ROOT = new URL('./', self.location.href);
 const SHELL_FILES = [
   './', './index.html', './styles.css', './space.css', './themes.css', './explore.css', './fresh.css', './zuka.css', './marketing.css', './identity.css', './app-ui.css', './theme.js',
-  './courses.js', './content.js', './exercises.js', './lesson-engine.js', './content-source.js', './library.js', './mascot.js', './config.js', './vendor/supabase/supabase.js', './vendor/qrcode/qrcodegen.js', './cloud.js', './network-hero.js', './landing.js', './app.js', './install.js',
+  './courses.js', './content.js', './exercises.js', './visuals.js', './lesson-engine.js', './content-source.js', './library.js', './mascot.js', './config.js', './vendor/supabase/supabase.js', './vendor/qrcode/qrcodegen.js', './cloud.js', './network-hero.js', './landing.js', './app.js', './install.js',
   './manifest.webmanifest', './assets/mark.svg',
   './assets/fonts/manrope-latin.woff2', './assets/fonts/OFL-Manrope.txt',
   './assets/autor-carlos.jpeg', './assets/icons/icon-192.png',
@@ -33,6 +33,10 @@ const SHELL_FILES = [
   './vendor/katex/fonts/KaTeX_Size4-Regular.woff2',
   './vendor/katex/fonts/KaTeX_Typewriter-Regular.woff2'
 ];
+// Librerías de visualización: pesan más de 2 MB juntas, así que no se descargan al instalar. Se guardan la
+// primera vez que una lección las usa y desde entonces funcionan sin conexión.
+const RUNTIME_FILES = ['./vendor/p5/p5.min.js', './vendor/jsxgraph/jsxgraphcore.js', './vendor/jsxgraph/jsxgraph.css', './vendor/three/three.module.min.js'];
+const RUNTIME_PATHS = new Set(RUNTIME_FILES.map(filename => new URL(filename, APP_ROOT).pathname));
 const SHELL_URLS = SHELL_FILES.map(filename => new URL(filename, APP_ROOT).href);
 const SHELL_PATHS = new Set(SHELL_URLS.map(address => new URL(address).pathname));
 
@@ -58,7 +62,7 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET' || address.origin !== APP_ROOT.origin || request.headers.has('range')) return;
   if (!address.pathname.startsWith(APP_ROOT.pathname)) return;
   const navigation = request.mode === 'navigate';
-  if (!navigation && !SHELL_PATHS.has(address.pathname)) return;
+  if (!navigation && !SHELL_PATHS.has(address.pathname) && !RUNTIME_PATHS.has(address.pathname)) return;
   const cacheKey = navigation ? new URL('./index.html', APP_ROOT).href : new URL(address.pathname, APP_ROOT.origin).href;
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);

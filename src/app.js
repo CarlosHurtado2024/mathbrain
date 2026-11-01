@@ -758,6 +758,7 @@
       + `<article class="reader ${resource.color}">${video || `<div class="reader-art">${artwork(resource)}</div>`}<div class="reader-body lesson-content">${resource.html}</div></article><div id="lesson-pager">${lessonPager(course, resource)}</div></div></div>`;
     document.title = `${resource.title} · ${course.title} | Zuka`;
     bindLessonExercises(resource);
+    selectAll('#detail-view figure[data-visual]').forEach(figure => window.ZUKA_VISUALS?.mount(figure));
     // En cursos largos, el temario lateral se desplaza hasta la lección actual.
     const aside = select('#lesson-outline');
     const current = document.querySelector('#lesson-outline .is-current');

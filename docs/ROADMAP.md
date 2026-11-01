@@ -67,9 +67,15 @@ Zuka avanza por etapas pequeñas: cada una se termina, se prueba en el celular y
 - Registro de desempeño en el dispositivo y en `exercise_attempts`.
 - Un ejercicio real de cada tipo nuevo en las lecciones.
 
+## ✅ Plataforma modular · Fase 3: motores de visualización
+
+- p5.js, JSXGraph y Three.js en `src/vendor/`, cargados solo cuando una lección los usa y guardados para usar sin conexión.
+- 10 escenas: tablero de Galton, paseos aleatorios, Monte Carlo, secante y tangente, sumas de Riemann, límites, vectores, superficies, sólido de revolución y transformaciones lineales.
+- Dos animaciones de Manim (49 y 42 s) con subtítulos en español y portada, generadas por `manim/render.py`.
+- Controles HTML accesibles, lectura en vivo, pausa fuera de pantalla y movimiento reducido.
+
 ## 🔜 Plataforma modular · Fases siguientes
 
-- Fase 3: motores de visualización (Manim, p5.js, JSXGraph, Three.js) como bloques `simulation`, `interactive_graph` y `visual_proof`.
 - Fase 4: unidades de microaprendizaje con secuencia flexible, `assessment` y `spaced_review`.
 - Fase 5: rutas, metas diarias opcionales, habilidades, retos semanales, logros de dominio y recomendaciones de repaso.
 

@@ -9,6 +9,12 @@ const katex = require('../vendor/katex/katex.min.js');
 const exerciseContext = vm.createContext({});
 vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'src', 'exercises.js'), 'utf8'), exerciseContext);
 const exerciseSystem = exerciseContext.ZUKA_EXERCISES;
+// Y el motor de visualizaciones valida cada escena (motor, nombre y parámetros).
+const visualContext = vm.createContext({});
+vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'src', 'visuals.js'), 'utf8'), visualContext);
+const visualSystem = visualContext.ZUKA_VISUALS;
+const VISUAL_BLOCKS = { p5: 'simulation', jsxgraph: 'interactive_graph', three: 'interactive_graph', manim: 'video' };
+const BLOCK_TYPES = new Set(['simulation', 'interactive_graph', 'visual_proof', 'application', 'concept', 'worked_example', 'video']);
 
 const root = path.resolve(__dirname, '..');
 const contentDirectory = path.join(root, 'content');
@@ -226,6 +232,29 @@ function interactive(lines, file, firstLine, id, number) {
   return spec;
 }
 
+// :::visual → escena interactiva (p5, jsxgraph o three) o video de Manim, escrito en JSON:
+//   { "engine": "jsxgraph", "scene": "riemann", "params": { "n": 6 }, "caption": "…", "text": "…" }
+//   { "engine": "manim", "src": "assets/videos/derivada.mp4", "captions": "assets/videos/derivada.vtt", "poster": "…" }
+// text (Markdown) va antes de la figura; caption es el pie. block elige el tipo de bloque si no basta el del motor.
+function visualBlock(lines, file, firstLine) {
+  let raw;
+  try { raw = JSON.parse(lines.join('\n')); } catch (error) { throw new ContentError(file, firstLine, `El bloque :::visual no es JSON válido: ${error.message}`); }
+  const errors = visualSystem.validate(raw);
+  if (errors.length) throw new ContentError(file, firstLine, `Visualización: ${errors.join(' ')}`);
+  const where = { file, line: firstLine };
+  const engine = raw.engine || visualSystem.SCENES[raw.scene]?.engine;
+  const type = raw.block || VISUAL_BLOCKS[engine];
+  if (!BLOCK_TYPES.has(type)) throw new ContentError(file, firstLine, `«block» debe ser uno de: ${[...BLOCK_TYPES].join(', ')}.`);
+  const html = raw.text ? blocks(raw.text.split('\n'), file, firstLine) : '';
+  const caption = raw.caption ? inline(raw.caption, where) : undefined;
+  if (engine === 'manim') {
+    for (const field of ['src', 'captions', 'poster']) if (raw[field] && !/^assets\/videos\/[\w.-]+$/.test(raw[field])) throw new ContentError(file, firstLine, `«${field}» debe ser un archivo de src/assets/videos/.`);
+    for (const field of ['src', 'captions', 'poster']) if (raw[field] && !fs.existsSync(path.join(root, 'src', raw[field]))) throw new ContentError(file, firstLine, `No existe src/${raw[field]}.`);
+    return { type: 'video', html, data: { src: raw.src, variant: 'manim', format: raw.format === 'vertical' ? 'vertical' : 'horizontal', ...(raw.captions ? { captions: raw.captions } : {}), ...(raw.poster ? { poster: raw.poster } : {}), ...(raw.title ? { title: raw.title } : {}), ...(caption ? { caption } : {}) } };
+  }
+  return { type, html, data: { visual: { engine, scene: raw.scene, ...(raw.params ? { params: raw.params } : {}), ...(raw.description ? { description: raw.description } : {}), ...(caption ? { caption } : {}) } } };
+}
+
 function compileLesson(source, file, id) {
   const lines = source.replace(/^﻿/, '').replace(/\r\n?/g, '\n').split('\n');
   if (lines[0].trim() !== '---') throw new ContentError(file, 1, 'La lección debe empezar con un bloque --- de datos (titulo, descripcion, video, etiquetas).');
@@ -245,6 +274,7 @@ function compileLesson(source, file, id) {
 
   const html = [];
   const specs = [];
+  const visuals = [];
   let key = '';
   let exercises = 0;
   let pending = [];
@@ -264,7 +294,10 @@ function compileLesson(source, file, id) {
     const inner = [];
     while (++index < lines.length && lines[index].trim() !== ':::') inner.push(lines[index]);
     if (index >= lines.length) throw new ContentError(file, start, `El bloque :::${type} no tiene cierre :::.`);
-    if (type === 'ejercicio' || type === 'interactivo') {
+    if (type === 'visual') {
+      visuals.push(visualBlock(inner, file, start + 1));
+      html.push(`<!--visual:${visuals.length - 1}-->`);
+    } else if (type === 'ejercicio' || type === 'interactivo') {
       exercises += 1;
       specs.push((type === 'ejercicio' ? exercise : interactive)(inner, file, start + 1, id, exercises));
       html.push(`<!--ejercicio:${specs.length - 1}-->`);
@@ -272,7 +305,7 @@ function compileLesson(source, file, id) {
       if (type === 'idea') key = key || plain(inner.join(' '));
       html.push(`<div class="${type === 'idea' ? 'key-concept' : type === 'ejemplo' ? 'example-box' : 'lesson-note'}"><h3>${blockTitles[type]}</h3>${blocks(inner, file, start + 1)}</div>`);
     } else {
-      throw new ContentError(file, start, `Bloque :::${type} desconocido. Usa :::idea, :::ejemplo, :::nota, :::ejercicio o :::interactivo.`);
+      throw new ContentError(file, start, `Bloque :::${type} desconocido. Usa :::idea, :::ejemplo, :::nota, :::ejercicio, :::interactivo o :::visual.`);
     }
     pendingLine = index + 2;
   }
@@ -282,19 +315,20 @@ function compileLesson(source, file, id) {
   const words = lines.slice(end + 1).join('\n').replace(/\$\$[\s\S]*?\$\$/g, ' f f f f ').replace(/\$[^$\n]*\$/g, ' f ').split(/\s+/).filter(word => /[\p{L}\p{N}]/u.test(word)).length;
   const minutes = Math.max(2, Math.round(words / 120));
   const fullHtml = html.join('');
-  return { id, title: data.titulo, description: data.descripcion, video: data.video || null, ...(data.formato === 'vertical' ? { videoFormat: 'vertical' } : {}), tags: data.etiquetas || '', unit: data.unidad || null, module: data.modulo || null, key, exercises, minutes, html: fullHtml, steps: splitSteps(fullHtml, specs) };
+  return { id, title: data.titulo, description: data.descripcion, video: data.video || null, ...(data.formato === 'vertical' ? { videoFormat: 'vertical' } : {}), tags: data.etiquetas || '', unit: data.unidad || null, module: data.modulo || null, key, exercises, minutes, html: fullHtml, steps: splitSteps(fullHtml, specs, visuals) };
 }
 
 // Divide la lección en pasos cortos para recorrerla una idea a la vez: cada subtítulo ##, cada bloque
 // :::idea, :::ejemplo y :::nota, y cada ejercicio forman su propio paso. Un subtítulo que queda solo
 // (como «## Practica») se une al paso siguiente. Un ejercicio es un paso con su especificación en data.exercise.
-function splitSteps(html, specs = []) {
+function splitSteps(html, specs = [], visuals = []) {
   const steps = [];
   let heading = '';
   const push = (type, part, data) => { steps.push({ type, html: heading + part, ...(data ? { data } : {}) }); heading = ''; };
-  for (const piece of html.split(/(<!--ejercicio:\d+-->)/).filter(Boolean)) {
-    const marker = piece.match(/^<!--ejercicio:(\d+)-->$/);
-    if (marker) { push('exercise', '', { exercise: specs[Number(marker[1])] }); continue; }
+  for (const piece of html.split(/(<!--(?:ejercicio|visual):\d+-->)/).filter(Boolean)) {
+    const marker = piece.match(/^<!--(ejercicio|visual):(\d+)-->$/);
+    if (marker?.[1] === 'ejercicio') { push('exercise', '', { exercise: specs[Number(marker[2])] }); continue; }
+    if (marker) { const block = visuals[Number(marker[2])]; push(block.type, block.html, block.data); continue; }
     for (const part of piece.split(/(?=<h2>)|(?=<div class="(?:key-concept|example-box|lesson-note)">)/).filter(section => section.trim())) {
       if (/^<h2>[\s\S]*?<\/h2>$/.test(part.trim())) heading += part;
       else push(part.startsWith('<div class="key-concept">') ? 'idea' : part.startsWith('<div class="example-box">') ? 'example' : part.startsWith('<div class="lesson-note">') ? 'note' : 'concept', part);

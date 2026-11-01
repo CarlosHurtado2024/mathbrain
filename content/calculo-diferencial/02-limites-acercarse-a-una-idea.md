@@ -20,6 +20,15 @@ Un límite describe el valor al que se aproxima una función. Ese valor puede ex
 Para x ≠ 1, (x² − 1)/(x − 1) = x + 1. Aunque la fracción no está definida en 1, cuando x se acerca a 1 su valor se acerca a 2.
 :::
 
+:::visual
+{
+  "engine": "jsxgraph",
+  "scene": "limit",
+  "text": "Mueve el deslizador para acercar los dos puntos a $x = 1$. La función no está definida ahí, pero sus valores se acercan a $2$ por ambos lados.",
+  "caption": "El límite describe hacia dónde van los valores, no el valor en el punto."
+}
+:::
+
 ## Practica
 
 :::ejercicio

@@ -1,0 +1,37 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:03.967
+La derivada mide qué tan rápido cambia una función en un punto.
+
+2
+00:00:03.967 --> 00:00:07.967
+Partimos de una curva y de un punto P sobre ella.
+
+3
+00:00:07.967 --> 00:00:11.967
+Tomamos otro punto Q, a una distancia h hacia la derecha.
+
+4
+00:00:11.967 --> 00:00:17.967
+La recta que pasa por P y por Q es una secante. Su pendiente es el cambio medio.
+
+5
+00:00:17.967 --> 00:00:26.933
+Ahora acercamos Q a P: h se hace cada vez más pequeña.
+
+6
+00:00:26.933 --> 00:00:33.900
+La secante gira y su pendiente se estabiliza.
+
+7
+00:00:33.900 --> 00:00:37.900
+La recta límite es la tangente en P.
+
+8
+00:00:37.900 --> 00:00:44.900
+Su pendiente, 0,84, es la derivada: el límite de las pendientes de las secantes.
+
+9
+00:00:44.900 --> 00:00:48.900
+Esa es la idea: la derivada es el cambio instantáneo.

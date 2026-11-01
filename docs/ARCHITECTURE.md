@@ -22,6 +22,7 @@ mathbrain/
 │   ├── courses.js           Programas de los cursos y sus módulos
 │   ├── library.js           Catálogo: simulaciones, ejercicios resueltos y búsqueda
 │   ├── exercises.js         Sistema de ejercicios: 12 tipos, validación, pistas y desempeño (window.ZUKA_EXERCISES)
+│   ├── visuals.js           Motores de visualización: escenas de p5.js, JSXGraph y Three.js (window.ZUKA_VISUALS)
 │   ├── lesson-engine.js     Motor de lecciones: un componente por tipo de bloque (window.ZUKA_ENGINE)
 │   ├── content-source.js    Lecciones y bloques desde Supabase, con respaldo local (window.ZUKA_CONTENT)
 │   ├── mascot.js            El destello ámbar en SVG y sus estados de ánimo
@@ -65,7 +66,7 @@ mathbrain/
 Orden de carga en `index.html`:
 
 1. `theme.js` (sin `defer`): aplica el tema guardado antes de pintar.
-2. Con `defer`, en orden: `courses.js` → `content.js` → `config.js` → `exercises.js` (`window.ZUKA_EXERCISES`) → `lesson-engine.js` (`window.ZUKA_ENGINE`) → `content-source.js` (aplica el índice de lecciones guardado de Supabase sobre `content.js`) → `library.js` (une lecciones, simulaciones y ejercicios en `window.MATHBRAIN_LIBRARY`) → `mascot.js` → `vendor/supabase/supabase.js` → `cloud.js` → `vendor/qrcode/qrcodegen.js` → `install.js` (`window.ZUKA_INSTALL`) → `landing.js` (`window.ZUKA_MARKETING`) → `app.js`.
+2. Con `defer`, en orden: `courses.js` → `content.js` → `config.js` → `exercises.js` (`window.ZUKA_EXERCISES`) → `visuals.js` (`window.ZUKA_VISUALS`) → `lesson-engine.js` (`window.ZUKA_ENGINE`) → `content-source.js` (aplica el índice de lecciones guardado de Supabase sobre `content.js`) → `library.js` (une lecciones, simulaciones y ejercicios en `window.MATHBRAIN_LIBRARY`) → `mascot.js` → `vendor/supabase/supabase.js` → `cloud.js` → `vendor/qrcode/qrcodegen.js` → `install.js` (`window.ZUKA_INSTALL`) → `landing.js` (`window.ZUKA_MARKETING`) → `app.js`.
 
 `app.js` es un módulo autoejecutable que lee el estado guardado, dibuja la vista según la dirección y escucha `hashchange`.
 
@@ -74,6 +75,12 @@ Orden de carga en `index.html`:
 Una lección es una secuencia de bloques `{ type, html, data }`. `lesson-engine.js` tiene un componente por tipo: su etiqueta, cómo se dibuja y, si hace falta, su comportamiento (`mount`). El reproductor de `app.js` no conoce los tipos: pide al motor el HTML, la etiqueta y si el bloque se califica (`graded`). Los tipos que acepta la base de datos son `challenge`, `video`, `concept`, `formula`, `worked_example`, `interactive_graph`, `simulation`, `exercise`, `step_by_step`, `visual_proof`, `application`, `assessment`, `summary` y `spaced_review`. Hoy tienen componente todos menos `interactive_graph`, `simulation`, `assessment` y `spaced_review`, que llegan en las fases 2 y 3 con `ZUKA_ENGINE.register()`; mientras tanto, un bloque de esos tipos sin HTML no se muestra.
 
 Los ejercicios son bloques `exercise` con su especificación en `data.exercise`. `exercises.js` define cada tipo con `render`, `mount`, `read` y `check`; `check` no toca el DOM, se prueba en `tests/exercises.test.cjs` y el compilador del contenido lo usa para validar. Cada intento llama a `onAttempt`, que `app.js` guarda en el dispositivo y envía a `exercise_attempts`.
+
+Las visualizaciones son bloques con `data.visual` (`{ engine, scene, params, caption }`). `visuals.js` define cada escena con su motor, su descripción accesible, sus parámetros (deslizadores HTML), sus acciones (botones) y `create`, que devuelve `destroy`, `resize`, `pause` y `resume`. La librería del motor se carga al mostrar la primera escena que la usa (p5.js y JSXGraph con `<script>`, Three.js con `import()`), sin recargar la página; el service worker la guarda entonces para usarla sin conexión. Cada escena se ajusta al ancho con `ResizeObserver`, se pausa fuera de la pantalla, respeta el movimiento reducido y escribe en una lectura `aria-live` lo que muestra. Al cambiar de vista se liberan lienzos, tableros y contextos WebGL.
+
+Las escenas de p5.js corren con un ciclo propio de `requestAnimationFrame` que llama a `redraw()` y avanza según el tiempo transcurrido, no según los cuadros.
+
+Los videos de Manim se producen fuera del navegador (`manim/`, ver su README) y llegan como bloques `video` con `variant: 'manim'`, subtítulos WebVTT y portada. No se convierten en escenas.
 
 `content-source.js` entrega los bloques al abrir una lección: primero los que hay en el dispositivo (los últimos de Supabase o los compilados) y, en segundo plano, los actuales de Supabase. Si cambiaron y la persona no ha avanzado, se muestran de inmediato. La posición dentro de la lección se guarda en `zuka-lecciones-en-curso` y en `lesson_sessions`, y la lección se retoma en ese bloque.
 

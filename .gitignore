@@ -10,3 +10,7 @@ node_modules/
 !.env.example
 *.log
 dist/
+
+# Animaciones de Manim: entorno de Python y cachés
+.manim/
+__pycache__/

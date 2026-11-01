@@ -29,6 +29,15 @@ $(f \circ g)(x) = f(g(x))$ aplica primero $g$. Una función uno a uno tiene inve
 Para $f(x) = \dfrac{2x + 3}{x - 1}$: de $y(x - 1) = 2x + 3$ sale $x(y - 2) = y + 3$, así que $f^{-1}(x) = \dfrac{x + 3}{x - 2}$. El dominio de $f^{-1}$ excluye $x = 2$, que es justamente el valor que $f$ nunca alcanza.
 :::
 
+:::visual
+{
+  "engine": "three",
+  "scene": "transform",
+  "text": "Las funciones también transforman el espacio. Este cubo pasa por una escala, una cizalla y un giro: componer transformaciones es aplicarlas una tras otra. Si la escala llega a $0$, el cubo se aplasta y ya no se puede deshacer: la transformación no tiene inversa.",
+  "caption": "El volumen se multiplica por el determinante; si vale 0, no hay inversa."
+}
+:::
+
 ## Practica
 
 :::ejercicio

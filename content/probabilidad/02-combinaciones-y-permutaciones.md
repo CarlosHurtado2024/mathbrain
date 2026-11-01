@@ -20,6 +20,15 @@ Si hay n opciones para una etapa y m para otra, hay n·m pares de opciones. Las 
 Para elegir 2 personas entre 5 sin asignar cargos, C(5,2) = 5!/(2!·3!) = 10. Si una será presidenta y la otra secretaria, hay 5·4 = 20 opciones.
 :::
 
+:::visual
+{
+  "engine": "p5",
+  "scene": "galton",
+  "text": "En el tablero de Galton, cada bola elige izquierda o derecha en cada fila. Para llegar a la casilla $k$ hay $\\binom{n}{k}$ caminos: por eso el centro se llena más.",
+  "caption": "La curva punteada es lo que predicen las combinaciones."
+}
+:::
+
 ## Practica
 
 :::ejercicio

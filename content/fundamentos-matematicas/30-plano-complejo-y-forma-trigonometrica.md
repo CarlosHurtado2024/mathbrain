@@ -33,6 +33,15 @@ En forma trigonométrica, $z = r\cis\theta$. Multiplicar complejos multiplica su
 Para $z = -1 + \sqrt{3}\,i$: el módulo es $r = \sqrt{1 + 3} = 2$. El punto está en el cuadrante II con $\tan\theta = -\sqrt{3}$, así que $\theta = 120^\circ$ y $z = 2\cis 120^\circ$.
 :::
 
+:::visual
+{
+  "engine": "jsxgraph",
+  "scene": "vectors",
+  "text": "En el plano complejo, sumar dos números es sumar vectores: $(a + bi) + (c + di)$ es la diagonal del paralelogramo. Arrastra $u$ y $v$ o usa los deslizadores.",
+  "caption": "La suma se hace componente a componente, como en los vectores."
+}
+:::
+
 ## Practica
 
 :::ejercicio

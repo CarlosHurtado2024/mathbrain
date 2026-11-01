@@ -84,6 +84,25 @@ Para los otros tipos de ejercicio, escribe su especificación en JSON dentro de 
 
 Todos aceptan `statement`, `visual` (`html` o `src` y `alt`, con `caption`), `hints` y `solution`. Hay un ejemplo de cada tipo en las lecciones 1.1, 1.3, 2.1, 2.4, 2.6, 3.1, 3.4 y 4.7 de Fundamentos, en Reglas de derivación y en la primera lección de Probabilidad.
 
+### Visualizaciones (`:::visual`)
+
+Una escena interactiva o una animación de Manim se escribe en JSON dentro de `:::visual`. `text` (Markdown y LaTeX) va antes de la figura y `caption` es el pie.
+
+```
+:::visual
+{ "engine": "jsxgraph", "scene": "riemann", "params": { "n": 6 }, "text": "Cambia el número de rectángulos.", "caption": "Más rectángulos, menos error." }
+:::
+```
+
+| Motor | Escenas | Para |
+| --- | --- | --- |
+| `p5` | `galton`, `random-walk`, `monte-carlo-pi` | Simulaciones, partículas, probabilidad y procesos estocásticos |
+| `jsxgraph` | `derivative-tangent`, `riemann`, `limit`, `vectors` | Funciones, límites, derivadas, integrales, geometría y vectores |
+| `three` | `surface`, `revolution`, `transform` | Superficies, sólidos y transformaciones en 3D |
+| `manim` | Un MP4 de `src/assets/videos/` con `captions` (.vtt) y `poster` | Animaciones de 30 a 90 segundos (ver `manim/README.md`) |
+
+El bloque es `simulation` (p5), `interactive_graph` (jsxgraph y three) o `video` (manim); `"block": "visual_proof"` lo cambia. La compilación valida la escena, sus parámetros y que los archivos del video existan. Para una escena nueva, añádela a `SCENES` en `src/visuals.js` con su descripción, parámetros y `create`.
+
 ### Cómo se divide en pasos
 
 Cada subtítulo `##`, cada bloque `:::idea`, `:::ejemplo` y `:::nota`, y cada `:::ejercicio` forman un paso. Un subtítulo que queda solo, como `## Practica`, se une al paso siguiente. Para lecciones más interactivas, intercala ejercicios entre las explicaciones en lugar de dejarlos todos al final. Un ejercicio de opción múltiple con exactamente dos opciones (por ejemplo `Verdadero` y `Falso`) se muestra como dos botones lado a lado. Al acertar se abre la `solucion` (la explicación de por qué) y tras un error, la `pista`: escríbelas para enseñar, no solo para dar el resultado. Cada lección debe tener al menos dos ejercicios.

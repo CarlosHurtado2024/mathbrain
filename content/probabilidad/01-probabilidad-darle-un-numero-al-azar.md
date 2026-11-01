@@ -20,6 +20,15 @@ La probabilidad de un evento está entre 0 y 1. El espacio muestral contiene tod
 Al lanzar un dado equilibrado, los resultados posibles son 1, 2, 3, 4, 5 y 6. El evento «obtener un par» es {2, 4, 6}, por lo que su probabilidad es 3/6 = 1/2.
 :::
 
+:::visual
+{
+  "engine": "p5",
+  "scene": "monte-carlo-pi",
+  "text": "La frecuencia también sirve para medir. Lanza puntos al azar en un cuadrado: la proporción que cae dentro del cuarto de círculo se acerca a $\\frac{\\pi}{4}$.",
+  "caption": "Con más puntos, la estimación se estabiliza: es la ley de los grandes números."
+}
+:::
+
 ## Practica
 
 :::ejercicio

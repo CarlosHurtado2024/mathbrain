@@ -30,30 +30,36 @@
   }
 
   // Video de YouTube o Vimeo, o un MP4 propio (por ejemplo, una animación de Manim) con subtítulos opcionales.
-  function videoHtml(src, { title = 'Video de la lección', vertical = false, captions = '' } = {}) {
+  function videoHtml(src, { title = 'Video de la lección', vertical = false, captions = '', poster = '' } = {}) {
     const source = videoSource(src);
     if (!source) return '';
     const isVertical = vertical || /\/shorts\//.test(src);
     const track = captions ? `<track kind="subtitles" srclang="es" label="Español" src="${escape(captions)}" default>` : '';
-    return `<div class="video-stage${isVertical ? ' is-vertical' : ''}">${source.type === 'iframe' ? `<iframe title="${escape(title)}" src="${escape(source.src)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>` : `<video controls playsinline preload="metadata" aria-label="${escape(title)}"><source src="${escape(source.src)}">${track}</video>`}</div>`;
+    return `<div class="video-stage${isVertical ? ' is-vertical' : ''}">${source.type === 'iframe' ? `<iframe title="${escape(title)}" src="${escape(source.src)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>` : `<video controls playsinline preload="metadata"${poster ? ` poster="${escape(poster)}"` : ''} aria-label="${escape(title)}"><source src="${escape(source.src)}" type="video/${/\.webm$/i.test(source.src) ? 'webm' : 'mp4'}">${track}<p>Tu navegador no puede reproducir este video.</p></video>`}</div>`;
   }
 
-  // Contenido común: un título opcional y el HTML del bloque (con LaTeX ya compilado por KaTeX).
-  const content = block => `${block.data.title ? `<h2>${escape(block.data.title)}</h2>` : ''}${block.html}`;
+  // Contenido común: un título opcional, el HTML del bloque (con LaTeX ya compilado por KaTeX) y, si el bloque
+  // trae data.visual, su escena interactiva (src/visuals.js: p5.js, JSXGraph o Three.js).
+  const visualKey = (block, context) => block.data.visual?.id || `${context.lessonId || 'leccion'}-visual-${context.index ?? 0}`;
+  const visual = (block, context = {}) => block.data.visual && window.ZUKA_VISUALS ? window.ZUKA_VISUALS.render(block.data.visual, visualKey(block, context)) : '';
+  const content = (block, context) => `${block.data.title ? `<h2>${escape(block.data.title)}</h2>` : ''}${block.html}${visual(block, context)}`;
+  const mountVisuals = element => element?.querySelectorAll?.('figure[data-visual]').forEach(figure => window.ZUKA_VISUALS?.mount(figure));
 
   const registry = new Map();
 
   function register(type, definition) {
-    registry.set(type, { label: '', render: content, ...definition });
+    registry.set(type, { label: '', render: content, mount: mountVisuals, ...definition });
   }
 
   register('challenge', { label: 'Reto inicial' });
   register('video', {
     label: 'Video',
     render: (block, context) => {
-      const player = videoHtml(block.data.src, { title: block.data.title || context.title, vertical: block.data.format === 'vertical', captions: block.data.captions });
-      return player ? `<h2>${escape(block.data.heading || 'Mira la clase')}</h2>${player}${block.html}` : block.html;
+      const player = videoHtml(block.data.src, { title: block.data.title || context.title, vertical: block.data.format === 'vertical', captions: block.data.captions, poster: block.data.poster });
+      const heading = block.data.heading || block.data.title || (block.data.variant === 'manim' ? 'Mira la animación' : 'Mira la clase');
+      return player ? `${block.html}<h2>${escape(heading)}</h2>${player}${block.data.caption ? `<p class="video-caption">${block.data.caption}</p>` : ''}` : block.html;
     },
+    variants: { manim: 'Animación' },
     immersive: block => block.data.format === 'vertical' || /\/shorts\//.test(block.data.src || '')
   });
   register('concept', { label: '', variants: { key: 'Idea clave', note: 'Atención' } });
@@ -86,6 +92,8 @@
     }
   });
   register('visual_proof', { label: 'Demostración visual' });
+  register('simulation', { label: 'Simulación' });
+  register('interactive_graph', { label: 'Gráfica interactiva' });
   register('application', { label: 'Aplicación' });
   register('summary', { label: 'Resumen' });
   register('intro', { label: 'Repaso' });
@@ -106,7 +114,7 @@
 
   // Solo se muestran los bloques que este motor sabe dibujar y que tienen algo que mostrar.
   function playable(blocks) {
-    return blocks.map(normalize).filter(block => registry.has(block.type) && (block.html || block.data.src || block.data.steps || block.data.exercise));
+    return blocks.map(normalize).filter(block => registry.has(block.type) && (block.html || block.data.src || block.data.steps || block.data.exercise || block.data.visual));
   }
 
   function definition(block) { return registry.get(block.type) || registry.get('concept'); }
@@ -120,7 +128,7 @@
   const mount = (block, element, context = {}) => { definition(block).mount?.(element, block, context); };
 
   // HTML de la lectura completa (una página): los bloques con componente propio se dibujan igual que en la lección.
-  const reading = (step, context = {}) => { const block = normalize(step); return block.data.exercise ? render(block, context) : block.html; };
+  const reading = (step, context = {}) => { const block = normalize(step); return block.data.exercise || block.data.visual || block.data.variant === 'manim' ? render(block, context) : block.html; };
 
   window.ZUKA_ENGINE = { TYPES, register, normalize, fromLesson, playable, graded, hasSolution, label, render, reading, immersive, mount, videoSource, videoHtml, has: type => registry.has(type) };
 })();

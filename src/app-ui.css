@@ -362,3 +362,29 @@ html[data-theme] .exercise-ask p { margin: 0; font-weight: 700; }
 @media (prefers-reduced-motion: reduce) {
   html[data-theme] :is(.exercise-order li, .exercise-zone, .exercise-sim-bar span) { transition: none; }
 }
+
+/* ---------- Visualizaciones (src/visuals.js): p5.js, JSXGraph y Three.js ----------
+   La figura ocupa el ancho de la tarjeta; los controles son HTML debajo de ella y la lectura en texto
+   dice lo que muestra la figura. */
+html[data-theme] .visual { display: grid; gap: 14px; margin: 18px 0 0; }
+html[data-theme] .visual-stage { position: relative; width: 100%; overflow: hidden; border-radius: 12px; background: var(--brand-inset); }
+html[data-theme] .visual-stage canvas { display: block; max-width: 100%; }
+html[data-theme] .visual-three .visual-stage { cursor: grab; }
+html[data-theme] .visual-three .visual-stage:active { cursor: grabbing; }
+html[data-theme] .visual-stage:focus-visible { outline: 3px solid var(--brand-primary); outline-offset: 3px; }
+html[data-theme] .visual-loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--brand-secondary); font-size: 14px; }
+html[data-theme] .visual-error { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 12px; padding: 16px; text-align: center; color: var(--brand-ink); font-size: 15px; }
+html[data-theme] .visual-error p { margin: 0; }
+html[data-theme] .visual-controls { display: grid; gap: 12px; }
+html[data-theme] .visual-param { display: grid; gap: 4px; color: var(--brand-ink); font-size: 15px; }
+html[data-theme] .visual-param span { display: flex; justify-content: space-between; gap: 12px; }
+html[data-theme] .visual-param output { color: var(--brand-primary); font-weight: 800; font-variant-numeric: tabular-nums; }
+html[data-theme] .visual-param input[type="range"] { width: 100%; min-height: 44px; accent-color: var(--brand-primary); }
+html[data-theme] .visual-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+html[data-theme] .visual-action[aria-pressed="true"] { border-color: var(--brand-primary); background: var(--brand-primary-soft); color: var(--brand-primary); }
+html[data-theme] .visual-readout { min-height: 3.2em; margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--brand-inset); color: var(--brand-ink); font-size: 14.5px; line-height: 1.55; font-variant-numeric: tabular-nums; }
+html[data-theme] .visual-readout:empty { display: none; }
+html[data-theme] .visual figcaption, html[data-theme] .video-caption { margin: 0; color: var(--brand-secondary); font-size: 14px; line-height: 1.55; }
+/* JSXGraph dibuja sus etiquetas en HTML: se alinean con la tipografía de la app. */
+html[data-theme] .visual-jsxgraph .visual-stage .JXGtext { font-family: Manrope, Arial, sans-serif !important; font-size: 13px !important; }
+html[data-theme] .video-stage video::cue { background: rgb(5 8 7 / .82); color: #f0f7f2; font-family: Manrope, Arial, sans-serif; }

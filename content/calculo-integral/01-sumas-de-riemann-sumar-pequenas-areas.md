@@ -20,6 +20,25 @@ Una suma de Riemann aproxima la acumulación mediante valores de la función mul
 Para f(x) = x² en [0,1], dos rectángulos por la derecha tienen ancho 1/2 y alturas 1/4 y 1. La suma es (1/2)·(1/4 + 1) = 0,625; el área exacta es 1/3.
 :::
 
+:::visual
+{
+  "engine": "manim",
+  "src": "assets/videos/suma-riemann.mp4",
+  "captions": "assets/videos/suma-riemann.vtt",
+  "poster": "assets/videos/suma-riemann.jpg",
+  "title": "Sumar rectángulos para medir un área"
+}
+:::
+
+:::visual
+{
+  "engine": "jsxgraph",
+  "scene": "riemann",
+  "text": "Cambia el número de rectángulos y la regla para elegir su altura. Compara cada suma con el área exacta.",
+  "caption": "Con más rectángulos, las tres reglas se acercan al mismo número."
+}
+:::
+
 ## Practica
 
 :::ejercicio

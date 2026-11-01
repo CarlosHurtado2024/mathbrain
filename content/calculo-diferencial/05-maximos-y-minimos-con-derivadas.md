@@ -20,6 +20,15 @@ En un extremo local interior de una función derivable, la derivada es cero. Una
 Para f(x) = x² − 4x + 5, f′(x) = 2x − 4 se anula en x = 2. La derivada pasa de negativa a positiva, así que hay un mínimo: f(2) = 1.
 :::
 
+:::visual
+{
+  "engine": "three",
+  "scene": "surface",
+  "text": "Las mismas ideas sirven con dos variables. Gira cada superficie: en un mínimo todo alrededor queda más alto; en un **punto de silla**, la superficie sube en una dirección y baja en otra.",
+  "caption": "Un punto donde la superficie es «plana» no siempre es un máximo ni un mínimo."
+}
+:::
+
 ## Practica
 
 :::ejercicio

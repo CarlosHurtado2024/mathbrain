@@ -1,0 +1,33 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.967
+¿Cuánto mide el área bajo esta curva, entre 0 y 4?
+
+2
+00:00:04.967 --> 00:00:10.967
+Una forma de aproximarla: cubrirla con cuatro rectángulos y sumar sus áreas.
+
+3
+00:00:10.967 --> 00:00:14.967
+Los rectángulos dejan huecos: la suma se queda corta.
+
+4
+00:00:14.967 --> 00:00:19.933
+Con ocho rectángulos más delgados, los huecos se reducen.
+
+5
+00:00:19.933 --> 00:00:24.900
+Con dieciséis, la suma se acerca todavía más.
+
+6
+00:00:24.900 --> 00:00:29.867
+Con sesenta y cuatro, casi no se distinguen de la curva.
+
+7
+00:00:29.867 --> 00:00:36.833
+Si seguimos sin límite, las sumas se acercan a un único número: la integral.
+
+8
+00:00:36.833 --> 00:00:41.833
+La integral definida es el límite de las sumas de Riemann.

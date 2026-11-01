@@ -34,7 +34,7 @@ Requiere Node.js 20 o superior. No hay dependencias de npm.
 2. **Siempre debe seguir siendo PWA:** `src/manifest.webmanifest`, `src/sw.js` e `src/install.js` funcionando, y la app usable sin conexión tras la primera visita. Si añades un archivo que la app necesita, agrégalo a `SHELL_FILES` en `src/sw.js`.
 3. **Mobile first.** Todo se comprueba a 375 px de ancho sin desplazamiento horizontal, y también en tableta y escritorio. En el celular la navegación es la barra inferior.
 4. **No cambiar las claves `mathbrain-*`** de `localStorage` ni el prefijo de caché `mathbrain-shell-`: son el progreso guardado de los estudiantes (nombre interno heredado de cuando la app se llamaba MathBrain). El nombre visible es **Zuka**.
-5. **Sin frameworks ni npm en el navegador.** HTML, CSS y JavaScript. Las librerías van copiadas en `src/vendor/` (KaTeX, `supabase-js` y Nayuki para generar el QR localmente); KaTeX compila las fórmulas al construir. Se conservan sus licencias.
+5. **Sin frameworks ni npm en el navegador.** HTML, CSS y JavaScript. Las librerías van copiadas en `src/vendor/` (KaTeX, `supabase-js`, Nayuki para el QR, p5.js 1.11.3, JSXGraph 1.10.1 y Three.js r170); KaTeX compila las fórmulas al construir y las de visualización se cargan solo cuando una lección las usa. Se conservan sus licencias.
 6. **Todo el texto visible en español**, con tono cercano y profesional, sin infantilismos.
 7. **Accesibilidad:** etiquetas en controles, foco visible, `aria-*` correctos, contraste AA y respeto de `prefers-reduced-motion`.
 8. **Pruebas:** `npm test` debe pasar antes de cada commit. Si cambias el comportamiento, añade o ajusta la prueba en `tests/`.
@@ -54,5 +54,6 @@ vendor/       KaTeX para compilar las fórmulas
 docs/         documentación del proyecto
 dist/         salida compilada (generada, ignorada por Git)
 supabase/     esquema de la base de datos (migraciones SQL)
+manim/        animaciones de Manim (Python) que se publican como MP4 en src/assets/videos/
 server.cjs    servidor local de desarrollo
 ```
