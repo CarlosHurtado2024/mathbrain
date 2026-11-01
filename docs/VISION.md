@@ -43,7 +43,7 @@ Muchos estudiantes llegan a la universidad con vacíos en álgebra, funciones y 
 
 ## Personalidad
 
-Zuka es cercana, clara y profesional. Su mascota es un destello verde que acompaña sin infantilizar: celebra los aciertos, anima tras un error y nunca regaña. El diseño usa morado para la identidad y las elecciones, verde para avanzar y celebrar, y superficies claras con espacio para concentrarse.
+Zuka es cercana, clara y profesional. Su mascota es un destello ámbar que acompaña sin infantilizar: celebra los aciertos, anima tras un error y nunca regaña. El diseño usa azul cobalto para la identidad, las elecciones y los aciertos, ámbar para avanzar y celebrar, y superficies claras con espacio para concentrarse.
 
 ## Qué no es Zuka
 

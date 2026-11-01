@@ -1,4 +1,4 @@
-/* Zuka · identidad compartida. Morado para elegir; verde para avanzar y celebrar. */
+/* Zuka · identidad compartida. Azul cobalto para elegir y responder; ámbar para avanzar y celebrar. */
 @font-face {
   font-family: 'Manrope';
   font-style: normal;
@@ -8,60 +8,62 @@
 }
 :root {
   --font-ui: 'Manrope', Arial, sans-serif;
-  --brand-primary: #6d43cf;
-  --brand-primary-hover: #5832b5;
+  --brand-primary: #2f5bea;
+  --brand-primary-hover: #2149cf;
   --brand-on-primary: #ffffff;
-  --brand-primary-soft: #f0eafa;
-  --brand-primary-line: #d6c9ed;
-  --brand-green: #147b4f;
-  --brand-green-hover: #0f623e;
-  --brand-on-green: #ffffff;
-  --brand-green-soft: #e9f7ee;
-  --brand-green-line: #b9dfc8;
-  --brand-canvas: #faf9fd;
+  --brand-primary-soft: #eaf0ff;
+  --brand-primary-line: #c7d5ff;
+  --brand-accent: #f59e0b;
+  --brand-accent-hover: #e08a00;
+  --brand-on-accent: #2b1a00;
+  --brand-accent-soft: #fff5df;
+  --brand-accent-line: #fbd58a;
+  --brand-accent-text: #8a5300;
+  --brand-canvas: #f7f9fc;
   --brand-surface: #ffffff;
-  --brand-inset: #f4f2f8;
-  --brand-ink: #262338;
-  --brand-secondary: #686477;
-  --brand-tertiary: #726c80;
-  --brand-disabled: #9b95a7;
-  --brand-line: #e7e3ee;
-  --brand-line-strong: #d2cbdf;
-  --brand-danger: #b33e55;
-  --brand-danger-soft: #fff0f3;
-  --brand-warning: #8a641f;
-  --brand-warning-soft: #fff7e8;
-  --brand-support: #29203e;
-  --brand-support-text: #f8f5ff;
-  --brand-support-muted: #d0c8de;
-  --brand-support-accent: #a8efbb;
+  --brand-inset: #eef2f8;
+  --brand-ink: #17203a;
+  --brand-secondary: #5e6678;
+  --brand-tertiary: #6b7385;
+  --brand-disabled: #9aa1b0;
+  --brand-line: #e2e7f0;
+  --brand-line-strong: #c9d1df;
+  --brand-danger: #c2410c;
+  --brand-danger-soft: #fff1ec;
+  --brand-warning: #8a5a00;
+  --brand-warning-soft: #fff5df;
+  --brand-support: #12214c;
+  --brand-support-text: #f5f8ff;
+  --brand-support-muted: #b8c6ee;
+  --brand-support-accent: #fbc95c;
   --brand-ease: cubic-bezier(.23, 1, .32, 1);
 }
 html[data-theme="dark"] {
-  --brand-primary: #b69aef;
-  --brand-primary-hover: #c8b0f6;
-  --brand-on-primary: #241637;
-  --brand-primary-soft: #2e2342;
-  --brand-primary-line: #5b457a;
-  --brand-green: #79dba4;
-  --brand-green-hover: #9ae8b9;
-  --brand-on-green: #122b20;
-  --brand-green-soft: #19372b;
-  --brand-green-line: #345a46;
-  --brand-canvas: #13101d;
-  --brand-surface: #1c1729;
-  --brand-inset: #241e32;
-  --brand-ink: #f1edf8;
-  --brand-secondary: #c0b7ce;
-  --brand-tertiary: #a99fb9;
-  --brand-disabled: #81778f;
-  --brand-line: #363044;
-  --brand-line-strong: #51465f;
-  --brand-danger: #f5a3b6;
-  --brand-danger-soft: #402330;
-  --brand-warning: #e9c67e;
-  --brand-warning-soft: #3a3020;
-  --brand-support: #231c33;
+  --brand-primary: #8aa8ff;
+  --brand-primary-hover: #a8bfff;
+  --brand-on-primary: #0d1630;
+  --brand-primary-soft: #18264d;
+  --brand-primary-line: #2f4a9a;
+  --brand-accent: #fbbf24;
+  --brand-accent-hover: #fcd05a;
+  --brand-on-accent: #2b1a00;
+  --brand-accent-soft: #3a2a0b;
+  --brand-accent-line: #7a5410;
+  --brand-accent-text: #fbbf24;
+  --brand-canvas: #0e1424;
+  --brand-surface: #161e33;
+  --brand-inset: #1c2640;
+  --brand-ink: #eef2fb;
+  --brand-secondary: #b4bccd;
+  --brand-tertiary: #9aa3b6;
+  --brand-disabled: #717a8e;
+  --brand-line: #28324b;
+  --brand-line-strong: #3c4867;
+  --brand-danger: #ff9f86;
+  --brand-danger-soft: #3d2219;
+  --brand-warning: #fcd05a;
+  --brand-warning-soft: #3a2a0b;
+  --brand-support: #0f1c40;
 }
 
 /* Puente de tokens para los componentes existentes y ambos temas. */
@@ -76,8 +78,8 @@ html[data-theme="dark"] {
   --fun-violet: var(--brand-primary);
   --fun-violet-dark: var(--brand-primary);
   --fun-violet-soft: var(--brand-primary-soft);
-  --fun-green: var(--brand-green);
-  --fun-green-dark: var(--brand-green);
+  --fun-green: var(--brand-accent);
+  --fun-green-dark: var(--brand-accent);
   --fun-orange: var(--brand-primary);
   --z-brand: var(--brand-primary);
   --z-brand-dark: var(--brand-primary);
@@ -90,7 +92,7 @@ html[data-theme="dark"] {
   --z-sidebar: var(--brand-canvas);
   --z-locked: var(--brand-inset);
   --z-locked-text: var(--brand-disabled);
-  --z-success: var(--brand-green);
+  --z-success: var(--brand-accent);
   --z-shadow: none;
   --z-radius: 16px;
   --m-bg: var(--brand-surface);
@@ -109,9 +111,9 @@ html[data-theme] :is(.purple, .blue, .rose) {
   --theme-accent: var(--brand-primary); --topic-wash: var(--brand-primary-soft);
 }
 html[data-theme] :is(.green, .sand, .slate) {
-  --fun: var(--brand-green); --fun-dark: var(--brand-green); --fun-soft: var(--brand-green-soft);
-  --card-accent: var(--brand-green); --card-bg: var(--brand-green-soft);
-  --theme-accent: var(--brand-green); --topic-wash: var(--brand-green-soft);
+  --fun: var(--brand-accent); --fun-dark: var(--brand-accent); --fun-soft: var(--brand-accent-soft);
+  --card-accent: var(--brand-accent); --card-bg: var(--brand-accent-soft);
+  --theme-accent: var(--brand-accent); --topic-wash: var(--brand-accent-soft);
 }
 html[data-theme] .topic-dot:is(.purple, .blue, .rose, .green, .sand, .slate) { background: var(--theme-accent); }
 
@@ -131,8 +133,8 @@ html[data-theme] :is(.button-primary, .m-button.is-primary) { color: var(--brand
 html[data-theme] :is(.button-primary, .m-button.is-primary):hover { background: var(--brand-primary-hover); border-color: var(--brand-primary-hover); }
 html[data-theme] :is(.button-secondary, .button-outline, .m-button.is-outline) { color: var(--brand-primary); background: var(--brand-surface); border-color: var(--brand-primary-line); }
 html[data-theme] :is(.button-secondary, .button-outline, .m-button.is-outline):hover { background: var(--brand-primary-soft); }
-html[data-theme] :is(.button-success, .player-continue, .home-next-button, .m-button.is-success) { color: var(--brand-on-green); background: var(--brand-green); border-color: var(--brand-green); }
-html[data-theme] :is(.button-success, .player-continue, .home-next-button, .m-button.is-success):hover { background: var(--brand-green-hover); border-color: var(--brand-green-hover); }
+html[data-theme] :is(.button-success, .player-continue, .home-next-button, .m-button.is-success) { color: var(--brand-on-accent); background: var(--brand-accent); border-color: var(--brand-accent); }
+html[data-theme] :is(.button-success, .player-continue, .home-next-button, .m-button.is-success):hover { background: var(--brand-accent-hover); border-color: var(--brand-accent-hover); }
 html[data-theme] :is(.button, .m-button):disabled { opacity: .5; transform: none; cursor: not-allowed; }
 html[data-theme] .m-button.is-small { min-height: 44px; padding: 10px 14px; font-size: 12px; }
 html[data-theme] .text-button { color: var(--brand-primary); }
@@ -176,12 +178,12 @@ html[data-theme] :is(.format-tab.active, .course-topic[aria-pressed="true"]) { c
 html[data-theme] :is(.home-next h2, .zcard-title h3, .course-school-heading .course-area) { font-weight: 700; }
 html[data-theme] .zcard-link { padding: 20px 24px; border-radius: 16px; }
 html[data-theme] .zcard-icon { border-radius: 14px; }
-html[data-theme] .znode.is-done .znode-disc { background: var(--brand-green-soft); color: var(--brand-green); }
-html[data-theme] .znode.is-done::before { background: var(--brand-green); }
+html[data-theme] .znode.is-done .znode-disc { background: var(--brand-accent-soft); color: var(--brand-accent-text); }
+html[data-theme] .znode.is-done::before { background: var(--brand-accent); }
 html[data-theme] .znode.is-review .znode-disc { color: var(--brand-primary); border-color: var(--brand-primary-line); background: var(--brand-primary-soft); }
 html[data-theme] .course-progress-track, html[data-theme] .profile-level-bar .course-progress-track { background: var(--brand-inset); }
-html[data-theme] .course-progress-track > span { background: var(--brand-green); }
-html[data-theme] :is(.zcard-status.is-done, .profile-badges li.is-earned .profile-badge-icon, .course-row-badge) { color: var(--brand-green); background: var(--brand-green-soft); }
+html[data-theme] .course-progress-track > span { background: var(--brand-accent); }
+html[data-theme] :is(.zcard-status.is-done, .profile-badges li.is-earned .profile-badge-icon, .course-row-badge) { color: var(--brand-accent-text); background: var(--brand-accent-soft); }
 html[data-theme] .profile-avatar { border: 0; background: transparent; }
 html[data-theme] .profile-header { border-bottom-color: var(--brand-line); }
 html[data-theme] .profile-auth-tabs { background: var(--brand-inset); }
@@ -199,25 +201,25 @@ html[data-theme] body.lesson-mode, html[data-theme] .player-top { background: va
 html[data-theme] .player-close { color: var(--brand-secondary); border-color: var(--brand-line); background: var(--brand-surface); }
 html[data-theme] .player-segments li { background: var(--brand-line); }
 html[data-theme] .player-segments li.is-current { background: var(--brand-primary); }
-html[data-theme] .player-segments li.is-done { background: var(--brand-green); }
+html[data-theme] .player-segments li.is-done { background: var(--brand-accent); }
 html[data-theme] .player-bar { background: var(--brand-surface); border-top-color: var(--brand-line); }
 html[data-theme] .lesson-choices label { color: var(--brand-ink); background: var(--brand-inset); border-color: var(--brand-line); }
 html[data-theme] .lesson-choices label:has(input:checked) { color: var(--brand-primary); background: var(--brand-primary-soft); border-color: var(--brand-primary); }
-html[data-theme] .lesson-exercise[data-state="correct"] .lesson-choices label:has(input:checked) { color: var(--brand-green); background: var(--brand-green-soft); border-color: var(--brand-green); }
+html[data-theme] .lesson-exercise[data-state="correct"] .lesson-choices label:has(input:checked) { color: var(--brand-accent-text); background: var(--brand-accent-soft); border-color: var(--brand-accent); }
 html[data-theme] .lesson-exercise[data-state="incorrect"] .lesson-choices label:has(input:checked) { color: var(--brand-danger); background: var(--brand-danger-soft); border-color: var(--brand-danger); }
 html[data-theme] .mascot-bubble { color: var(--brand-secondary); background: var(--brand-primary-soft); border-color: var(--brand-primary-line); }
-html[data-theme] .is-correct .mascot-bubble { color: var(--brand-green); background: var(--brand-green-soft); border-color: var(--brand-green-line); }
+html[data-theme] .is-correct .mascot-bubble { color: var(--brand-accent-text); background: var(--brand-accent-soft); border-color: var(--brand-accent-line); }
 html[data-theme] .is-retry .mascot-bubble { color: var(--brand-danger); background: var(--brand-danger-soft); border-color: var(--brand-danger); }
-html[data-theme] .player-bar:has(.is-correct) { background: var(--brand-green-soft); border-top-color: var(--brand-green-line); }
+html[data-theme] .player-bar:has(.is-correct) { background: var(--brand-accent-soft); border-top-color: var(--brand-accent-line); }
 html[data-theme] .player-bar:has(.is-retry) { background: var(--brand-danger-soft); border-top-color: var(--brand-danger); }
 html[data-theme] .is-correct .player-continue { box-shadow: none; }
 html[data-theme] .player-end { padding: 28px 24px; border-color: var(--brand-line); border-radius: 20px; }
 html[data-theme] .lesson-player:has(.player-end) .player-heading { display: none; }
 html[data-theme] .player-end-mascot { width: 188px; margin: 0 auto 16px; }
 html[data-theme] .player-end .player-end-title { color: var(--brand-ink); font-size: clamp(27px, 4vw, 34px); font-weight: 800; letter-spacing: -.03em; line-height: 1.2; }
-html[data-theme] .player-end .player-end-xp { display: grid; justify-items: center; gap: 4px; width: fit-content; min-width: 180px; margin: 24px auto; padding: 16px 28px; border-radius: 16px; background: var(--brand-green-soft); color: var(--brand-green); }
+html[data-theme] .player-end .player-end-xp { display: grid; justify-items: center; gap: 4px; width: fit-content; min-width: 180px; margin: 24px auto; padding: 16px 28px; border-radius: 16px; background: var(--brand-accent-soft); color: var(--brand-accent-text); }
 .player-end-xp > span { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
-.player-end-xp > strong { color: var(--brand-green); font-size: 38px; font-weight: 800; letter-spacing: -.04em; line-height: 1.2; }
+.player-end-xp > strong { color: var(--brand-accent-text); font-size: 38px; font-weight: 800; letter-spacing: -.04em; line-height: 1.2; }
 .player-end-accuracy { margin-top: 12px; color: var(--brand-secondary); font-size: 13px; }
 .zuka-spark { width: 100%; height: auto; }
 html[data-theme] .course-school-heading .course-area { font-size: 16px; font-weight: 700; letter-spacing: -.02em; text-transform: none; }

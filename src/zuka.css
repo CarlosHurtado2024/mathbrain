@@ -134,7 +134,7 @@ html[data-theme] .course-area { margin: 26px 0 6px; color: var(--z-text); font-s
 .zcard-title { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
 .zcard-title h3 { color: var(--z-text); font-size: 17px; font-weight: 800; letter-spacing: -.01em; }
 .zcard-status { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 999px; background: var(--z-soft); color: var(--z-brand-dark); font-size: 12px; font-weight: 700; }
-.zcard-status.is-done { background: var(--brand-green-soft); color: var(--brand-green); }
+.zcard-status.is-done { background: var(--brand-accent-soft); color: var(--brand-accent-text); }
 .zcard-status .icon { width: 13px; height: 13px; }
 .zcard-description { margin-top: 4px; color: var(--z-muted); font-size: 14px; line-height: 1.55; }
 .zcard-meta { margin-top: 8px; font-size: 12.5px; }
@@ -157,9 +157,9 @@ html[data-theme] .lesson-choices label { padding: 14px 16px; border-radius: 14px
 html[data-theme] .player-card .answer-row input[type="text"] { min-height: 52px; font-size: 18px; border-radius: 14px; }
 html[data-theme] .player-card .answer-row .button { min-height: 52px; border-radius: 14px; }
 html[data-theme] .player-card :is(.lesson-hint, .lesson-solution) { margin-top: 14px; border-radius: 14px; }
-html[data-theme="light"] .player-card .lesson-solution[open] { background: var(--brand-green-soft); border-color: var(--brand-green-line); }
+html[data-theme="light"] .player-card .lesson-solution[open] { background: var(--brand-accent-soft); border-color: var(--brand-accent-line); }
 html[data-theme="light"] .player-card .lesson-hint[open] { background: #fdf8ec; border-color: #f0dfb4; }
-.player-gain { display: inline-block; margin-left: 4px; padding: 1px 8px; border-radius: 999px; background: rgb(46 158 106 / .14); color: var(--z-success); font-size: 12.5px; font-weight: 700; }
+.player-gain { display: inline-block; margin-left: 4px; padding: 1px 8px; border-radius: 999px; background: rgb(182 121 22 / .14); color: var(--z-success); font-size: 12.5px; font-weight: 700; }
 html[data-theme] .player-bar .button-primary { min-height: 50px; padding-inline: 26px; font-size: 15.5px; }
 
 /* Videos: 16:9 por defecto y 9:16 para los verticales, sin ocupar más que la pantalla. */

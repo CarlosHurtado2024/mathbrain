@@ -31,12 +31,12 @@ html[data-theme] body.marketing-mode :is(#detail-view, #about-view) { padding: 0
 .m-button.is-outline { border-color: var(--m-line); background: transparent; color: var(--m-text); }
 .m-button.is-outline:hover { background: var(--m-cream); }
 .m-button.is-small { min-height: 40px; padding: 10px 16px; font-size: 11px; }
-.m-button.is-white { background: #f4f3e8; color: #233f37; }
+.m-button.is-white { background: #f4f3e8; color: #573a0b; }
 .m-menu { display: none; position: relative; }
 .m-menu summary { display: grid; place-items: center; width: 44px; height: 44px; cursor: pointer; list-style: none; }
 .m-menu summary::-webkit-details-marker { display: none; }
 .m-menu summary svg { width: 21px; height: 21px; }
-.m-menu nav { position: absolute; right: 0; top: 48px; display: grid; width: 230px; padding: 12px; border: 1px solid var(--m-line); border-radius: 12px; background: var(--m-surface); box-shadow: 0 15px 35px #152c1f12; }
+.m-menu nav { position: absolute; right: 0; top: 48px; display: grid; width: 230px; padding: 12px; border: 1px solid var(--m-line); border-radius: 12px; background: var(--m-surface); box-shadow: 0 15px 35px #3a260712; }
 .m-menu nav a { padding: 12px; font-size: 13px; font-weight: 600; }
 .m-eyebrow { margin-bottom: 16px; color: var(--m-accent); font-size: 11px; font-weight: 800; letter-spacing: .12em; line-height: 1.6; }
 .m-hero { display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; gap: 70px; padding-block: 72px 80px; }

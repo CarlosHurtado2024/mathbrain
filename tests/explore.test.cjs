@@ -302,11 +302,15 @@ test('Inicio, detalle del curso y recursos siguen siendo accesibles', () => {
   assert.equal(app.node('#home-view').hidden, false);
   assert.equal(app.node('#courses-view').hidden, true);
   const home = app.node('#today-panel').innerHTML;
-  assert.match(home, /Primera lección · 1\.1<\/small>Sistemas numéricos y números reales/);
-  assert.equal((home.match(/class="button button-primary/g) || []).length, 1, 'El inicio tiene un solo botón principal');
-  assert.match(home, /href="#contenido\/fundamentos-matematicas-1">[\s\S]*Empezar a aprender/);
-  assert.match(home, /Tu camino[\s\S]*Números reales y aritmética/);
-  assert.doesNotMatch(home, /znode-pop/);
+  // El inicio es un carrusel: un curso por tarjeta, cada una con un solo botón para empezar.
+  const slides = [...home.matchAll(/<article class="spotlight-slide [^"]*"[\s\S]*?<\/article>/g)].map(match => match[0]);
+  assert.equal(slides.length, 5);
+  assert.match(slides[0], /<h2 id="slide-fundamentos-matematicas">Fundamentos de Matemáticas<\/h2><p class="spotlight-level">UNIDAD 1 · RECOMENDADO<\/p>/);
+  assert.match(slides[0], /Primera lección<\/small><strong>Sistemas numéricos y números reales<\/strong>/);
+  assert.match(slides[0], /<strong>Razones, proporciones y proporcionalidad<\/strong>/);
+  for (const slide of slides) assert.equal((slide.match(/class="button spotlight-start"/g) || []).length, 1);
+  assert.match(slides[0], /href="#contenido\/fundamentos-matematicas-1">Empezar<\/a>/);
+  assert.equal((home.match(/data-spotlight="/g) || []).length, 5);
   app.navigate('#curso/fundamentos-matematicas');
   assert.equal(app.node('#courses-view').hidden, true);
   assert.equal(app.node('#detail-view').hidden, false);
@@ -443,7 +447,7 @@ test('Completar lecciones actualiza el camino, el catálogo y el panel del inici
   app.navigate('#explorar');
   assert.match(app.node('#course-grid').innerHTML, /<span class="zcard-status">40 %<\/span>/);
   app.navigate('#');
-  assert.match(app.node('#today-panel').innerHTML, /Siguiente lección · 2\.1<\/small>Probabilidad condicional e independencia[\s\S]*Continuar aprendiendo/);
+  assert.match(app.node('#today-panel').innerHTML, /<h2 id="slide-probabilidad">Probabilidad<\/h2><p class="spotlight-level">MÓDULO 2 · EN CURSO<\/p>[\s\S]*?Siguiente<\/small><strong>Probabilidad condicional e independencia<\/strong>[\s\S]*?>Continuar<\/a>/);
   app.navigate('#contenido/probabilidad-1?vista=lectura');
   app.click(app.all('[data-complete="probabilidad-1"]').at(-1));
   assert.match(app.node('#lesson-pager').innerHTML, /aria-pressed="false"/);
@@ -695,7 +699,7 @@ test('La recuperación de contraseña no redirige hasta guardar la contraseña y
   assert.equal(app.location.hash, '#contenido/probabilidad-2');
   const other = environment('#registro?continuar=https%3A%2F%2Fejemplo.com', undefined, registeredCloud());
   assert.equal(other.location.hash, '#');
-  assert.match(other.node('#today-panel').innerHTML, /Empezar a aprender/);
+  assert.match(other.node('#today-panel').innerHTML, /class="button spotlight-start" href="#contenido\/fundamentos-matematicas-1">Empezar</);
 });
 
 test('Sin Supabase se puede explorar la primera lección pero no se habilita todo el contenido', () => {
@@ -820,7 +824,7 @@ test('Las páginas públicas conservan el panel del estudiante y el acceso limit
   assert.match(app.node('#detail-view').innerHTML, /Mi aprendizaje/);
   app.navigate('#');
   assert.equal(app.document.body.classList.contains('marketing-mode'), false);
-  assert.match(app.node('#today-panel').innerHTML, /Empezar a aprender/);
+  assert.match(app.node('#today-panel').innerHTML, /class="button spotlight-start" href="#contenido\/fundamentos-matematicas-1">Empezar</);
   const guest = environment('#programa/ingenieria', undefined, guestCloud());
   guest.navigate('#contenido/calculo-diferencial-2');
   assert.equal(guest.document.body.classList.contains('marketing-mode'), false);

@@ -1,0 +1,121 @@
+/*
+  Zuka · interfaz de la app (se carga al final).
+  Inicio con carrusel de cursos, barra de lección con «Comprobar», catálogo por categorías y perfil con cifras.
+  Paleta: azul cobalto para elegir y acertar; ámbar para avanzar, XP y racha. Sin morado ni verde.
+*/
+
+/* Colores de cada curso: cobalto, cielo, ámbar, coral y rosa. */
+html[data-theme] .purple { --fun: #2f5bea; --fun-dark: #2149cf; --fun-soft: #eaf0ff; --fun-ink: #ffffff; }
+html[data-theme] .blue { --fun: #0284c7; --fun-dark: #0369a1; --fun-soft: #e0f2fe; --fun-ink: #ffffff; }
+html[data-theme] .sand { --fun: #f59e0b; --fun-dark: #b45309; --fun-soft: #fff5df; --fun-ink: #2b1a00; }
+html[data-theme] .green { --fun: #fb7c3c; --fun-dark: #c2410c; --fun-soft: #fff1e7; --fun-ink: #2b1200; }
+html[data-theme] .slate { --fun: #e11d48; --fun-dark: #be123c; --fun-soft: #ffe4ea; --fun-ink: #ffffff; }
+html[data-theme] .rose { --fun: #db2777; --fun-dark: #9d174d; --fun-soft: #fce7f3; --fun-ink: #ffffff; }
+html[data-theme="dark"] :is(.purple, .blue, .sand, .green, .slate, .rose) { --fun-soft: color-mix(in srgb, var(--fun) 18%, transparent); --fun-dark: color-mix(in srgb, var(--fun) 70%, white); }
+
+/* Botón con relieve, como una tecla: se hunde al pulsarlo. */
+.button-3d, .spotlight-start, html[data-theme] .player-actions .button {
+  box-shadow: 0 4px 0 var(--key-shadow, rgb(0 0 0 / .22));
+  transition: transform .08s ease, box-shadow .08s ease;
+}
+.button-3d:active, .spotlight-start:active, html[data-theme] .player-actions .button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--key-shadow, rgb(0 0 0 / .22)); }
+
+/* ---------- Inicio: carrusel de cursos ---------- */
+.home-spotlight { max-width: 560px; gap: 18px; }
+.home-top { text-align: center; }
+.home-top h1 { color: var(--brand-ink); font-size: clamp(24px, 3vw, 30px); font-weight: 800; letter-spacing: -.03em; }
+.home-top h1:focus { outline: none; }
+.home-top p { margin-top: 4px; color: var(--brand-secondary); font-size: 15px; }
+.home-top .home-goal { margin-top: 10px; }
+/* El carrusel no debe ensanchar la cuadrícula del inicio: se ajusta al ancho disponible. */
+.home-spotlight > * { min-width: 0; }
+.spotlight { min-width: 0; margin-inline: -16px; overflow: hidden; }
+.spotlight-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+.spotlight-track::-webkit-scrollbar { display: none; }
+.spotlight-slide { flex: 0 0 100%; scroll-snap-align: center; display: grid; justify-items: center; gap: 6px; padding: 4px 16px; text-align: center; }
+.spotlight-slide h2 { color: var(--brand-ink); font-size: clamp(26px, 7vw, 32px); font-weight: 800; letter-spacing: -.03em; line-height: 1.15; }
+.spotlight-level { color: var(--fun-dark, var(--brand-primary)); font-size: 13px; font-weight: 800; letter-spacing: .08em; }
+.spotlight-art { position: relative; width: min(230px, 62vw); aspect-ratio: 1; margin: 10px 0 14px; }
+.spotlight-art > svg { width: 100%; height: 100%; border-radius: 32px; }
+.spotlight-symbol { position: absolute; right: 14px; bottom: 12px; padding: 4px 12px; border-radius: 12px; background: var(--brand-surface); color: var(--fun-dark, var(--brand-primary)); font: italic 800 24px/1.2 var(--sans); box-shadow: 0 2px 8px rgb(23 32 58 / .12); }
+.spotlight-card { width: 100%; padding: 14px 16px 16px; border: 1px solid var(--brand-line); border-radius: 26px; background: var(--brand-surface); box-shadow: 0 1px 2px rgb(23 32 58 / .05), 0 14px 30px -22px rgb(23 32 58 / .35); text-align: left; }
+.spotlight-lessons { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.spotlight-lessons li { display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: center; gap: 14px; padding: 4px 2px; }
+.spotlight-mascot { width: 64px; }
+.spotlight-mascot svg { width: 100%; height: auto; }
+.spotlight-pedestal { display: grid; place-items: center; width: 64px; height: 48px; color: var(--brand-secondary); }
+.spotlight-pedestal svg { width: 52px; }
+.spotlight-lesson { display: grid; gap: 1px; min-width: 0; }
+.spotlight-lesson small { color: var(--fun-dark, var(--brand-primary)); font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.spotlight-lesson strong { color: var(--brand-ink); font-size: 16.5px; font-weight: 800; line-height: 1.3; }
+.spotlight-lessons li:not(.is-current) strong { color: var(--brand-secondary); font-weight: 600; }
+.spotlight-start { --key-shadow: var(--fun-dark, var(--brand-primary-hover)); display: flex !important; align-items: center; justify-content: center; width: 100%; min-height: 54px; margin: 12px 0 0 !important; border: 0 !important; border-radius: 16px !important; background: var(--fun, var(--brand-primary)) !important; color: var(--fun-ink, #fff) !important; font-size: 17px !important; font-weight: 800; }
+.spotlight-dots { display: flex; justify-content: center; gap: 2px; margin-top: 14px; }
+.spotlight-dot { display: grid; place-items: center; width: 28px; height: 28px; }
+.spotlight-dot::after { content: ''; width: 8px; height: 8px; border-radius: 4px; background: var(--brand-line-strong); transition: width .2s ease, background .2s ease; }
+.spotlight-dot.is-active::after { width: 22px; background: var(--brand-primary); }
+
+/* ---------- Lección: barra inferior con «Comprobar» ---------- */
+/* El botón propio del ejercicio se sustituye por el de la barra (Enter sigue comprobando). */
+html[data-theme] .player-card .lesson-exercise .answer-row > .button { display: none; }
+html[data-theme] .player-bar-inner { display: grid; gap: 10px; align-items: stretch; }
+.player-verdict { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 0; }
+.player-verdict:not(:has(*)) { display: none; }
+.player-verdict p { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0; color: var(--brand-ink); font-size: 15px; }
+.player-verdict p strong { font-size: 21px; font-weight: 800; letter-spacing: -.01em; }
+.player-verdict p:empty { display: none; }
+.player-link { flex-shrink: 0; padding: 9px 16px; border-radius: 999px; background: color-mix(in srgb, var(--brand-ink) 7%, transparent); color: var(--brand-ink); font-size: 14px; font-weight: 700; }
+.player-link:hover { background: color-mix(in srgb, var(--brand-ink) 12%, transparent); }
+.player-verdict:has(> p:empty) { justify-content: flex-end; }
+.player-bar-row { display: flex; align-items: center; gap: 12px; }
+.player-mascot { flex: 0 0 52px; width: 52px; }
+.player-mascot svg { width: 100%; height: auto; }
+html[data-theme] .player-actions { flex: 1; display: flex; }
+html[data-theme] .player-actions .button { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 54px; border: 0; border-radius: 16px; font-size: 17px; font-weight: 800; }
+html[data-theme] .player-actions .button-primary { --key-shadow: var(--brand-primary-hover); background: var(--brand-primary); color: var(--brand-on-primary); }
+html[data-theme] .player-actions [data-player-retry] { --key-shadow: var(--brand-accent-hover); background: var(--brand-accent); color: var(--brand-on-accent); }
+html[data-theme] .player-bar:has(.is-correct) { background: var(--brand-primary-soft); border-top-color: var(--brand-primary-line); }
+html[data-theme] .player-bar:has(.is-correct) .player-verdict strong { color: var(--brand-primary); }
+html[data-theme] .player-bar:has(.is-retry) { background: var(--brand-accent-soft); border-top-color: var(--brand-accent-line); }
+html[data-theme] .player-bar:has(.is-retry) .player-verdict strong { color: var(--brand-accent-text); }
+.player-gain { padding: 2px 9px; border-radius: 999px; background: var(--brand-accent); color: var(--brand-on-accent); font-size: 13px; font-weight: 800; }
+/* Opciones grandes, fáciles de tocar. */
+html[data-theme] .player-card .lesson-choices label { min-height: 54px; border-width: 2px; font-weight: 600; }
+html[data-theme] .player-card .lesson-choices label:has(input:checked) { border-color: var(--brand-primary); background: var(--brand-primary-soft); }
+html[data-theme] .lesson-exercise[data-state="correct"] .lesson-choices label:has(input:checked) { border-color: var(--brand-primary); color: var(--brand-primary); background: var(--brand-primary-soft); }
+html[data-theme] .lesson-exercise[data-state="incorrect"] .lesson-choices label:has(input:checked) { border-color: var(--brand-accent); background: var(--brand-accent-soft); }
+
+/* ---------- Catálogo: categorías en fila y cursos conectados ---------- */
+html[data-theme] .course-topics { display: flex; flex-wrap: nowrap; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 6px; }
+html[data-theme] .course-topics::-webkit-scrollbar { display: none; }
+html[data-theme] .course-topic { flex-shrink: 0; min-height: 44px; padding: 0 18px; border: 2px solid var(--brand-line); border-radius: 14px; background: var(--brand-surface); color: var(--brand-secondary); font-weight: 800; }
+html[data-theme] .course-topic[aria-pressed="true"] { border-color: var(--brand-primary); background: var(--brand-primary-soft); color: var(--brand-primary); }
+.course-school { position: relative; }
+.course-school .zcard + .zcard { margin-top: 14px; }
+.course-school .zcard + .zcard::before { content: ''; position: absolute; left: 50%; top: -14px; width: 2px; height: 14px; background: var(--brand-line-strong); }
+.course-school .zcard { position: relative; }
+html[data-theme] .zcard-link { border-width: 2px; border-radius: 22px; box-shadow: 0 3px 0 var(--brand-line); }
+html[data-theme] .zcard-link:hover { border-color: var(--fun, var(--brand-primary)); }
+html[data-theme] .zcard-icon { width: 64px; height: 64px; border-radius: 18px; background: var(--fun-soft); color: var(--fun-dark); font-size: 21px; }
+html[data-theme] .zcard .course-progress-track > span, html[data-theme] .home-next .course-progress-track > span { background: var(--fun, var(--brand-primary)); }
+
+/* ---------- Perfil: inicial y cifras ---------- */
+.profile-hero { align-items: center; }
+.profile-initial { display: grid; place-items: center; flex: 0 0 76px; width: 76px; height: 76px; overflow: hidden; border-radius: 50%; background: var(--brand-accent); color: var(--brand-on-accent); font-size: 34px; font-weight: 800; }
+.profile-initial svg { width: 88%; height: auto; }
+html[data-theme] .profile-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+html[data-theme] .profile-stats li { padding: 16px 18px; border: 2px solid var(--brand-line); border-radius: 20px; background: var(--brand-surface); }
+html[data-theme] .profile-stats li strong { color: var(--brand-ink); font-size: 30px; font-weight: 800; }
+html[data-theme] .profile-stats .icon { width: 24px; height: 24px; }
+html[data-theme] .profile-stats li:nth-child(1) .icon, html[data-theme] .profile-stats li:nth-child(3) .icon { color: var(--brand-accent); fill: color-mix(in srgb, var(--brand-accent) 30%, transparent); }
+html[data-theme] .profile-stats li:nth-child(2) .icon { color: var(--brand-accent); fill: var(--brand-accent); }
+html[data-theme] .profile-stats li:nth-child(4) .icon { color: var(--brand-primary); }
+
+@media (min-width: 900px) {
+  .spotlight { margin-inline: 0; }
+  .spotlight-slide { padding-inline: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spotlight-track { scroll-behavior: auto; }
+  .spotlight-start, html[data-theme] .player-actions .button { transition: none; }
+}

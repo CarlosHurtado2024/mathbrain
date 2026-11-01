@@ -98,6 +98,7 @@
     star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/>',
     lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-4 4.3-6 8-6s6.8 2 8 6"/>',
+    bolt: '<path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/>',
     list: '<path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>'
   };
 
@@ -184,13 +185,13 @@
     // En el tema claro, las ilustraciones usan fondos suaves y trazos de colores vivos.
     const light = document.documentElement?.dataset?.theme === 'light';
     const palette = (light ? {
-      blue: ['#e1f5fe', '#1899d6', '#ff9f1c'], sand: ['#fff2e0', '#f08a00', '#7c5cff'],
-      green: ['#e3f9ec', '#1a9e56', '#1cb0f6'], purple: ['#f1ecff', '#6d3fe0', '#ff6f91'],
-      rose: ['#ffe6f1', '#e0457f', '#1cb0f6'], slate: ['#ddf7f3', '#0f9488', '#ff9f1c']
+      blue: ['#e1f5fe', '#1899d6', '#ff9f1c'], sand: ['#fff2e0', '#f08a00', '#5c87ff'],
+      green: ['#fbf1e1', '#a46d14', '#1cb0f6'], purple: ['#ecf1ff', '#3f6ae0', '#ff6f91'],
+      rose: ['#ffe6f1', '#e0457f', '#1cb0f6'], slate: ['#faeeda', '#94610f', '#ff9f1c']
     } : {
-      blue: ['#11263d', '#8dc8ed', '#b0e7df'], sand: ['#30253b', '#e1bd99', '#b7a9ed'],
-      green: ['#12312f', '#9fd6be', '#d8d9a1'], purple: ['#241e42', '#bca5ed', '#8adbd8'],
-      rose: ['#322039', '#e2a6c4', '#9ac8e9'], slate: ['#12313c', '#9bd7d5', '#dcd0a5']
+      blue: ['#11263d', '#8dc8ed', '#f4d5a3'], sand: ['#12224e', '#e1bd99', '#a9bbed'],
+      green: ['#3c2807', '#f0c785', '#d8d9a1'], purple: ['#12224e', '#a5b8ed', '#eec077'],
+      rose: ['#112048', '#e2a6c4', '#9ac8e9'], slate: ['#12313c', '#f0c682', '#dcd0a5']
     })[resource.color];
     const [background, primary, accent] = palette;
     const patternId = `art-grid-${artworkSequence}`;
@@ -285,7 +286,8 @@
     return started[0] || courses.find(course => courseProgress(course).done < courseProgress(course).total) || courses[0];
   }
 
-  // Inicio: un panel de aprendizaje. Saludo, la siguiente lección con un único botón principal y la unidad en curso.
+  // Inicio con cuenta: un carrusel de cursos. Cada tarjeta muestra el curso, su unidad, la lección actual
+  // (con la mascota) y la siguiente, y un solo botón para empezar. La primera es el curso en el que la persona va.
   function renderHome() {
     if (accountPending()) {
       select('#today-panel').innerHTML = '<section class="welcome" aria-labelledby="home-title"><h1 id="home-title" tabindex="-1">Preparando tu espacio…</h1><p role="status">Estamos comprobando tu sesión.</p></section>';
@@ -293,25 +295,53 @@
     }
     if (!hasAccount()) { renderWelcome(); return; }
     document.body?.classList.toggle('marketing-mode', false);
-    const course = activeCourse();
-    const progress = courseProgress(course);
-    const state = pathState(course);
-    const next = progress.next;
-    const unit = state.modules.find(module => module.lessons.some(({ lesson }) => lesson.id === next.id)) || state.modules[0];
-    const label = unit.lessons.find(({ lesson }) => lesson.id === next.id)?.label;
-    const started = completed.size > 0;
+    const first = activeCourse();
+    const inProgress = course => { const progress = courseProgress(course); return progress.done > 0 && progress.done < progress.total; };
+    const ordered = [first, ...courses.filter(course => course !== first && inProgress(course)), ...courses.filter(course => course !== first && !inProgress(course))];
     const name = loadProfile().name;
     const goal = weeklyGoal();
-    const others = courses.filter(candidate => candidate !== course && courseProgress(candidate).done > 0);
-    const title = started ? `${greeting()}${name ? `, ${escape(name)}` : ''}` : `¡Hola${name ? `, ${escape(name)}` : ''}! Soy ${mascot.name || 'Zuka'}`;
-    const lead = started ? `Sigues en <strong>${escape(course.title)}</strong>. Tu siguiente paso ya está listo.` : 'Aprende matemáticas resolviendo, una idea a la vez. Te sugerimos empezar por aquí.';
-    select('#today-panel').innerHTML = `<div class="home-dash">`
-      + `<header class="home-greeting"><span class="home-mascot" aria-hidden="true">${mascot.svg(started ? 'feliz' : 'saluda')}</span><div><h1 id="home-title" tabindex="-1">${title}</h1><p>${lead}</p>${goal.target ? `<p class="home-goal">${icon('check')}Meta semanal: ${goal.done} de ${goal.target} días${goal.done >= goal.target ? ' · ¡cumplida!' : ''}</p>` : ''}</div></header>`
-      + `<article class="home-next ${course.color}" aria-labelledby="home-next-title"><p class="home-next-course"><span class="home-next-symbol" aria-hidden="true">${courseSymbol(course)}</span>${escape(course.title)} · ${escape(unit.kicker)}</p><h2 id="home-next-title"><small>${progress.done ? 'Siguiente lección' : 'Primera lección'}${label ? ` · ${escape(label)}` : ''}</small>${escape(next.title)}</h2><p class="home-next-description">${escape(next.description)}</p><p class="home-next-meta">${lessonMeta(next)}</p>${progress.done ? progressBar(progress) : ''}<a class="button button-primary button-big home-next-button" href="#contenido/${next.id}">${icon('play')}${started ? 'Continuar aprendiendo' : 'Empezar a aprender'}</a></article>`
-      + `<section class="home-path" aria-labelledby="home-path-title"><div class="home-section-head"><h2 id="home-path-title">Tu camino</h2><a class="text-button" href="#curso/${course.id}">Ver el curso completo${icon('right')}</a></div>${pathUnit(course, unit, state, { popup: false })}</section>`
-      + (others.length ? `<section class="home-others" aria-labelledby="home-others-title"><h2 id="home-others-title">También estudias</h2><ul>${others.map(other => { const otherProgress = courseProgress(other); return `<li class="${other.color}"><a href="#curso/${other.id}"><span class="home-next-symbol" aria-hidden="true">${courseSymbol(other)}</span><span><strong>${escape(other.title)}</strong>${progressBar(otherProgress, false)}</span><small>${otherProgress.percent} %</small></a></li>`; }).join('')}</ul></section>` : '')
-      + `<p class="home-explore">¿Buscas otro tema? <a href="#explorar">Explora los cursos</a></p>${started && cloud()?.state.available && cloud()?.state.ready && !cloud()?.state.user ? '<p class="home-explore home-account">Guarda tu progreso en la nube: <a href="#perfil">crea tu cuenta gratis</a></p>' : ''}</div>`;
+    const title = completed.size ? `${greeting()}${name ? `, ${escape(name)}` : ''}` : `¡Hola${name ? `, ${escape(name)}` : ''}!`;
+    select('#today-panel').innerHTML = `<div class="home-dash home-spotlight">`
+      + `<header class="home-top"><h1 id="home-title" tabindex="-1">${title}</h1><p>${completed.size ? 'Elige un curso y sigue donde lo dejaste.' : 'Elige un curso para empezar. Cada lección toma unos minutos.'}</p>${goal.target ? `<p class="home-goal">${icon('check')}Meta semanal: ${goal.done} de ${goal.target} días${goal.done >= goal.target ? ' · ¡cumplida!' : ''}</p>` : ''}</header>`
+      + `<section class="spotlight" aria-roledescription="carrusel" aria-label="Tus cursos"><div class="spotlight-track" id="spotlight-track">${ordered.map((course, index) => homeSlide(course, index === 0)).join('')}</div>`
+      + `<div class="spotlight-dots" role="group" aria-label="Elegir curso">${ordered.map((course, index) => `<button type="button" class="spotlight-dot${index ? '' : ' is-active'}" data-spotlight="${index}" aria-label="Ver ${escape(course.title)}"${index ? '' : ' aria-current="true"'}></button>`).join('')}</div></section>`
+      + `<p class="home-explore">¿Buscas otro tema? <a href="#explorar">Explora todos los cursos</a></p></div>`;
+    bindSpotlight();
     document.title = 'Zuka — Aprende matemáticas paso a paso';
+  }
+
+  function homeSlide(course, current) {
+    const progress = courseProgress(course);
+    const lessons = courseLessons(course);
+    const next = progress.next;
+    const after = lessons[lessons.indexOf(next) + 1];
+    const unit = courseModules(course).find(module => module.lessons.some(({ lesson }) => lesson.id === next.id));
+    const finished = progress.done === progress.total;
+    const status = finished ? 'COMPLETADO' : progress.done ? 'EN CURSO' : current ? 'RECOMENDADO' : '';
+    const pedestal = '<svg viewBox="0 0 80 40" aria-hidden="true"><ellipse cx="40" cy="26" rx="34" ry="11" fill="currentColor" opacity=".18"/><ellipse cx="40" cy="22" rx="27" ry="8" fill="currentColor" opacity=".3"/></svg>';
+    return `<article class="spotlight-slide ${course.color}" aria-roledescription="diapositiva" aria-labelledby="slide-${course.id}">`
+      + `<h2 id="slide-${course.id}">${escape(course.title)}</h2><p class="spotlight-level">${escape((unit?.kicker || course.label).toUpperCase())}${status ? ` · ${status}` : ''}</p>`
+      + `<div class="spotlight-art" aria-hidden="true">${artwork(course, true)}<span class="spotlight-symbol">${courseSymbol(course)}</span></div>`
+      + `<div class="spotlight-card"><ol class="spotlight-lessons"><li class="is-current"><span class="spotlight-mascot" aria-hidden="true">${mascot.svg(finished ? 'celebra' : 'feliz')}</span><span class="spotlight-lesson"><small>${finished ? 'Repasa desde' : progress.done ? 'Siguiente' : 'Primera lección'}</small><strong>${escape(next.title)}</strong></span></li>`
+      + `${after && !finished ? `<li><span class="spotlight-pedestal">${pedestal}</span><span class="spotlight-lesson"><strong>${escape(after.title)}</strong></span></li>` : ''}</ol>`
+      + `<a class="button spotlight-start" href="#contenido/${next.id}">${finished ? 'Repasar' : progress.done ? 'Continuar' : 'Empezar'}</a></div></article>`;
+  }
+
+  // Los puntos siguen al curso visible del carrusel y llevan a cada uno.
+  function bindSpotlight() {
+    const track = select('#spotlight-track');
+    if (!track) return;
+    const dots = selectAll('[data-spotlight]');
+    const mark = index => dots.forEach((dot, position) => {
+      dot.classList.toggle('is-active', position === index);
+      if (position === index) dot.setAttribute('aria-current', 'true'); else dot.removeAttribute('aria-current');
+    });
+    track.addEventListener('scroll', () => mark(Math.round(track.scrollLeft / Math.max(1, track.clientWidth))), { passive: true });
+    dots.forEach(dot => dot.addEventListener('click', () => {
+      const index = Number(dot.dataset.spotlight);
+      track.scrollTo?.({ left: index * track.clientWidth, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+      mark(index);
+    }));
   }
 
   function renderCatalog() {
@@ -667,6 +697,7 @@
   }
 
   function answerStep(result) {
+    player.retryReady = false;
     const index = player.index;
     const previous = player.results[index];
     if (previous === 'correct' || previous === 'revealed') return renderPlayerBar();
@@ -696,33 +727,50 @@
     renderPlayerBar();
   }
 
+  // Barra inferior de la lección: la mascota, el veredicto y una sola acción principal.
+  // Sin responder: «Comprobar». Al acertar: «¡Correcto!», «¿Por qué?» y «Continuar». Tras un error: «Casi.» e «Intentar de nuevo».
   function renderPlayerBar() {
     const step = player.steps[player.index];
     const result = player.results[player.index];
     const last = player.index === player.steps.length - 1;
-    const open = step.type !== 'exercise' || result === 'correct' || result === 'revealed';
-    const hint = step.type === 'exercise' && /lesson-hint/.test(step.html);
     const solution = step.type === 'exercise' && /lesson-solution/.test(step.html);
     const back = player.index > 0 ? `<button class="player-back" type="button" data-player-back="1" aria-label="Paso anterior">${icon('left')}</button>` : '';
-    let message = '';
+    const next = `<button class="button button-primary player-continue" type="button" data-player-next="1">${last ? 'Terminar' : 'Continuar'}</button>`;
+    const reveal = '<button type="button" class="player-link" data-player-reveal="1">Ver solución</button>';
     let state = '';
-    // La retroalimentación explica: al acertar se abre la solución y tras un error, la pista.
+    let verdict = '';
+    let extra = '';
+    let action = next;
+    let mood = 'feliz';
     if (step.type === 'exercise') {
-      if (result === 'correct') { state = 'is-correct'; message = mascot.say('feliz', `<strong>¡Correcto!</strong> ${solution ? 'Lee la explicación para ver por qué funciona.' : 'Bien razonado.'} <span class="player-gain">+${player.gains[player.index]} XP</span>`); }
-      else if (result === 'revealed') { state = 'is-revealed'; message = mascot.say('animo', '<strong>Así se resuelve.</strong> Repasa la solución con calma y sigue adelante.'); }
-      else if (result === 'retry') { state = 'is-retry'; message = mascot.say('animo', hint ? '<strong>Todavía no.</strong> Te abrimos una pista: léela y vuelve a intentarlo.' : '<strong>Todavía no.</strong> Revisa el planteamiento y vuelve a intentarlo.'); }
-      else message = mascot.say('piensa', 'Tu turno: responde para continuar.');
+      if (result === 'correct') {
+        state = 'is-correct'; mood = 'celebra';
+        verdict = `<strong>¡Correcto!</strong><span class="player-gain">+${player.gains[player.index]} XP</span>`;
+        extra = solution ? '<button type="button" class="player-link" data-player-why="1">¿Por qué?</button>' : '';
+      } else if (result === 'revealed') {
+        state = 'is-revealed'; mood = 'animo';
+        verdict = '<strong>Así se resuelve.</strong>';
+      } else if (result === 'retry' && !player.retryReady) {
+        state = 'is-retry'; mood = 'animo';
+        verdict = '<strong>Casi.</strong><span>Lee la pista y vuelve a intentarlo.</span>';
+        extra = reveal;
+        action = '<button class="button player-check" type="button" data-player-retry="1">Intentar de nuevo</button>';
+      } else {
+        mood = 'piensa';
+        extra = reveal;
+        action = '<button class="button button-primary player-check" type="button" data-player-check="1">Comprobar</button>';
+      }
     }
-    const actions = open
-      ? `<button class="button button-primary player-continue" type="button" data-player-next="1">${last ? 'Terminar' : 'Continuar'}${icon('right')}</button>`
-      : '<button class="button button-secondary player-reveal" type="button" data-player-reveal="1">Ver solución</button>';
-    select('#player-bar').innerHTML = `<div class="player-bar-inner ${state}">${back}<div class="player-feedback" role="status" aria-live="polite">${message}</div><div class="player-actions">${actions}</div></div>`;
+    select('#player-bar').innerHTML = `<div class="player-bar-inner ${state}">`
+      + (verdict || extra ? `<div class="player-verdict" role="status" aria-live="polite"><p>${verdict}</p>${extra}</div>` : '<div class="player-verdict" role="status" aria-live="polite"></div>')
+      + `<div class="player-bar-row">${back}<span class="player-mascot" aria-hidden="true">${mascot.svg(mood)}</span><div class="player-actions">${action}</div></div></div>`;
   }
 
   function movePlayer(step) {
     if (!player) return;
     const current = player.steps[player.index];
     if (step > 0 && current?.type === 'exercise' && !['correct', 'revealed'].includes(player.results[player.index])) return;
+    player.retryReady = false;
     player.index = Math.max(0, Math.min(player.steps.length, player.index + step));
     renderPlayerStep();
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -975,12 +1023,12 @@
     const week = weekActivity();
     const studiedWeek = week.filter(day => day.done).length;
     const progress = courses.map(course => ({ course, progress: courseProgress(course) })).sort((a, b) => Number(b.progress.done > 0) - Number(a.progress.done > 0));
-    const statItems = [['flame', streak, streak === 1 ? 'día de racha' : 'días de racha'], ['star', bestStreak(), 'mejor racha'], ['check', completed.size, completed.size === 1 ? 'lección completada' : 'lecciones completadas'], ['bookmark', saved.size, saved.size === 1 ? 'contenido guardado' : 'contenidos guardados']];
+    const statItems = [['flame', streak, streak === 1 ? 'día de racha' : 'días de racha'], ['star', stats.xp, 'XP en total'], ['bolt', bestStreak(), 'racha máxima'], ['check', completed.size, completed.size === 1 ? 'lección completada' : 'lecciones completadas']];
     select('#detail-view').innerHTML = `<section class="profile-view" aria-labelledby="detail-title">`
-      + `<header class="profile-header"><span class="profile-avatar" aria-hidden="true">${mascot.svg(streak ? 'celebra' : 'feliz')}</span><div class="profile-identity"><p class="eyebrow">TU PERFIL</p><h1 id="detail-title" tabindex="-1">${profile.name ? `Hola, ${escape(profile.name)}` : 'Hola'}</h1><p class="profile-level"><strong>Nivel ${level.level}</strong> · ${stats.xp} XP</p><div class="profile-level-bar"><span class="course-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="${level.need}" aria-valuenow="${level.into}" aria-label="Progreso hacia el nivel ${level.level + 1}"><span style="width:${level.percent}%"></span></span><small>${level.need - level.into} XP para el nivel ${level.level + 1}</small></div></div></header>`
+      + `<header class="profile-header profile-hero"><span class="profile-initial" aria-hidden="true">${profile.name ? escape(profile.name.trim().charAt(0).toUpperCase()) : mascot.svg(streak ? 'celebra' : 'feliz')}</span><div class="profile-identity"><p class="eyebrow">TU PERFIL</p><h1 id="detail-title" tabindex="-1">${profile.name ? `Hola, ${escape(profile.name)}` : 'Hola'}</h1><p class="profile-level"><strong>Nivel ${level.level}</strong> · ${stats.xp} XP</p><div class="profile-level-bar"><span class="course-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="${level.need}" aria-valuenow="${level.into}" aria-label="Progreso hacia el nivel ${level.level + 1}"><span style="width:${level.percent}%"></span></span><small>${level.need - level.into} XP para el nivel ${level.level + 1}</small></div></div></header>`
+      + `<ul class="profile-stats" aria-label="Tus números">${statItems.map(([name, value, label]) => `<li>${icon(name)}<strong>${value}</strong><span>${label}</span></li>`).join('')}</ul>`
       + accountCard()
       + `<form class="profile-name" data-profile-form="1"><div class="profile-field"><label for="profile-name">¿Cómo quieres que te llamemos?</label><input id="profile-name" name="name" type="text" maxlength="40" autocomplete="nickname" placeholder="Tu nombre o apodo" value="${escape(profile.name)}"></div><div class="profile-field"><label for="profile-goal">Meta semanal <span>(opcional)</span></label><select id="profile-goal" name="goal">${[[0, 'Sin meta'], [2, '2 días por semana'], [3, '3 días por semana'], [5, '5 días por semana'], [7, 'Todos los días']].map(([value, label]) => `<option value="${value}"${profile.goal === value ? ' selected' : ''}>${label}</option>`).join('')}</select></div><button class="button button-secondary" type="submit">Guardar</button></form>`
-      + `<ul class="profile-stats" aria-label="Tus números">${statItems.map(([name, value, label]) => `<li>${icon(name)}<strong>${value}</strong><span>${label}</span></li>`).join('')}</ul>`
       + `<section class="profile-card" aria-labelledby="profile-week-title"><div class="profile-card-heading"><h2 id="profile-week-title">Últimos 7 días</h2><p>${studiedWeek ? `Estudiaste ${plural(studiedWeek, 'día', 'días')}${profile.goal ? ` de tu meta de ${profile.goal}` : ' de 7'}.` : 'Completa una lección y aparecerá aquí.'}</p></div><ol class="profile-week">${week.map(day => `<li class="${day.done ? 'is-done' : ''}${day.today ? ' is-today' : ''}"><span aria-hidden="true">${day.done ? icon('check') : ''}</span><small aria-hidden="true">${escape(day.short)}</small><span class="sr-only">${escape(day.long)}: ${day.done ? 'estudiaste' : 'sin estudio'}</span></li>`).join('')}</ol></section>`
       + `<section class="profile-card" aria-labelledby="profile-courses-title"><div class="profile-card-heading"><h2 id="profile-courses-title">Tus cursos</h2><p>${progress.some(item => item.progress.done) ? 'Tu avance en cada ruta.' : 'Todavía no empiezas ningún curso. Elige uno y da el primer paso.'}</p></div><ul class="profile-courses">${progress.map(({ course, progress: courseState }) => `<li class="${course.color}"><span class="profile-course-symbol" aria-hidden="true">${courseSymbol(course)}</span><div><a href="#curso/${course.id}"><strong>${escape(course.title)}</strong></a>${progressBar(courseState)}</div><a class="text-button" href="#contenido/${courseState.next.id}">${courseState.done === courseState.total ? 'Repasar' : courseState.done ? 'Continuar' : 'Empezar'}${icon('right')}</a></li>`).join('')}</ul></section>`
       + `<section class="profile-card" aria-labelledby="profile-badges-title"><div class="profile-card-heading"><h2 id="profile-badges-title">Logros</h2><p>${achievements().filter(([, , earned]) => earned).length} de ${achievements().length} conseguidos.</p></div><ul class="profile-badges">${achievements().map(([name, description, earned]) => `<li class="${earned ? 'is-earned' : ''}"><span class="profile-badge-icon" aria-hidden="true">${icon(earned ? 'star' : 'lock')}</span><strong>${name}</strong><small>${description}</small><span class="sr-only">${earned ? 'Conseguido' : 'Pendiente'}</span></li>`).join('')}</ul></section>`
@@ -1155,7 +1203,7 @@
         const vertical = input => 250 - input * 45;
         const curve = linePath(Array.from({ length: 101 }, (_, index) => { const input = -2.4 + index * .048; return [horizontal(input), vertical(input ** 2)]; }));
         const tangent = linePath([-3, 3].map(input => [horizontal(input), vertical(value ** 2 + 2 * value * (input - value))]));
-        graph = graphFrame(`Parábola f(x) = x². En x = ${number(value)}, la pendiente es ${number(2 * value)}.`, `<path d="M40 250H560M300 270V20" stroke="#8ba8bd" stroke-opacity=".4"/><g clip-path="url(#simulation-clip)" fill="none"><path d="${curve}" stroke="#9adfd2" stroke-width="2.5"/><path d="${tangent}" stroke="#e9cd9c" stroke-width="1.8"/><path d="M${horizontal(value)} 250V${vertical(value ** 2)}H300" stroke="#e9cd9c" stroke-dasharray="4 6" opacity=".3"/></g><circle cx="${horizontal(value)}" cy="${vertical(value ** 2)}" r="5" fill="#e9cd9c"/><circle cx="${horizontal(value)}" cy="${vertical(value ** 2)}" r="12" fill="none" stroke="#e9cd9c" opacity=".3"/><g fill="#8ba8bd" font-family="Arial,sans-serif" font-size="11"><text x="96" y="280">−2</text><text x="196" y="280">−1</text><text x="297" y="280">0</text><text x="397" y="280">1</text><text x="497" y="280">2</text></g><text x="415" y="40" fill="#9adfd2" font-family="Georgia,serif" font-size="18">f(x) = x²</text><text x="48" y="39" fill="#e9cd9c" font-family="Arial,sans-serif" font-size="10">RECTA TANGENTE</text>`);
+        graph = graphFrame(`Parábola f(x) = x². En x = ${number(value)}, la pendiente es ${number(2 * value)}.`, `<path d="M40 250H560M300 270V20" stroke="#8ba8bd" stroke-opacity=".4"/><g clip-path="url(#simulation-clip)" fill="none"><path d="${curve}" stroke="#f0c989" stroke-width="2.5"/><path d="${tangent}" stroke="#e9cd9c" stroke-width="1.8"/><path d="M${horizontal(value)} 250V${vertical(value ** 2)}H300" stroke="#e9cd9c" stroke-dasharray="4 6" opacity=".3"/></g><circle cx="${horizontal(value)}" cy="${vertical(value ** 2)}" r="5" fill="#e9cd9c"/><circle cx="${horizontal(value)}" cy="${vertical(value ** 2)}" r="12" fill="none" stroke="#e9cd9c" opacity=".3"/><g fill="#8ba8bd" font-family="Arial,sans-serif" font-size="11"><text x="96" y="280">−2</text><text x="196" y="280">−1</text><text x="297" y="280">0</text><text x="397" y="280">1</text><text x="497" y="280">2</text></g><text x="415" y="40" fill="#f0c989" font-family="Georgia,serif" font-size="18">f(x) = x²</text><text x="48" y="39" fill="#e9cd9c" font-family="Arial,sans-serif" font-size="10">RECTA TANGENTE</text>`);
         statistics = stat('Posición x', number(value)) + stat('Altura f(x)', number(value ** 2)) + stat('Pendiente f′(x)', number(2 * value));
         explanation = value < 0 ? 'La pendiente es negativa: al avanzar hacia la derecha, esta parte de la parábola desciende.' : value > 0 ? 'La pendiente es positiva: al avanzar hacia la derecha, esta parte de la parábola crece.' : 'La tangente es horizontal. La pendiente es cero y aquí la parábola alcanza su mínimo.';
         controlValue = number(value, 2);
@@ -1164,7 +1212,7 @@
         const offset = method === 'left' ? 0 : method === 'right' ? 1 : .5;
         const rectangles = Array.from({ length: value }, (_, index) => {
           const height = ((index + offset) / value) ** 2;
-          return `<rect x="${65 + index / value * 470}" y="${250 - height * 200}" width="${470 / value}" height="${height * 200}" fill="#9adfd2" fill-opacity=".16" stroke="#9adfd2" stroke-opacity=".55" stroke-width=".7"/>`;
+          return `<rect x="${65 + index / value * 470}" y="${250 - height * 200}" width="${470 / value}" height="${height * 200}" fill="#f0c989" fill-opacity=".16" stroke="#f0c989" stroke-opacity=".55" stroke-width=".7"/>`;
         }).join('');
         const curve = linePath(Array.from({ length: 101 }, (_, index) => [65 + index * 4.7, 250 - (index / 100) ** 2 * 200]));
         const area = library.riemannSum(value, method);
@@ -1178,7 +1226,7 @@
         const pointY = 153 - sine * 95;
         const wave = linePath(Array.from({ length: 121 }, (_, index) => [322 + index / 120 * 225, 153 - Math.sin(index / 120 * Math.PI * 2) * 70]));
         const waveX = 322 + value / 360 * 225;
-        graph = graphFrame(`Círculo unitario. Ángulo ${value} grados, coseno ${number(cosine)} y seno ${number(sine)}.`, `<g stroke="#8ba8bd" stroke-opacity=".35" fill="none"><path d="M45 153H277M162 36V270M315 153H558"/><circle cx="162" cy="153" r="95"/></g><path d="M162 153H${pointX}V${pointY}Z" fill="#a6c5f1" fill-opacity=".07" stroke="#a6c5f1" stroke-width="1.8"/><path d="M162 153H${pointX}" stroke="#e9cd9c" stroke-width="3"/><path d="M${pointX} 153V${pointY}" stroke="#9adfd2" stroke-width="3"/><circle cx="${pointX}" cy="${pointY}" r="5" fill="#d8e6c7"/><path d="${wave}" fill="none" stroke="#9adfd2" stroke-width="2"/><path d="M${waveX} 153V${153 - sine * 70}" stroke="#9adfd2" stroke-dasharray="4 4" opacity=".6"/><circle cx="${waveX}" cy="${153 - sine * 70}" r="4" fill="#d8e6c7"/><g fill="#8ba8bd" font-family="Arial,sans-serif" font-size="10"><text x="324" y="252">0°</text><text x="420" y="252">180°</text><text x="525" y="252">360°</text><text x="322" y="45" fill="#9adfd2">SENO DEL ÁNGULO</text><text x="64" y="286" fill="#e9cd9c">cos θ</text><text x="205" y="286" fill="#9adfd2">sen θ</text></g>`);
+        graph = graphFrame(`Círculo unitario. Ángulo ${value} grados, coseno ${number(cosine)} y seno ${number(sine)}.`, `<g stroke="#8ba8bd" stroke-opacity=".35" fill="none"><path d="M45 153H277M162 36V270M315 153H558"/><circle cx="162" cy="153" r="95"/></g><path d="M162 153H${pointX}V${pointY}Z" fill="#a6c5f1" fill-opacity=".07" stroke="#a6c5f1" stroke-width="1.8"/><path d="M162 153H${pointX}" stroke="#e9cd9c" stroke-width="3"/><path d="M${pointX} 153V${pointY}" stroke="#f0c989" stroke-width="3"/><circle cx="${pointX}" cy="${pointY}" r="5" fill="#f6deb7"/><path d="${wave}" fill="none" stroke="#f0c989" stroke-width="2"/><path d="M${waveX} 153V${153 - sine * 70}" stroke="#f0c989" stroke-dasharray="4 4" opacity=".6"/><circle cx="${waveX}" cy="${153 - sine * 70}" r="4" fill="#f6deb7"/><g fill="#8ba8bd" font-family="Arial,sans-serif" font-size="10"><text x="324" y="252">0°</text><text x="420" y="252">180°</text><text x="525" y="252">360°</text><text x="322" y="45" fill="#f0c989">SENO DEL ÁNGULO</text><text x="64" y="286" fill="#e9cd9c">cos θ</text><text x="205" y="286" fill="#f0c989">sen θ</text></g>`);
         statistics = stat('Coseno', number(cosine)) + stat('Seno', number(sine)) + stat('Radianes', number(radians));
         explanation = 'El tramo horizontal muestra el coseno y el vertical, el seno. Sus signos cambian según el cuadrante. La onda muestra cómo varía el seno al completar una vuelta.';
         controlValue = `${value}°`;
@@ -1190,7 +1238,7 @@
         const equation = value === 0 ? '1' : `${value === 1 ? '' : value === -1 ? '−' : number(value, 2)}x + 1`;
         const visible = solution.solutions === 1 && solution.x >= -2 && solution.x <= 8 && solution.y >= -2 && solution.y <= 8;
         const ticks = [0, 2, 4, 6, 8].map(tick => `<text x="${horizontal(tick) - 3}" y="${vertical(0) + 16}">${tick}</text>`).join('') + [2, 4, 6, 8].map(tick => `<text x="${horizontal(0) - 14}" y="${vertical(tick) + 4}">${tick}</text>`).join('');
-        graph = graphFrame(solution.solutions === 1 ? `Rectas x + y = 5 e y = ${equation}. Se cruzan en (${number(solution.x, 2)}, ${number(solution.y, 2)}).` : 'Rectas paralelas y distintas: el sistema no tiene solución.', `<path d="M55 ${vertical(0)}H552M${horizontal(0)} 262V28" stroke="#8ba8bd" stroke-opacity=".4"/><g clip-path="url(#simulation-clip)" fill="none" stroke-width="2.2"><path d="${segment(-1, 5)}" stroke="#e9cd9c"/><path d="${segment(value, 1)}" stroke="#9adfd2"/></g>${visible ? `<path d="M${horizontal(solution.x)} ${vertical(0)}V${vertical(solution.y)}H${horizontal(0)}" stroke="#d8e6c7" stroke-dasharray="4 6" opacity=".35" fill="none"/><circle cx="${horizontal(solution.x)}" cy="${vertical(solution.y)}" r="5" fill="#d8e6c7"/><circle cx="${horizontal(solution.x)}" cy="${vertical(solution.y)}" r="12" fill="none" stroke="#d8e6c7" opacity=".3"/>` : ''}<g fill="#8ba8bd" font-family="Arial,sans-serif" font-size="11">${ticks}</g><g font-family="Georgia,serif" font-size="17" paint-order="stroke" stroke="#0a1626" stroke-width="6" stroke-linejoin="round"><text x="440" y="40" fill="#e9cd9c">x + y = 5</text><text x="440" y="64" fill="#9adfd2">y = ${equation}</text></g>`);
+        graph = graphFrame(solution.solutions === 1 ? `Rectas x + y = 5 e y = ${equation}. Se cruzan en (${number(solution.x, 2)}, ${number(solution.y, 2)}).` : 'Rectas paralelas y distintas: el sistema no tiene solución.', `<path d="M55 ${vertical(0)}H552M${horizontal(0)} 262V28" stroke="#8ba8bd" stroke-opacity=".4"/><g clip-path="url(#simulation-clip)" fill="none" stroke-width="2.2"><path d="${segment(-1, 5)}" stroke="#e9cd9c"/><path d="${segment(value, 1)}" stroke="#f0c989"/></g>${visible ? `<path d="M${horizontal(solution.x)} ${vertical(0)}V${vertical(solution.y)}H${horizontal(0)}" stroke="#f6deb7" stroke-dasharray="4 6" opacity=".35" fill="none"/><circle cx="${horizontal(solution.x)}" cy="${vertical(solution.y)}" r="5" fill="#f6deb7"/><circle cx="${horizontal(solution.x)}" cy="${vertical(solution.y)}" r="12" fill="none" stroke="#f6deb7" opacity=".3"/>` : ''}<g fill="#8ba8bd" font-family="Arial,sans-serif" font-size="11">${ticks}</g><g font-family="Georgia,serif" font-size="17" paint-order="stroke" stroke="#0a1626" stroke-width="6" stroke-linejoin="round"><text x="440" y="40" fill="#e9cd9c">x + y = 5</text><text x="440" y="64" fill="#f0c989">y = ${equation}</text></g>`);
         statistics = stat('Pendiente m', number(value, 2)) + stat('Solución x', solution.solutions === 1 ? number(solution.x, 2) : '—') + stat('Solución y', solution.solutions === 1 ? number(solution.y, 2) : '—');
         explanation = solution.solutions === 0 ? 'Con m = −1 las rectas son paralelas y distintas: nunca se cruzan, así que ningún par (x, y) cumple las dos ecuaciones. El sistema no tiene solución.' : `Las rectas se cruzan en un único punto: (${number(solution.x, 2)}, ${number(solution.y, 2)}) cumple las dos ecuaciones a la vez.${visible ? '' : ' El cruce queda fuera de la ventana: cuanto más se parecen las pendientes, más lejos está.'}`;
         controlValue = number(value, 2);
@@ -1199,8 +1247,8 @@
         const rowHeight = 225 / Math.max(intervals.length, 20);
         const covered = intervals.filter(interval => interval.covers).length;
         const margin = 1.96 * 10 / Math.sqrt(value);
-        const rows = intervals.map((interval, index) => { const vertical = 25 + (index + .5) * rowHeight; const color = interval.covers ? '#9adfd2' : '#e2a6c4'; return `<path d="M${horizontal(interval.lower)} ${vertical}H${horizontal(interval.upper)}" stroke="${color}" stroke-width="${Math.min(3, rowHeight * .55).toFixed(2)}" stroke-linecap="round"/><circle cx="${horizontal(interval.center)}" cy="${vertical}" r="${Math.min(2.6, rowHeight * .4).toFixed(2)}" fill="${color}"/>`; }).join('');
-        graph = graphFrame(intervals.length ? `${intervals.length} intervalos del 95 % con muestras de tamaño ${value}. ${covered} contienen la media real 50.` : 'Sin muestras. Pulsa Tomar 20 muestras para construir intervalos.', `<path d="M55 255H552" stroke="#8ba8bd" stroke-opacity=".4"/><g clip-path="url(#simulation-clip)">${rows}</g><path d="M${horizontal(50)} 22V255" stroke="#e9cd9c" stroke-width="1.4" stroke-dasharray="5 5"/>${intervals.length ? '' : '<text x="300" y="140" text-anchor="middle" fill="#94aec8" font-size="14" font-family="Arial,sans-serif">Cada muestra produce un intervalo distinto.</text>'}<g fill="#8ba8bd" font-family="Arial,sans-serif" font-size="11">${[30, 40, 50, 60, 70].map(tick => `<text x="${horizontal(tick) - 7}" y="275">${tick}</text>`).join('')}<text x="${horizontal(50) + 8}" y="18" fill="#e9cd9c">MEDIA REAL μ = 50</text><text x="65" y="292" fill="#9adfd2">CONTIENE μ</text><text x="160" y="292" fill="#e2a6c4">NO CONTIENE μ</text></g>`);
+        const rows = intervals.map((interval, index) => { const vertical = 25 + (index + .5) * rowHeight; const color = interval.covers ? '#f0c989' : '#e2a6c4'; return `<path d="M${horizontal(interval.lower)} ${vertical}H${horizontal(interval.upper)}" stroke="${color}" stroke-width="${Math.min(3, rowHeight * .55).toFixed(2)}" stroke-linecap="round"/><circle cx="${horizontal(interval.center)}" cy="${vertical}" r="${Math.min(2.6, rowHeight * .4).toFixed(2)}" fill="${color}"/>`; }).join('');
+        graph = graphFrame(intervals.length ? `${intervals.length} intervalos del 95 % con muestras de tamaño ${value}. ${covered} contienen la media real 50.` : 'Sin muestras. Pulsa Tomar 20 muestras para construir intervalos.', `<path d="M55 255H552" stroke="#8ba8bd" stroke-opacity=".4"/><g clip-path="url(#simulation-clip)">${rows}</g><path d="M${horizontal(50)} 22V255" stroke="#e9cd9c" stroke-width="1.4" stroke-dasharray="5 5"/>${intervals.length ? '' : '<text x="300" y="140" text-anchor="middle" fill="#94aec8" font-size="14" font-family="Arial,sans-serif">Cada muestra produce un intervalo distinto.</text>'}<g fill="#8ba8bd" font-family="Arial,sans-serif" font-size="11">${[30, 40, 50, 60, 70].map(tick => `<text x="${horizontal(tick) - 7}" y="275">${tick}</text>`).join('')}<text x="${horizontal(50) + 8}" y="18" fill="#e9cd9c">MEDIA REAL μ = 50</text><text x="65" y="292" fill="#f0c989">CONTIENE μ</text><text x="160" y="292" fill="#e2a6c4">NO CONTIENE μ</text></g>`);
         statistics = stat('Intervalos', number(intervals.length, 0)) + stat('Contienen μ', number(covered, 0)) + stat('Cobertura', intervals.length ? `${number(covered / intervals.length * 100, 1)} %` : '—');
         explanation = `Población normal con μ = 50 y σ = 10. Con n = ${value}, cada intervalo es x̄ ± ${number(margin, 2)}. Muestras más grandes producen intervalos más estrechos, pero la cobertura a largo plazo sigue cerca del 95 %. Al cambiar n, el experimento se reinicia. Límite: 100 intervalos.`;
         controlValue = String(value);
@@ -1209,7 +1257,7 @@
         let heads = 0;
         const points = flips.map((flip, index) => { heads += flip; return [65 + (index + 1) / Math.max(flips.length, 100) * 470, 250 - heads / (index + 1) * 205]; });
         const frequency = flips.length ? heads / flips.length : null;
-        graph = graphFrame(flips.length ? `${flips.length} lanzamientos: ${heads} caras. Frecuencia ${number(frequency)} y probabilidad ${number(value)}.` : 'Sin lanzamientos. Pulsa Lanzar 100 veces para iniciar el experimento.', `<path d="M55 250H550M65 262V28" stroke="#8ba8bd" stroke-opacity=".4"/><path d="M65 ${250 - value * 205}H540" stroke="#e9cd9c" stroke-width="1.4" stroke-dasharray="5 5"/>${points.length ? `<path d="${linePath(points)}" stroke="#9adfd2" stroke-width="1.6" fill="none"/>` : '<text x="300" y="150" text-anchor="middle" fill="#94aec8" font-size="14" font-family="Arial,sans-serif">Tu experimento empieza con un lanzamiento.</text>'}<g fill="#8ba8bd" font-size="11" font-family="Arial,sans-serif"><text x="42" y="254">0</text><text x="42" y="49">1</text><text x="65" y="280">0</text><text x="511" y="280">${Math.max(flips.length, 100)}</text><text x="80" y="30" fill="#9adfd2">FRECUENCIA DE CARAS</text><text x="405" y="30" fill="#e9cd9c">PROBABILIDAD p</text></g>`);
+        graph = graphFrame(flips.length ? `${flips.length} lanzamientos: ${heads} caras. Frecuencia ${number(frequency)} y probabilidad ${number(value)}.` : 'Sin lanzamientos. Pulsa Lanzar 100 veces para iniciar el experimento.', `<path d="M55 250H550M65 262V28" stroke="#8ba8bd" stroke-opacity=".4"/><path d="M65 ${250 - value * 205}H540" stroke="#e9cd9c" stroke-width="1.4" stroke-dasharray="5 5"/>${points.length ? `<path d="${linePath(points)}" stroke="#f0c989" stroke-width="1.6" fill="none"/>` : '<text x="300" y="150" text-anchor="middle" fill="#94aec8" font-size="14" font-family="Arial,sans-serif">Tu experimento empieza con un lanzamiento.</text>'}<g fill="#8ba8bd" font-size="11" font-family="Arial,sans-serif"><text x="42" y="254">0</text><text x="42" y="49">1</text><text x="65" y="280">0</text><text x="511" y="280">${Math.max(flips.length, 100)}</text><text x="80" y="30" fill="#f0c989">FRECUENCIA DE CARAS</text><text x="405" y="30" fill="#e9cd9c">PROBABILIDAD p</text></g>`);
         statistics = stat('Lanzamientos', number(flips.length, 0)) + stat('Caras', number(heads, 0)) + stat('Frecuencia', frequency === null ? '—' : `${number(frequency * 100, 1)} %`);
         explanation = 'Cada lanzamiento es independiente. La línea amarilla es la probabilidad elegida y la verde, la frecuencia observada. Pueden diferir, especialmente al principio. Al cambiar la probabilidad, el experimento se reinicia. Límite por experimento: 5.000 lanzamientos.';
         controlValue = `${number(value * 100, 0)} %`;
@@ -1309,6 +1357,24 @@
     if (event.target.closest('[data-player-next]')) { movePlayer(1); return; }
     if (event.target.closest('[data-player-back]')) { movePlayer(-1); return; }
     if (event.target.closest('[data-player-reveal]')) { revealStep(); return; }
+    if (event.target.closest('[data-player-check]')) { document.querySelector('#player-stage .lesson-exercise')?.requestSubmit(); return; }
+    if (event.target.closest('[data-player-retry]')) {
+      // Intentar de nuevo: se limpia la respuesta y vuelve «Comprobar»; la pista sigue abierta.
+      const form = document.querySelector('#player-stage .lesson-exercise');
+      form?.querySelectorAll('input[type="radio"]').forEach(input => { input.checked = false; });
+      const text = form?.querySelector('input[type="text"], input:not([type])');
+      if (text) text.value = '';
+      if (form) form.dataset.state = '';
+      player.retryReady = true;
+      renderPlayerBar();
+      (text || form?.querySelector('input'))?.focus();
+      return;
+    }
+    if (event.target.closest('[data-player-why]')) {
+      const solution = document.querySelector('#player-stage .lesson-solution');
+      if (solution) { solution.open = true; solution.scrollIntoView({ block: 'center', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }); }
+      return;
+    }
     const complete = event.target.closest('[data-complete]');
     if (complete) { setCompleted(complete.dataset.complete, !completed.has(complete.dataset.complete)); select('[data-complete]')?.focus(); return; }
     // Avanzar a la siguiente lección completa la actual, sin interrumpir la navegación.

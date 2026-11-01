@@ -30,6 +30,13 @@ Zuka avanza por etapas pequeñas: cada una se termina, se prueba en el celular y
 - Gamificación moderada: el contador de racha y XP se oculta hasta empezar, logros ocasionales y meta semanal opcional en el perfil.
 - Videos verticales 9:16 (`formato: vertical`) y subtítulos en español activados.
 
+## ✅ Etapa 1.3 · Paleta cobalto y ámbar y app de práctica activa
+
+- Nueva paleta sin morado ni verde: azul cobalto para elegir y acertar, ámbar para avanzar, XP y racha; colores propios por curso. Mascota, logo e iconos en ámbar y cobalto.
+- Inicio con carrusel de cursos (unidad, ilustración, lección actual y siguiente, botón «Empezar/Continuar»).
+- Lección con barra inferior: «Comprobar», «¡Correcto! +XP · ¿Por qué?» y «Casi. · Intentar de nuevo».
+- Catálogo con categorías en fila y cursos conectados; perfil con inicial y cifras en tarjetas.
+
 ## 🔜 Etapa 2 · Contenido completo
 
 - Videos de todas las lecciones de Fundamentos de Matemáticas (YouTube «No listado»).
