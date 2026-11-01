@@ -1,10 +1,10 @@
 /*
   Zuka · interfaz de la app (se carga al final).
   Inicio con carrusel de cursos, barra de lección con «Comprobar», catálogo por categorías y perfil con cifras.
-  Paleta: azul cobalto para elegir y acertar; ámbar para avanzar, XP y racha. Sin morado ni verde.
+  Paleta: negro y verde menta para aprender, practicar y avanzar.
 */
 
-/* Colores de cada curso: cobalto, cielo, ámbar, coral y rosa. */
+/* Los identificadores históricos de cursos comparten la identidad negra y verde. */
 html[data-theme] button.theme-control { display: grid; place-items: center; width: 44px; min-width: 44px; height: 44px; padding: 0; border: 1px solid var(--brand-line); border-radius: 10px; background: var(--brand-surface); color: var(--brand-secondary); cursor: pointer; }
 html[data-theme] button.theme-control:hover { background: var(--brand-inset); color: var(--brand-primary); }
 button.theme-control > svg { width: 20px; height: 20px; }
@@ -71,20 +71,16 @@ html[data-theme] .install-dialog p, html[data-theme] .install-dialog ol { color:
   .m-hero { grid-template-columns: minmax(0, 1fr); }
   .m-hero > .m-journey { display: none; }
 }
-html[data-theme] .purple { --fun: #2f5bea; --fun-dark: #2149cf; --fun-soft: #eaf0ff; --fun-ink: #ffffff; }
-html[data-theme] .blue { --fun: #0284c7; --fun-dark: #0369a1; --fun-soft: #e0f2fe; --fun-ink: #ffffff; }
-html[data-theme] .sand { --fun: #f59e0b; --fun-dark: #b45309; --fun-soft: #fff5df; --fun-ink: #2b1a00; }
-html[data-theme] .green { --fun: #fb7c3c; --fun-dark: #c2410c; --fun-soft: #fff1e7; --fun-ink: #2b1200; }
-html[data-theme] .slate { --fun: #e11d48; --fun-dark: #be123c; --fun-soft: #ffe4ea; --fun-ink: #ffffff; }
-html[data-theme] .rose { --fun: #db2777; --fun-dark: #9d174d; --fun-soft: #fce7f3; --fun-ink: #ffffff; }
-html[data-theme="dark"] :is(.purple, .blue, .sand, .green, .slate, .rose) { --fun-soft: color-mix(in srgb, var(--fun) 18%, transparent); --fun-dark: color-mix(in srgb, var(--fun) 70%, white); }
+html[data-theme] :is(.purple, .blue, .sand, .green, .slate, .rose) {
+  --fun: var(--brand-primary); --fun-dark: var(--brand-primary-hover); --fun-soft: var(--brand-primary-soft); --fun-ink: var(--brand-on-primary);
+}
 
-/* Botón con relieve, como una tecla: se hunde al pulsarlo. */
+/* Respuesta táctil discreta, sin sombras duras. */
 .button-3d, .spotlight-start, html[data-theme] .player-actions .button {
-  box-shadow: 0 4px 0 var(--key-shadow, rgb(0 0 0 / .22));
+  box-shadow: none;
   transition: transform .08s ease, box-shadow .08s ease;
 }
-.button-3d:active, .spotlight-start:active, html[data-theme] .player-actions .button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--key-shadow, rgb(0 0 0 / .22)); }
+.button-3d:active, .spotlight-start:active, html[data-theme] .player-actions .button:active { transform: translateY(1px); box-shadow: none; }
 
 /* ---------- Inicio: carrusel de cursos ---------- */
 .home-spotlight { max-width: 560px; gap: 18px; }
@@ -160,7 +156,7 @@ html[data-theme] .course-topic[aria-pressed="true"] { border-color: var(--brand-
 .course-school .zcard + .zcard { margin-top: 14px; }
 .course-school .zcard + .zcard::before { content: ''; position: absolute; left: 50%; top: -14px; width: 2px; height: 14px; background: var(--brand-line-strong); }
 .course-school .zcard { position: relative; }
-html[data-theme] .zcard-link { border-width: 2px; border-radius: 22px; box-shadow: 0 3px 0 var(--brand-line); }
+html[data-theme] .zcard-link { border-width: 1px; border-radius: 14px; box-shadow: none; }
 html[data-theme] .zcard-link:hover { border-color: var(--fun, var(--brand-primary)); }
 html[data-theme] .zcard-icon { width: 64px; height: 64px; border-radius: 18px; background: var(--fun-soft); color: var(--fun-dark); font-size: 21px; }
 html[data-theme] .zcard .course-progress-track > span, html[data-theme] .home-next .course-progress-track > span { background: var(--fun, var(--brand-primary)); }
@@ -203,7 +199,7 @@ html[data-theme] .player-card .lesson-exercise:not([data-state="correct"]):not([
 .onboarding-sheet p strong { color: var(--brand-ink); }
 .slide-start { --slide-progress: 0; position: relative; display: flex; align-items: center; width: min(100%, 360px); height: 68px; margin-top: 10px; padding: 6px; border-radius: 999px; background: var(--brand-inset); overflow: hidden; }
 .slide-start::before { content: ''; position: absolute; top: 6px; bottom: 6px; left: 6px; width: calc(56px + (100% - 68px) * var(--slide-progress)); border-radius: 999px; background: var(--brand-primary-soft); }
-.slide-thumb { position: relative; z-index: 2; display: grid; place-items: center; flex-shrink: 0; width: 56px; height: 56px; border-radius: 50%; background: var(--brand-primary); color: var(--brand-on-primary); box-shadow: 0 6px 14px -6px rgb(47 91 234 / .6); touch-action: none; cursor: grab; transition: transform .28s cubic-bezier(.23, 1, .32, 1); }
+.slide-thumb { position: relative; z-index: 2; display: grid; place-items: center; flex-shrink: 0; width: 56px; height: 56px; border-radius: 50%; background: var(--brand-primary); color: var(--brand-on-primary); box-shadow: 0 6px 14px -6px rgb(8 123 78 / .25); touch-action: none; cursor: grab; transition: transform .28s cubic-bezier(.23, 1, .32, 1); }
 .slide-start.is-dragging .slide-thumb { transition: none; cursor: grabbing; }
 .slide-thumb .icon { width: 24px; height: 24px; stroke-width: 2.2; }
 .slide-label { position: absolute; inset: 0; display: grid; place-items: center; padding-left: 44px; color: var(--brand-ink); font-size: 16px; font-weight: 700; opacity: calc(1 - var(--slide-progress) * 1.6); pointer-events: none; }

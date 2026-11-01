@@ -1,93 +1,70 @@
 # Sistema de diseño de Zuka
 
-La interfaz acompaña a estudiantes que se preparan para ingresar a la universidad o necesitan avanzar y permanecer en su carrera. Debe transmitir claridad, rigor académico y un impulso cercano. La dirección sigue la skill [interface-design](https://github.com/Dammyjay93/interface-design), con un destello ámbar que celebra sobre una base azul cobalto. La experiencia de aprendizaje toma patrones de uso de apps de práctica activa (carrusel de cursos, barra inferior para comprobar, feedback inmediato) sin copiar su marca, ilustraciones ni código.
+Zuka transmite claridad, rigor académico y acompañamiento. La identidad compartida usa negro y verde menta en la portada y en el producto. La referencia elegida es [Sumz](https://sumz.co/): fondo oscuro, tipografía amplia y texto junto a una figura matemática. Zuka la adapta a su contenido y conserva Manrope, su destello y sus rutas. `DESIGN.md` registra los tokens y reglas visuales; `.impeccable/design.json` contiene extensiones y muestras de componentes.
 
-## Identidad y jerarquía
+## Identidad y tokens
 
-El **azul cobalto** identifica la marca, las selecciones, el acceso y las respuestas correctas. El **ámbar** identifica el avance, los XP, la racha, la celebración y «Intentar de nuevo». La paleta no usa morado ni verde. Cada curso tiene su color (cobalto, cielo, ámbar, coral y rosa) en su tarjeta, su botón «Empezar» y sus barras. Los fondos son blancos y gris azulado muy suave, con tinta azul marino.
+`src/identity.css` concentra ambos temas y conecta los nombres anteriores (`--z-*`, `--fun-*`, `--m-*`) con la identidad compartida. Se carga después de las hojas históricas; `src/app-ui.css` se carga al final para patrones de producto. Los componentes nuevos usan los tokens compartidos. Las clases históricas de los cursos conservan sus nombres, pero comparten la paleta verde.
 
-El destello es la firma de Zuka: aparece en el logo, el camino de la landing, el saludo del estudiante, el acceso, el perfil y la celebración de la lección. La mascota acompaña sin competir con el contenido.
-
-| Vista | Foco |
-| --- | --- |
-| Landing | La meta del estudiante y las opciones para empezar |
-| Inicio con cuenta | Carrusel de cursos: título, unidad, ilustración, lección actual y siguiente, y un solo botón «Empezar/Continuar» |
-| Catálogo | Cursos agrupados por escuela y filtros claros |
-| Lección | Un concepto o un reto a la vez; barra inferior con la mascota y «Comprobar» |
-| Final de lección | Celebración, XP ganados y siguiente paso |
-| Perfil y acceso | Identidad, progreso y formulario de la cuenta |
-
-## Tokens de color
-
-`src/identity.css` concentra la identidad y sus dos temas. Se carga después de las hojas de componentes y conecta los nombres anteriores (`--z-*`, `--fun-*`, `--m-*`) con los tokens compartidos. Los componentes nuevos deben usar estos tokens, sin añadir colores independientes.
-
-| Token | Claro | Oscuro | Uso |
+| Token | Oscuro | Claro | Uso |
 | --- | --- | --- | --- |
-| `--brand-primary` | `#2f5bea` | `#8aa8ff` | Marca, acción principal, selección, acierto |
-| `--brand-primary-hover` | `#2149cf` | `#a8bfff` | Acción principal al pasar el cursor; relieve del botón |
-| `--brand-on-primary` | `#ffffff` | `#0d1630` | Texto del botón cobalto |
-| `--brand-primary-soft` | `#eaf0ff` | `#18264d` | Selecciones y barra de acierto |
-| `--brand-accent` | `#f59e0b` | `#fbbf24` | Avance, XP, racha, «Intentar de nuevo» (fondos y botones) |
-| `--brand-on-accent` | `#2b1a00` | `#2b1a00` | Texto sobre ámbar |
-| `--brand-accent-text` | `#8a5300` | `#fbbf24` | Ámbar como texto (cumple AA) |
-| `--brand-accent-soft` | `#fff5df` | `#3a2a0b` | Barra de «Casi.» y recompensas |
-| `--brand-canvas` | `#f7f9fc` | `#0e1424` | Fondo de la plataforma |
-| `--brand-surface` | `#ffffff` | `#161e33` | Tarjetas y cabecera |
-| `--brand-inset` | `#eef2f8` | `#1c2640` | Campos y controles en reposo |
-| `--brand-ink` | `#17203a` | `#eef2fb` | Texto principal |
-| `--brand-secondary` | `#5e6678` | `#b4bccd` | Explicaciones y contexto |
-| `--brand-tertiary` | `#6b7385` | `#9aa3b6` | Metadatos legibles |
-| `--brand-line` | `#e2e7f0` | `#28324b` | Separación de superficies |
+| `--brand-primary` | `#59f7bd` | `#087b4e` | Marca, selección y acción principal |
+| `--brand-primary-hover` | `#83ffd2` | `#05603a` | Acción principal al pasar el cursor |
+| `--brand-on-primary` | `#03180c` | `#ffffff` | Texto sobre la acción principal |
+| `--brand-primary-soft` | `#102b1e` | `#e8f7ef` | Selección y contexto de marca |
+| `--brand-primary-line` | `#28573f` | `#b1dfc8` | Bordes de selección |
+| `--brand-accent` | `#59f7bd` | `#59f7bd` | Avance, XP y recompensas |
+| `--brand-on-accent` | `#03180c` | `#031b10` | Texto sobre menta |
+| `--brand-accent-text` | `#7af6c3` | `#076b42` | Avance como texto |
+| `--brand-accent-soft` | `#0d261a` | `#e4f9ed` | Recompensas y estados suaves |
+| `--brand-canvas` | `#050807` | `#f4f8f5` | Fondo de la plataforma |
+| `--brand-surface` | `#0b120e` | `#ffffff` | Tarjetas y cabecera |
+| `--brand-inset` | `#111c15` | `#edf3ef` | Campos y controles |
+| `--brand-ink` | `#f0f7f2` | `#0c1a12` | Texto principal |
+| `--brand-secondary` | `#b7c9bd` | `#465d50` | Explicaciones y contexto |
+| `--brand-tertiary` | `#9cb3a5` | `#50685a` | Metadatos |
+| `--brand-line` | `#213b2c` | `#dce8e0` | Separación de superficies |
+| `--brand-line-strong` | `#345540` | `#bdcec3` | Bordes de campos |
 
-Los estados de error y advertencia conservan sus tokens semánticos propios. Las clases históricas de los cursos conservan su nombre, pero ya no su color (`src/app-ui.css`): `.purple` cobalto (Fundamentos), `.blue` cielo (Cálculo diferencial), `.sand` ámbar (Probabilidad), `.green` coral (Inferencia), `.slate` rosa intenso (Cálculo integral) y `.rose` fucsia. Cada clase define `--fun`, `--fun-dark`, `--fun-soft` y `--fun-ink` (texto del botón).
-
-El botón cobalto con texto blanco alcanza 5,5:1; los botones ámbar y coral usan tinta oscura. Todo texto normal debe alcanzar AA (4,5:1), también en fondos suaves y en el tema oscuro. El texto de los controles oscuros usa tinta oscura sobre los acentos claros.
+Error y advertencia conservan tokens semánticos propios. El color acompaña etiquetas y estados; no es la única señal. El requisito de contraste es AA (4,5:1 para texto normal), que debe verificarse en ambos temas y estados.
 
 ## Tipografía, superficies y espacio
 
-- **Manrope**, pesos 400–800, con Arial como respaldo. El archivo variable latino se incluye en `src/assets/fonts/manrope-latin.woff2`, se precarga y funciona sin conexión. Su licencia SIL OFL se distribuye al lado del archivo.
-- Texto base de 14,5–16 px; lectura de lecciones de 16,5 px con interlineado amplio. Campos de al menos 16 px en móvil. Títulos de producto de 27–38 px; la landing usa una escala mayor.
-- Jerarquía mediante tamaño, peso, color y espacio: títulos 700–800, controles 700, texto 400–500, metadatos secundarios. Números de progreso y XP tabulares.
-- Fórmulas con KaTeX y sus fuentes locales. Los símbolos académicos decorativos pueden usar Georgia; no se necesitan servicios externos de fuentes.
-- Unidad de espacio de 4 px: 8, 12, 16, 20, 24, 32, 48. Densidad media en catálogo y perfil; lectura más abierta en lecciones y landing.
-- Profundidad mediante superficies y bordes discretos. Los botones principales de la lección y del inicio tienen relieve de tecla (sombra inferior de 4 px del mismo color, que se hunde al pulsar). Fondo, tarjeta y campo mantienen el mismo matiz.
-- Radios de 10 px en botones y campos, 14–16 px en tarjetas y 20–24 px en contenedores amplios. Círculos solo cuando la forma comunica progreso o avatar.
+- **Manrope**, pesos 400–800, con Arial como respaldo. La fuente variable latina y su licencia SIL OFL se distribuyen en `src/assets/fonts/`; la fuente funciona sin conexión.
+- Texto base de 14,5 px/1,6; formularios de 16 px. La portada usa títulos amplios de peso 550 y el producto títulos de 700–800. Fórmulas con KaTeX local; símbolos académicos con la tipografía ya existente.
+- Ritmo de 4 px con pasos habituales de 8, 12, 16, 20, 24, 32 y 48 px. El producto es más compacto que la portada.
+- Profundidad principalmente tonal y bordes discretos. Botones y tarjetas de catálogo sin sombra. El diálogo de instalación conserva una sombra ambiental; sombras locales heredadas no constituyen una regla para nuevas superficies.
+- Radios habituales: 10 px en controles; 14–16 px en tarjetas; 20–24 px en contenedores amplios. La acción de lección y la del carrusel usan 16 px y altura mínima de 54 px.
 
-## Componentes
+## Componentes y navegación
 
 | Componente | Patrón |
 | --- | --- |
-| Acción principal | `.button-primary` / `.m-button.is-primary`: cobalto, mínimo 44 px, radio 10 px, texto 14 px/700 |
-| Avanzar | `.button-success`, `.spotlight-start`: ámbar o el color del curso, con texto de contraste |
-| Consultar | Los botones de WhatsApp usan `.m-button.is-success`; los enlaces conservan su destino y mensaje |
-| Acción secundaria | Fondo de tarjeta, borde suave y texto cobalto |
-| Campo | Fondo inset, borde neutral, radio 10 px, etiqueta visible y foco cobalto |
-| Curso | Icono académico suave, título, descripción y metadatos reales; tarjeta con borde discreto |
-| Carrusel de inicio | `.spotlight-slide`: un curso por tarjeta, desplazable con el dedo; puntos `.spotlight-dot` para cambiar de curso |
-| Camino | Nodo actual cobalto; completado en ámbar suave; contenido que requiere cuenta con candado y texto legible |
-| Progreso | Barra del color del curso sobre una pista neutral, con etiqueta y `role="progressbar"` |
-| Recompensa | Mascota celebrando, título principal, XP reales destacados en ámbar y acción para continuar |
-| Barra de la lección | Mascota a la izquierda y una acción: «Comprobar» (cobalto); «¡Correcto! +XP» con «¿Por qué?» y «Continuar» (barra cobalto suave); «Casi.» con la pista abierta e «Intentar de nuevo» (barra y botón ámbar); «Ver solución» siempre disponible |
-| Perfil | Círculo ámbar con la inicial, nivel y cuatro cifras en tarjetas: racha, XP total, racha máxima y lecciones |
+| Acción principal | Verde principal, texto de contraste, altura mínima de 44 px y radio de 10 px |
+| Avanzar / consultar | Menta; WhatsApp conserva el destino y mensaje existentes |
+| Acción secundaria | Fondo de superficie, borde de marca suave y texto verde |
+| Campo | Fondo inset, borde neutral, radio de 10 px y etiqueta visible |
+| Selección de escuela | Filtros horizontales, altura de 44 px; borde y fondo suave para la selección |
+| Curso | Título, descripción y metadatos reales, tarjeta con borde discreto y progreso etiquetado |
+| Inicio | Carrusel de cursos con una acción «Empezar/Continuar» y puntos para cambiar de curso |
+| Lección | Un concepto o reto a la vez; mascota y acción «Comprobar»; feedback, reintento y solución disponibles según el estado |
+| Recompensa | Mascota, XP reales y siguiente acción |
+| Perfil | Inicial o mascota, nivel y cuatro cifras: racha, XP total, racha máxima y lecciones |
 
-Los controles se construyen con HTML nativo. Las acciones tienen estados de reposo, hover, pulsación, foco y deshabilitado. Las transiciones nuevas animan solo transformaciones durante 160 ms; `prefers-reduced-motion` elimina el movimiento. El foco visible tiene un contorno de 3 px.
+Los controles son HTML nativo, con hover, pulsación, foco y deshabilitado. El foco compartido tiene contorno de 2 px y separación de 3 px. El movimiento reducido elimina las transiciones y animaciones correspondientes. La navegación de producto conserva cinco destinos: Inicio, Cursos, Entrenamiento, Tutorías y Perfil; en móvil usa la barra inferior y da más espacio a Entrenamiento.
 
-## Mascota y logo
+## Portada, mascota e instalación
 
-Zuka es un destello ámbar con la silueta del logo, dos trazos para los ojos y un detalle cobalto según el estado. La figura prescinde de boca, mejillas y pedestal. Se dibuja en SVG en `src/mascot.js`; conserva `MATHBRAIN_MASCOT.svg(estado)` y `MATHBRAIN_MASCOT.say(estado, html)`. Los estados son `saluda`, `feliz`, `piensa`, `animo` y `celebra`. Cada SVG utiliza identificadores de gradiente independientes y escapa sus etiquetas accesibles.
+La portada del navegador presenta el propósito, los servicios, las cuatro escuelas y las acciones para probar o descargar Zuka. En escritorio combina el texto a la izquierda con una superficie matemática paramétrica a la derecha. El canvas se apila bajo el texto en pantallas compactas y conserva enlaces a las cuatro escuelas. `src/network-hero.js` dibuja la geometría localmente: movimiento reducido deja una imagen estática, se pausa fuera de pantalla o con la pestaña oculta y libera observadores y animación al cambiar de ruta. Hay un fallback SVG.
 
-El logo integra el destello ámbar y una Z azul marino sobre una base cobalto. `src/assets/mark.svg` sirve de logo y favicon. `src/assets/icons/app-icon.svg` genera los PNG de 192 y 512 px, el adaptable de Android y el de Apple mediante `node scripts/generate-icons.cjs`, con `sharp` disponible. Los PNG son opacos y el icono adaptable conserva su margen de seguridad.
+La mascota es un destello verde con dos trazos para los ojos y detalles verde oscuro. Conserva `MATHBRAIN_MASCOT.svg(estado)` y `MATHBRAIN_MASCOT.say(estado, html)` y los estados `saluda`, `feliz`, `piensa`, `animo` y `celebra`. El logo combina el destello menta y una Z oscura sobre negro. Los iconos PWA se generan desde `src/assets/icons/app-icon.svg` mediante `scripts/generate-icons.cjs`.
 
-## Comportamiento que debe conservarse
+Las visitas nuevas empiezan en oscuro. `src/theme.js` conserva las preferencias guardadas, incluido el tema claro; el botón indica el tema al que cambiará y conserva el foco. La instalación en computador usa un QR oscuro sobre blanco, con cuatro módulos de margen, dirigido siempre a `https://mathbrain-psi.vercel.app/#descargar`, también desde localhost o una vista previa.
 
-La landing presenta programas, escuelas, visión y acompañamiento. La bienvenida permite deslizar, tocar o usar el teclado para crear un perfil local y acceder a todas las lecciones. Antes de entrar se prueba la primera lección de cada curso; las cuentas de correo quedan disponibles mediante emailAccounts, en pausa por defecto. El rediseño conserva rutas, contacto, progreso, claves `mathbrain-*`, sincronización e instalación PWA. No se añaden cifras, reseñas o resultados inventados.
+## Hechos y verificación
 
-La revisión visual debe cubrir 375 px, tableta y escritorio, ambos temas, formularios, filtros, estados de práctica y final de lección, sin desplazamiento horizontal. Los assets de identidad y la fuente deben estar en el shell del service worker.
+Se conservan los cinco cursos publicados, sus 51 lecciones y 155 ejercicios, las cuatro escuelas, los programas y el entrenamiento. Los simulacros son práctica con el contenido publicado; no son exámenes oficiales. El acompañamiento se consulta por WhatsApp al **+57 324 354 6355**. No se inventan precios, horarios, reseñas o resultados. Con `emailAccounts: false`, la bienvenida crea o conserva un perfil local y habilita el contenido completo; las cuentas de correo están en pausa.
 
-## Portada, instalación y entrenamiento
+Verificación del rediseño: 159 pruebas automatizadas correctas y compilación de los 16 archivos JavaScript. Se inspeccionaron vistas con anchos CSS de 320, 375, 768, 1280 y 1440 px, ambos temas, la navegación y los estados de foco e instalación. Las capturas nativas pueden excluir las barras de desplazamiento y tener otras dimensiones de imagen. Se comprobaron contraste de los pares principales, movimiento reducido, limpieza de la animación y QR público. La instalación en un celular físico queda fuera de esta verificación.
 
-En una pestaña del navegador, la raíz siempre presenta los servicios y la acción para probar o descargar Zuka. La app instalada conserva la bienvenida y el panel del estudiante. La portada mantiene la identidad existente, con tres filas de servicios; en pantallas compactas se prioriza el texto y se oculta la ilustración del camino.
-
-El cambio de tema es un botón con dos estados, claro y oscuro, una etiqueta que indica la siguiente acción y foco conservado tras el cambio. La instalación en computador muestra un QR oscuro sobre blanco con cuatro módulos de margen; no se colorea ni se deforma el código.
-
-La navegación móvil tiene cinco destinos: Inicio, Cursos, Entrenamiento, Tutorías y Perfil. Entrenamiento recibe más espacio para mantener su etiqueta en una línea. Su contenido usa una selección de materia y listas de parciales y unidades, con cantidades de ejercicios reales y sin presentar los simulacros como exámenes oficiales.
+Los recuadros de conceptos, ejemplos y notas usan superficie verde y borde uniforme de 1 px en lectura y en el reproductor. El contexto de unidad y nivel aparece debajo del título. Los alias heredados se resuelven a los tokens de marca también en el tema claro.

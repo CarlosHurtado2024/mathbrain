@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="#050807">
   <meta name="color-scheme" content="dark light">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="Zuka">
@@ -40,6 +40,7 @@
   <script defer src="cloud.js"></script>
   <script defer src="vendor/qrcode/qrcodegen.js"></script>
   <script defer src="install.js"></script>
+  <script defer src="network-hero.js"></script>
   <script defer src="landing.js"></script>
   <script defer src="app.js"></script>
 </head>
@@ -68,12 +69,12 @@
       <aside id="explore-notice" class="explore-notice" aria-label="Modo de exploración" hidden><span aria-hidden="true" data-icon="lock"></span><p><strong>Estás explorando.</strong> Prueba la primera lección de cada curso. <a href="#ingreso">Desliza para empezar</a>: es gratis, sin registro, y accedes a todo.</p></aside>
       <div id="home-view"><div id="today-panel"></div></div>
       <section id="courses-view" class="course-browser" aria-labelledby="courses-title" hidden>
-        <header class="course-browser-heading"><div><p class="eyebrow">ESCUELAS DE INGENIERÍA</p><h1 id="courses-title" tabindex="-1">Elige qué aprender</h1><p>Cursos organizados por escuelas, con lecciones para estudiar a tu ritmo y opciones de acompañamiento.</p></div></header>
+        <header class="course-browser-heading"><div><h1 id="courses-title" tabindex="-1">Elige qué aprender</h1><p>Cursos organizados por escuelas, con lecciones para estudiar a tu ritmo y opciones de acompañamiento.</p></div></header>
         <div class="course-browser-toolbar"><div id="course-topics" class="course-topics" role="group" aria-label="Filtrar cursos por tema"></div><label class="course-level"><span>Nivel</span><select id="course-level-filter" aria-label="Filtrar cursos por nivel"><option value="all">Todos los niveles</option><option value="Inicial">Inicial</option><option value="Intermedio">Intermedio</option></select></label></div>
         <section class="course-collection" aria-labelledby="course-collection-title"><div class="course-collection-heading"><div><h2 id="course-collection-title">Todos los cursos</h2><p id="course-results" role="status" aria-live="polite"></p></div><a class="course-content-link" href="#explorar?vista=contenidos">Buscar un contenido <span data-icon="right"></span></a></div><div id="course-grid" class="course-grid"></div><div id="course-empty" class="course-empty" hidden><h3>No hay cursos con esta combinación.</h3><p>Prueba otro tema o nivel para encontrar tu siguiente idea.</p><button class="button button-secondary" type="button" data-reset-courses>Ver todos los cursos</button></div></section>
       </section>
       <section class="discovery" aria-label="Catálogo de contenidos">
-        <div id="catalog-heading" class="catalog-heading" hidden><p class="eyebrow" id="catalog-eyebrow">EXPLORA A TU MANERA</p><h1 id="catalog-title" tabindex="-1">Encuentra esa idea.</h1><p id="catalog-description"></p></div>
+        <div id="catalog-heading" class="catalog-heading" hidden><h1 id="catalog-title" tabindex="-1">Encuentra esa idea.</h1><p id="catalog-description"></p></div>
         <div class="catalog-toolbar"><div class="format-tabs" role="group" aria-label="Tipo de contenido"><button class="format-tab active" type="button" data-format="all" aria-pressed="true">Todo</button><button class="format-tab" type="button" data-format="explanation" aria-pressed="false"><span data-icon="book"></span>Explicaciones</button><button class="format-tab" type="button" data-format="simulation" aria-pressed="false"><span data-icon="simulation"></span>Simulaciones</button><button class="format-tab" type="button" data-format="exercise" aria-pressed="false"><span data-icon="exercise"></span>Ejercicios resueltos</button></div><div class="catalog-selects"><label><span class="sr-only">Filtrar por tema</span><select id="topic-filter"><option value="all">Todos los temas</option><option value="fundamentos">Fundamentos</option><option value="calculo">Cálculo</option><option value="probabilidad">Probabilidad</option><option value="estadistica">Estadística</option></select></label><label><span class="sr-only">Filtrar por nivel</span><select id="level-filter"><option value="all">Todos los niveles</option><option value="Inicial">Inicial</option><option value="Intermedio">Intermedio</option></select></label></div></div>
         <p id="results-count" class="results-count" role="status" aria-live="polite"></p>
         <div id="catalog-content"></div>

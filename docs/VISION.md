@@ -33,7 +33,7 @@ Muchos estudiantes llegan a la universidad con vacíos en álgebra, funciones y 
 - **Aprender haciendo.** Una idea por pantalla y retos que hay que responder para avanzar, con pista, solución y ánimo de la mascota.
 - **Constancia.** XP, niveles, rachas y repasos para estudiar un poco cada día.
 - **Rigor académico.** Contenido escrito por un estadístico, con notación LaTeX y programas de curso con objetivos y unidades.
-- **En el bolsillo.** Una PWA que se instala en el celular y funciona sin conexión tras la primera visita. Se exploran los cursos y se prueba su primera lección sin cuenta; una cuenta gratuita con correo y contraseña da acceso completo.
+- **En el bolsillo.** Una PWA que se instala en el celular y funciona sin conexión tras preparar el contenido, excepto los videos externos. Se exploran los cursos y se prueba su primera lección antes de entrar; con las cuentas de correo en pausa, la bienvenida crea o conserva un perfil local y habilita el contenido completo.
 
 ## Para quién
 
@@ -43,14 +43,14 @@ Muchos estudiantes llegan a la universidad con vacíos en álgebra, funciones y 
 
 ## Personalidad
 
-Zuka es cercana, clara y profesional. Su mascota es un destello ámbar que acompaña sin infantilizar: celebra los aciertos, anima tras un error y nunca regaña. El diseño usa azul cobalto para la identidad, las elecciones y los aciertos, ámbar para avanzar y celebrar, y superficies claras con espacio para concentrarse.
+Zuka es cercana, clara y profesional. Su mascota es un destello verde menta que acompaña sin infantilizar: celebra los aciertos, anima tras un error y nunca regaña. El diseño comparte una base negra y un acento menta para la identidad, las elecciones y el avance. Manrope, superficies tonales y espacio para concentrarse unen la portada y el aprendizaje. Las visitas nuevas empiezan en oscuro; el tema claro elegido se conserva.
 
 ## Qué no es Zuka
 
 - No es una app nativa: se construye con tecnologías web y se instala como PWA.
 - No es una calculadora ni un solucionador de tareas.
 - No es una red social ni una plataforma de cursos en video largos.
-- No incorpora rastreadores. Al explorar, el progreso vive solo en el dispositivo; con cuenta, el correo, el perfil y el progreso se gestionan en Supabase para continuar en otros dispositivos.
+- No incorpora rastreadores. Con las cuentas de correo en pausa, el perfil y el progreso viven en el dispositivo. La sincronización con Supabase pertenece al modo de cuentas, que requiere habilitar `emailAccounts`.
 
 ## Cómo se mide el éxito
 

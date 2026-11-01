@@ -1,6 +1,6 @@
 # Zuka · guía para trabajar en este proyecto
 
-Zuka es una **app web progresiva (PWA)** en español para aprender matemáticas y estadística paso a paso: cursos, lecciones cortas con LaTeX y video, retos interactivos, XP, rachas y un destello ámbar como mascota. Se usa en el navegador y se instala en el celular desde Chrome. **No es una app nativa**: nada de Kotlin, Java ni Android Studio.
+Zuka es una **app web progresiva (PWA)** en español para aprender matemáticas y estadística paso a paso: cursos, lecciones cortas con LaTeX y video, retos interactivos, XP, rachas y un destello verde menta como mascota. Se usa en el navegador y se instala en el celular desde Chrome. **No es una app nativa**: nada de Kotlin, Java ni Android Studio.
 
 Antes de cambiar algo, lee el documento de `docs/` que corresponda:
 
@@ -11,6 +11,7 @@ Antes de cambiar algo, lee el documento de `docs/` que corresponda:
 | `docs/ARCHITECTURE.md` | Carpetas, scripts, rutas, service worker y despliegue |
 | `docs/DATABASE.md` | Datos en el dispositivo y en Supabase, y el modelo del contenido |
 | `docs/DESIGN_SYSTEM.md` | Colores, tipografía, componentes y la mascota |
+| `DESIGN.md` | Tokens visuales y reglas compartidas; extensiones en `.impeccable/design.json` |
 | `docs/CONTENIDO.md` | Cómo escribir lecciones en Markdown y editar los programas |
 | `docs/ROADMAP.md` | Etapas del proyecto y lo que sigue |
 | `docs/PRUEBAS_ANDROID.md` | Probar la app en un celular Android |
@@ -40,6 +41,7 @@ Requiere Node.js 20 o superior. No hay dependencias de npm.
 9. **Git:** commits pequeños con mensaje claro. No hacer `push` sin que Carlos lo pida: cada push a `main` publica en Vercel.
 10. Trabajar por etapas (`docs/ROADMAP.md`): una funcionalidad a la vez, probarla en el celular y luego seguir.
 11. **Acceso y Supabase:** con `emailAccounts: false`, la bienvenida crea un perfil local y habilita todo el contenido; antes de entrar solo se prueba la primera lección de cada curso. Con `emailAccounts: true`, el acceso completo requiere sesión de correo y contraseña. En modo local no se inicializa el cliente de Supabase. Toda tabla nueva lleva Row Level Security y va en un archivo nuevo de `supabase/migrations/`. En `src/config.js` solo va la clave publicable, nunca la secreta.
+12. **Identidad:** negro y verde menta compartidos por landing y producto, con Manrope local. `src/identity.css` es la fuente de los colores; los nombres históricos de cursos no autorizan paletas independientes. Las visitas nuevas empiezan en oscuro; se respeta el tema claro guardado.
 
 ## Estructura
 

@@ -673,7 +673,7 @@ test('Visitar los programas cancela una entrada que todavía está animándose',
   app.flushTimers();
   assert.equal(app.location.hash, '#conoce');
   assert.equal(app.stored.has('zuka-ingreso'), false);
-  assert.match(app.node('#detail-view').innerHTML, /Tus sueños/);
+  assert.match(app.node('#detail-view').innerHTML, /Aprende hoy/);
   assert.doesNotMatch(app.node('#detail-view').innerHTML, /href="#registro"|href="#ingresar"/);
 });
 
@@ -850,8 +850,8 @@ test('Sin Supabase se puede explorar la primera lección pero no se habilita tod
 test('La landing presenta el propósito, los seis servicios y las cuatro escuelas', () => {
   const app = environment('#conoce', undefined, guestCloud());
   const html = app.node('#detail-view').innerHTML;
-  assert.match(html, /Tus sueños/);
-  assert.match(html, /merecen/);
+  assert.match(html, /Aprende hoy/);
+  assert.match(html, /Avanza hacia/);
   assert.match(html, /ingresar a la universidad/);
   assert.equal(app.document.body.classList.contains('marketing-mode'), true);
   for (const id of ['preicfes', 'preuniversitario', 'preingeniero', 'ingenieria', 'tutorias', 'asesorias']) {
@@ -903,7 +903,7 @@ test('Los cursos se agrupan por escuelas conservando su contenido y su progreso'
   for (const id of ['fundamentos-matematicas', 'calculo-diferencial', 'calculo-integral']) assert.ok(math.includes(`href="#curso/${id}"`), id);
   for (const id of ['probabilidad', 'inferencia-estadistica']) assert.ok(stats.includes(`href="#curso/${id}"`), id);
   assert.doesNotMatch(math, /href="#curso\/probabilidad"/);
-  assert.match(html, /CURSO CON ACOMPAÑAMIENTO/);
+  assert.match(html, /Curso con acompañamiento/);
   app.navigate('#explorar?curso_tema=calculo&curso_nivel=Intermedio');
   assertCourses(app, 2);
   assert.doesNotMatch(app.node('#course-grid').innerHTML, /data-school="fisica"|CURSO CON ACOMPAÑAMIENTO/);
@@ -927,8 +927,8 @@ test('Cada escuela abre sus cursos reales o las opciones de acompañamiento corr
 test('Sobre Zuka presenta la visión y el objetivo sin la biografía ni la foto del fundador', () => {
   const app = environment('#nosotros', undefined, guestCloud());
   const html = app.node('#about-view').innerHTML;
-  assert.match(html, /NUESTRA VISIÓN/);
-  assert.match(html, /NUESTRO OBJETIVO/);
+  assert.match(html, /Nuestra visión/);
+  assert.match(html, /Nuestro objetivo/);
   assert.match(html, /ingresar a la universidad y culminar una carrera/);
   assert.match(html, /razón para abandonar/);
   assert.doesNotMatch(html, /Carlos Hurtado|autor-carlos|creator-section|fundador/);

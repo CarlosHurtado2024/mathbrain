@@ -1,4 +1,4 @@
-/* Zuka · identidad compartida. Azul cobalto para elegir y responder; ámbar para avanzar y celebrar. */
+/* Zuka · identidad compartida. Negro y verde menta, con un tema claro complementario. */
 @font-face {
   font-family: 'Manrope';
   font-style: normal;
@@ -8,66 +8,69 @@
 }
 :root {
   --font-ui: 'Manrope', Arial, sans-serif;
-  --brand-primary: #2f5bea;
-  --brand-primary-hover: #2149cf;
-  --brand-on-primary: #ffffff;
-  --brand-primary-soft: #eaf0ff;
-  --brand-primary-line: #c7d5ff;
-  --brand-accent: #f59e0b;
-  --brand-accent-hover: #e08a00;
-  --brand-on-accent: #2b1a00;
-  --brand-accent-soft: #fff5df;
-  --brand-accent-line: #fbd58a;
-  --brand-accent-text: #8a5300;
-  --brand-canvas: #f7f9fc;
-  --brand-surface: #ffffff;
-  --brand-inset: #eef2f8;
-  --brand-ink: #17203a;
-  --brand-secondary: #5e6678;
-  --brand-tertiary: #6b7385;
-  --brand-disabled: #9aa1b0;
-  --brand-line: #e2e7f0;
-  --brand-line-strong: #c9d1df;
-  --brand-danger: #c2410c;
-  --brand-danger-soft: #fff1ec;
-  --brand-warning: #8a5a00;
-  --brand-warning-soft: #fff5df;
-  --brand-support: #12214c;
-  --brand-support-text: #f5f8ff;
-  --brand-support-muted: #b8c6ee;
-  --brand-support-accent: #fbc95c;
+  --brand-primary: #59f7bd;
+  --brand-primary-hover: #83ffd2;
+  --brand-on-primary: #03180c;
+  --brand-primary-soft: #102b1e;
+  --brand-primary-line: #28573f;
+  --brand-accent: #59f7bd;
+  --brand-accent-hover: #83ffd2;
+  --brand-on-accent: #03180c;
+  --brand-accent-soft: #0d261a;
+  --brand-accent-line: #28573f;
+  --brand-accent-text: #7af6c3;
+  --brand-canvas: #050807;
+  --brand-surface: #0b120e;
+  --brand-inset: #111c15;
+  --brand-ink: #f0f7f2;
+  --brand-secondary: #b7c9bd;
+  --brand-tertiary: #9cb3a5;
+  --brand-disabled: #617c6c;
+  --brand-line: #213b2c;
+  --brand-line-strong: #345540;
+  --brand-danger: #ffaaa1;
+  --brand-danger-soft: #311916;
+  --brand-warning: #e2ce94;
+  --brand-warning-soft: #272515;
+  --brand-support: #0e1e14;
+  --brand-support-text: #f1faf4;
+  --brand-support-muted: #a8c7b5;
+  --brand-support-accent: #59f7bd;
   --brand-ease: cubic-bezier(.23, 1, .32, 1);
 }
-html[data-theme="dark"] {
-  --brand-primary: #8aa8ff;
-  --brand-primary-hover: #a8bfff;
-  --brand-on-primary: #0d1630;
-  --brand-primary-soft: #18264d;
-  --brand-primary-line: #2f4a9a;
-  --brand-accent: #fbbf24;
-  --brand-accent-hover: #fcd05a;
-  --brand-on-accent: #2b1a00;
-  --brand-accent-soft: #3a2a0b;
-  --brand-accent-line: #7a5410;
-  --brand-accent-text: #fbbf24;
-  --brand-canvas: #0e1424;
-  --brand-surface: #161e33;
-  --brand-inset: #1c2640;
-  --brand-ink: #eef2fb;
-  --brand-secondary: #b4bccd;
-  --brand-tertiary: #9aa3b6;
-  --brand-disabled: #717a8e;
-  --brand-line: #28324b;
-  --brand-line-strong: #3c4867;
-  --brand-danger: #ff9f86;
-  --brand-danger-soft: #3d2219;
-  --brand-warning: #fcd05a;
-  --brand-warning-soft: #3a2a0b;
-  --brand-support: #0f1c40;
+html[data-theme="light"] {
+  --brand-primary: #087b4e;
+  --brand-primary-hover: #05603a;
+  --brand-on-primary: #ffffff;
+  --brand-primary-soft: #e8f7ef;
+  --brand-primary-line: #b1dfc8;
+  --brand-accent: #59f7bd;
+  --brand-accent-hover: #3be3a5;
+  --brand-on-accent: #031b10;
+  --brand-accent-soft: #e4f9ed;
+  --brand-accent-line: #afe9cc;
+  --brand-accent-text: #076b42;
+  --brand-canvas: #f4f8f5;
+  --brand-surface: #ffffff;
+  --brand-inset: #edf3ef;
+  --brand-ink: #0c1a12;
+  --brand-secondary: #465d50;
+  --brand-tertiary: #50685a;
+  --brand-disabled: #81968a;
+  --brand-line: #dce8e0;
+  --brand-line-strong: #bdcec3;
+  --brand-danger: #b33e3e;
+  --brand-danger-soft: #fff0ed;
+  --brand-warning: #7c5d18;
+  --brand-warning-soft: #faf5e9;
+  --brand-support: #0b1a12;
+  --brand-support-text: #f1faf4;
+  --brand-support-muted: #a8c7b5;
+  --brand-support-accent: #59f7bd;
 }
 
 /* Puente de tokens para los componentes existentes y ambos temas. */
-:root, html[data-theme], :root:not([data-theme="light"]) {
+:root, :root[data-theme], :root:not([data-theme="light"]) {
   --sans: var(--font-ui);
   --paper: var(--brand-canvas);
   --ink: var(--brand-ink);
@@ -118,9 +121,9 @@ html[data-theme] :is(.green, .sand, .slate) {
 html[data-theme] .topic-dot:is(.purple, .blue, .rose, .green, .sand, .slate) { background: var(--theme-accent); }
 
 html[data-theme] body { background: var(--brand-canvas); color: var(--brand-ink); font-family: var(--font-ui); }
-html[data-theme] body::before { opacity: .08; }
+html[data-theme] body::before { display: none; }
 html[data-theme] ::selection { background: var(--brand-primary); color: var(--brand-on-primary); }
-html[data-theme] :is(a, button, input, select, summary, [tabindex="0"]):focus-visible { outline: 3px solid var(--brand-primary); outline-offset: 3px; }
+html[data-theme] :is(a, button, input, select, summary, [tabindex="0"]):focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 3px; }
 :is(h1, h2, h3) { text-wrap: balance; }
 :is(.stats-chip, .player-xp, .player-end-xp, .profile-level, .course-progress, .zunit-count) { font-variant-numeric: tabular-nums; }
 
@@ -194,7 +197,7 @@ html[data-theme] .auth-page .profile-auth { gap: 20px; }
 html[data-theme] .auth-page .profile-auth .button { margin-top: 4px; min-height: 48px; }
 html[data-theme] .explore-notice { background: var(--brand-primary-soft); border-color: transparent; }
 
-/* Aprender: morado para la actividad actual y verde para el avance conseguido. */
+/* Aprender: verde menta para practicar y reconocer el avance. */
 html[data-theme] body.lesson-mode, html[data-theme] .player-top { background: var(--brand-canvas); }
 html[data-theme] .player-close { color: var(--brand-secondary); border-color: var(--brand-line); background: var(--brand-surface); }
 html[data-theme] .player-segments li { background: var(--brand-line); }
@@ -242,3 +245,13 @@ html[data-theme] .course-school-heading .course-area { font-size: 16px; font-wei
   html[data-theme] :is(.button, .m-button, .content-card, .znode-disc) { transition: none; }
   html[data-theme] :is(.button, .m-button):active { transform: none; }
 }
+
+/* Los estados del navegador también usan la identidad de Zuka. */
+html { scrollbar-color: var(--brand-line-strong) var(--brand-canvas); }
+html[data-theme] ::selection { color: var(--brand-on-primary); background: var(--brand-primary); }
+input, textarea { caret-color: var(--brand-primary); }
+
+html[data-theme] .install-app-button:hover { color: var(--brand-primary); background: var(--brand-primary-soft); border-color: var(--brand-primary-line); }
+html[data-theme] :is(.reader, .player-card) :is(.key-concept, .example-box, .lesson-note) { color: var(--brand-ink); background: var(--brand-primary-soft); border: 1px solid var(--brand-primary-line); border-radius: 12px; }
+html[data-theme] :is(.reader, .player-card) :is(.key-concept, .example-box, .lesson-note) h3 { color: var(--brand-primary); }
+html[data-theme] .detail-context { margin-block: 12px 16px; color: var(--brand-secondary); font-size: 13px; font-weight: 600; line-height: 1.6; letter-spacing: 0; }

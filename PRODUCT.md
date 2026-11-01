@@ -27,13 +27,13 @@ La PWA instalada abre la bienvenida o el panel de aprendizaje. El menú principa
 - PWA estática en español, sin frameworks ni dependencias npm en el navegador. Se edita `src/` y el contenido se compila desde `content/`.
 - Lecciones cortas, fórmulas, videos opcionales, ejercicios con pistas y soluciones, XP y progreso local.
 - Las cuentas de correo y contraseña están en pausa mediante `emailAccounts: false`; la entrada crea o conserva un perfil local. Los identificadores y claves históricas `mathbrain-*` se conservan.
-- Dos temas: claro y oscuro. Instalación y funcionamiento sin conexión tras preparar el contenido, excepto los videos externos.
+- Dos temas: oscuro por defecto para visitas nuevas y claro cuando el estudiante lo elige; se respeta la preferencia guardada. Instalación y funcionamiento sin conexión tras preparar el contenido, excepto los videos externos.
 - Los servicios con acompañamiento se consultan por WhatsApp al +57 324 354 6355. Precios, horarios y disponibilidad se consultan; no están definidos en el proyecto.
 - Se conservan los programas PreICFES, preuniversitario y preingeniero y las escuelas de Matemáticas, Física, Estadística y Programación.
 
 ## Brand Commitments
 
-Nombre visible: Zuka. Logo y mascota existentes: un destello con ojos. Tono cercano y profesional, sin infantilismos ni promesas de resultados garantizados.
+Nombre visible: Zuka. Identidad compartida de negro y verde menta, con Manrope local. Logo: destello con una Z; mascota: el mismo destello con ojos. Tono cercano y profesional, sin infantilismos ni promesas de resultados garantizados. Los tokens y patrones visuales se registran en `DESIGN.md` y `docs/DESIGN_SYSTEM.md`.
 
 ## Evidence on Hand
 

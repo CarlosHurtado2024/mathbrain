@@ -1,0 +1,535 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-01T18:12:35.352Z",
+  "title": "Design System: Zuka",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Menta",
+        "tonalRamp": [
+          "oklch(15% 0.0617 164.9)",
+          "oklch(25% 0.1028 164.9)",
+          "oklch(38% 0.1563 164.9)",
+          "oklch(50% 0.1563 164.9)",
+          "oklch(62% 0.1563 164.9)",
+          "oklch(74% 0.1563 164.9)",
+          "oklch(86% 0.0841 164.9)",
+          "oklch(95% 0.0301 164.9)"
+        ]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Menta clara",
+        "tonalRamp": [
+          "oklch(15% 0.0511 167.5)",
+          "oklch(25% 0.0851 167.5)",
+          "oklch(38% 0.1293 167.5)",
+          "oklch(50% 0.1293 167.5)",
+          "oklch(62% 0.1293 167.5)",
+          "oklch(74% 0.1293 167.5)",
+          "oklch(86% 0.0696 167.5)",
+          "oklch(95% 0.0249 167.5)"
+        ]
+      },
+      "on-primary": {
+        "role": "neutral",
+        "displayName": "Tinta sobre menta",
+        "tonalRamp": [
+          "oklch(15% 0.0150 156.9)",
+          "oklch(25% 0.0250 156.9)",
+          "oklch(38% 0.0380 156.9)",
+          "oklch(50% 0.0380 156.9)",
+          "oklch(62% 0.0380 156.9)",
+          "oklch(74% 0.0380 156.9)",
+          "oklch(86% 0.0205 156.9)",
+          "oklch(95% 0.0073 156.9)"
+        ]
+      },
+      "primary-soft": {
+        "role": "primary",
+        "displayName": "Menta profunda",
+        "tonalRamp": [
+          "oklch(15% 0.0164 160.7)",
+          "oklch(25% 0.0273 160.7)",
+          "oklch(38% 0.0415 160.7)",
+          "oklch(50% 0.0415 160.7)",
+          "oklch(62% 0.0415 160.7)",
+          "oklch(74% 0.0415 160.7)",
+          "oklch(86% 0.0224 160.7)",
+          "oklch(95% 0.0080 160.7)"
+        ]
+      },
+      "primary-line": {
+        "role": "primary",
+        "displayName": "Borde de marca",
+        "tonalRamp": [
+          "oklch(15% 0.0261 159.3)",
+          "oklch(25% 0.0434 159.3)",
+          "oklch(38% 0.0660 159.3)",
+          "oklch(50% 0.0660 159.3)",
+          "oklch(62% 0.0660 159.3)",
+          "oklch(74% 0.0660 159.3)",
+          "oklch(86% 0.0356 159.3)",
+          "oklch(95% 0.0127 159.3)"
+        ]
+      },
+      "accent-text": {
+        "role": "primary",
+        "displayName": "Menta de lectura",
+        "tonalRamp": [
+          "oklch(15% 0.0528 164.4)",
+          "oklch(25% 0.0880 164.4)",
+          "oklch(38% 0.1338 164.4)",
+          "oklch(50% 0.1338 164.4)",
+          "oklch(62% 0.1338 164.4)",
+          "oklch(74% 0.1338 164.4)",
+          "oklch(86% 0.0720 164.4)",
+          "oklch(95% 0.0257 164.4)"
+        ]
+      },
+      "accent-soft": {
+        "role": "primary",
+        "displayName": "Fondo de recompensa",
+        "tonalRamp": [
+          "oklch(15% 0.0154 160.6)",
+          "oklch(25% 0.0257 160.6)",
+          "oklch(38% 0.0390 160.6)",
+          "oklch(50% 0.0390 160.6)",
+          "oklch(62% 0.0390 160.6)",
+          "oklch(74% 0.0390 160.6)",
+          "oklch(86% 0.0210 160.6)",
+          "oklch(95% 0.0075 160.6)"
+        ]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Negro vegetal",
+        "tonalRamp": [
+          "oklch(15% 0.0028 174.7)",
+          "oklch(25% 0.0046 174.7)",
+          "oklch(38% 0.0071 174.7)",
+          "oklch(50% 0.0071 174.7)",
+          "oklch(62% 0.0071 174.7)",
+          "oklch(74% 0.0071 174.7)",
+          "oklch(86% 0.0038 174.7)",
+          "oklch(95% 0.0014 174.7)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Superficie oscura",
+        "tonalRamp": [
+          "oklch(15% 0.0054 159.5)",
+          "oklch(25% 0.0089 159.5)",
+          "oklch(38% 0.0136 159.5)",
+          "oklch(50% 0.0136 159.5)",
+          "oklch(62% 0.0136 159.5)",
+          "oklch(74% 0.0136 159.5)",
+          "oklch(86% 0.0073 159.5)",
+          "oklch(95% 0.0026 159.5)"
+        ]
+      },
+      "inset": {
+        "role": "neutral",
+        "displayName": "Campo oscuro",
+        "tonalRamp": [
+          "oklch(15% 0.0083 156.2)",
+          "oklch(25% 0.0138 156.2)",
+          "oklch(38% 0.0210 156.2)",
+          "oklch(50% 0.0210 156.2)",
+          "oklch(62% 0.0210 156.2)",
+          "oklch(74% 0.0210 156.2)",
+          "oklch(86% 0.0113 156.2)",
+          "oklch(95% 0.0040 156.2)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Tinta clara",
+        "tonalRamp": [
+          "oklch(15% 0.0039 155.1)",
+          "oklch(25% 0.0065 155.1)",
+          "oklch(38% 0.0099 155.1)",
+          "oklch(50% 0.0099 155.1)",
+          "oklch(62% 0.0099 155.1)",
+          "oklch(74% 0.0099 155.1)",
+          "oklch(86% 0.0053 155.1)",
+          "oklch(95% 0.0019 155.1)"
+        ]
+      },
+      "secondary": {
+        "role": "neutral",
+        "displayName": "Texto secundario",
+        "tonalRamp": [
+          "oklch(15% 0.0101 156.6)",
+          "oklch(25% 0.0169 156.6)",
+          "oklch(38% 0.0257 156.6)",
+          "oklch(50% 0.0257 156.6)",
+          "oklch(62% 0.0257 156.6)",
+          "oklch(74% 0.0257 156.6)",
+          "oklch(86% 0.0138 156.6)",
+          "oklch(95% 0.0049 156.6)"
+        ]
+      },
+      "tertiary": {
+        "role": "neutral",
+        "displayName": "Metadatos",
+        "tonalRamp": [
+          "oklch(15% 0.0127 158.8)",
+          "oklch(25% 0.0212 158.8)",
+          "oklch(38% 0.0323 158.8)",
+          "oklch(50% 0.0323 158.8)",
+          "oklch(62% 0.0323 158.8)",
+          "oklch(74% 0.0323 158.8)",
+          "oklch(86% 0.0174 158.8)",
+          "oklch(95% 0.0062 158.8)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Divisor oscuro",
+        "tonalRamp": [
+          "oklch(15% 0.0166 157.7)",
+          "oklch(25% 0.0276 157.7)",
+          "oklch(38% 0.0420 157.7)",
+          "oklch(50% 0.0420 157.7)",
+          "oklch(62% 0.0420 157.7)",
+          "oklch(74% 0.0420 157.7)",
+          "oklch(86% 0.0226 157.7)",
+          "oklch(95% 0.0081 157.7)"
+        ]
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Borde fuerte oscuro",
+        "tonalRamp": [
+          "oklch(15% 0.0207 155.5)",
+          "oklch(25% 0.0345 155.5)",
+          "oklch(38% 0.0525 155.5)",
+          "oklch(50% 0.0525 155.5)",
+          "oklch(62% 0.0525 155.5)",
+          "oklch(74% 0.0525 155.5)",
+          "oklch(86% 0.0283 155.5)",
+          "oklch(95% 0.0101 155.5)"
+        ]
+      },
+      "danger": {
+        "role": "error",
+        "displayName": "Error",
+        "tonalRamp": [
+          "oklch(15% 0.0402 26.2)",
+          "oklch(25% 0.0670 26.2)",
+          "oklch(38% 0.1018 26.2)",
+          "oklch(50% 0.1018 26.2)",
+          "oklch(62% 0.1018 26.2)",
+          "oklch(74% 0.1018 26.2)",
+          "oklch(86% 0.0548 26.2)",
+          "oklch(95% 0.0196 26.2)"
+        ]
+      },
+      "danger-soft": {
+        "role": "error",
+        "displayName": "Fondo de error",
+        "tonalRamp": [
+          "oklch(15% 0.0155 27.9)",
+          "oklch(25% 0.0258 27.9)",
+          "oklch(38% 0.0392 27.9)",
+          "oklch(50% 0.0392 27.9)",
+          "oklch(62% 0.0392 27.9)",
+          "oklch(74% 0.0392 27.9)",
+          "oklch(86% 0.0211 27.9)",
+          "oklch(95% 0.0075 27.9)"
+        ]
+      },
+      "light-primary": {
+        "role": "primary",
+        "displayName": "Verde de lectura",
+        "tonalRamp": [
+          "oklch(15% 0.0460 158.9)",
+          "oklch(25% 0.0766 158.9)",
+          "oklch(38% 0.1164 158.9)",
+          "oklch(50% 0.1164 158.9)",
+          "oklch(62% 0.1164 158.9)",
+          "oklch(74% 0.1164 158.9)",
+          "oklch(86% 0.0627 158.9)",
+          "oklch(95% 0.0224 158.9)"
+        ]
+      },
+      "light-primary-hover": {
+        "role": "primary",
+        "displayName": "Verde profundo",
+        "tonalRamp": [
+          "oklch(15% 0.0393 157.7)",
+          "oklch(25% 0.0655 157.7)",
+          "oklch(38% 0.0995 157.7)",
+          "oklch(50% 0.0995 157.7)",
+          "oklch(62% 0.0995 157.7)",
+          "oklch(74% 0.0995 157.7)",
+          "oklch(86% 0.0536 157.7)",
+          "oklch(95% 0.0191 157.7)"
+        ]
+      },
+      "light-on-primary": {
+        "role": "neutral",
+        "displayName": "Blanco sobre verde",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.9)",
+          "oklch(25% 0.0000 89.9)",
+          "oklch(38% 0.0000 89.9)",
+          "oklch(50% 0.0000 89.9)",
+          "oklch(62% 0.0000 89.9)",
+          "oklch(74% 0.0000 89.9)",
+          "oklch(86% 0.0000 89.9)",
+          "oklch(95% 0.0000 89.9)"
+        ]
+      },
+      "light-primary-soft": {
+        "role": "primary",
+        "displayName": "Selección clara",
+        "tonalRamp": [
+          "oklch(15% 0.0075 162.9)",
+          "oklch(25% 0.0125 162.9)",
+          "oklch(38% 0.0190 162.9)",
+          "oklch(50% 0.0190 162.9)",
+          "oklch(62% 0.0190 162.9)",
+          "oklch(74% 0.0190 162.9)",
+          "oklch(86% 0.0102 162.9)",
+          "oklch(95% 0.0037 162.9)"
+        ]
+      },
+      "light-canvas": {
+        "role": "neutral",
+        "displayName": "Papel verde",
+        "tonalRamp": [
+          "oklch(15% 0.0023 153.8)",
+          "oklch(25% 0.0038 153.8)",
+          "oklch(38% 0.0058 153.8)",
+          "oklch(50% 0.0058 153.8)",
+          "oklch(62% 0.0058 153.8)",
+          "oklch(74% 0.0058 153.8)",
+          "oklch(86% 0.0031 153.8)",
+          "oklch(95% 0.0011 153.8)"
+        ]
+      },
+      "light-inset": {
+        "role": "neutral",
+        "displayName": "Campo claro",
+        "tonalRamp": [
+          "oklch(15% 0.0033 157.1)",
+          "oklch(25% 0.0054 157.1)",
+          "oklch(38% 0.0083 157.1)",
+          "oklch(50% 0.0083 157.1)",
+          "oklch(62% 0.0083 157.1)",
+          "oklch(74% 0.0083 157.1)",
+          "oklch(86% 0.0045 157.1)",
+          "oklch(95% 0.0016 157.1)"
+        ]
+      },
+      "light-ink": {
+        "role": "neutral",
+        "displayName": "Tinta oscura",
+        "tonalRamp": [
+          "oklch(15% 0.0100 158.0)",
+          "oklch(25% 0.0167 158.0)",
+          "oklch(38% 0.0254 158.0)",
+          "oklch(50% 0.0254 158.0)",
+          "oklch(62% 0.0254 158.0)",
+          "oklch(74% 0.0254 158.0)",
+          "oklch(86% 0.0137 158.0)",
+          "oklch(95% 0.0049 158.0)"
+        ]
+      },
+      "light-secondary": {
+        "role": "neutral",
+        "displayName": "Texto secundario claro",
+        "tonalRamp": [
+          "oklch(15% 0.0138 159.9)",
+          "oklch(25% 0.0230 159.9)",
+          "oklch(38% 0.0350 159.9)",
+          "oklch(50% 0.0350 159.9)",
+          "oklch(62% 0.0350 159.9)",
+          "oklch(74% 0.0350 159.9)",
+          "oklch(86% 0.0188 159.9)",
+          "oklch(95% 0.0067 159.9)"
+        ]
+      },
+      "light-line": {
+        "role": "neutral",
+        "displayName": "Divisor claro",
+        "tonalRamp": [
+          "oklch(15% 0.0066 156.9)",
+          "oklch(25% 0.0110 156.9)",
+          "oklch(38% 0.0167 156.9)",
+          "oklch(50% 0.0167 156.9)",
+          "oklch(62% 0.0167 156.9)",
+          "oklch(74% 0.0167 156.9)",
+          "oklch(86% 0.0090 156.9)",
+          "oklch(95% 0.0032 156.9)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Portada",
+        "purpose": "Título principal público; escala responsive en móvil."
+      },
+      "headline": {
+        "displayName": "Sección pública",
+        "purpose": "Títulos de secciones de la portada."
+      },
+      "title": {
+        "displayName": "Título de curso",
+        "purpose": "Tarjetas compactas del catálogo."
+      },
+      "body": {
+        "displayName": "Lectura de producto",
+        "purpose": "Texto base de la aplicación."
+      },
+      "label": {
+        "displayName": "Control",
+        "purpose": "Acciones generales."
+      }
+    },
+    "shadows": [
+      {
+        "name": "install-dialog",
+        "value": "0 24px 80px rgb(8 15 32 / .3)",
+        "purpose": "Separar el diálogo de instalación del fondo."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-brand",
+        "value": "cubic-bezier(.23, 1, .32, 1)",
+        "purpose": "Respuesta de controles generales."
+      },
+      {
+        "name": "control-transform",
+        "value": "160ms",
+        "purpose": "Pulsación de controles generales; se elimina con movimiento reducido."
+      },
+      {
+        "name": "hero-rotation",
+        "value": "requestAnimationFrame, redraw >=33ms",
+        "purpose": "Rotación lenta de la superficie; imagen estática con movimiento reducido, pausa fuera de pantalla o pestaña oculta."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "public-narrow",
+        "value": "1100px"
+      },
+      {
+        "name": "services-two-columns",
+        "value": "1000px"
+      },
+      {
+        "name": "product-mobile-navigation",
+        "value": "950px"
+      },
+      {
+        "name": "public-hero-stack",
+        "value": "900px"
+      },
+      {
+        "name": "public-menu",
+        "value": "850px"
+      },
+      {
+        "name": "mobile",
+        "value": "650px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Acción principal",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Acción general de marca en ambos temas.",
+      "html": "<button class=\"ds-primary\">Continuar</button>",
+      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:12px 20px;border:1px solid transparent;border-radius:10px;font:700 14px/1.4 var(--font-ui);cursor:pointer;box-shadow:none;transition:transform 160ms var(--brand-ease);background:var(--brand-primary);color:var(--brand-on-primary);border-color:var(--brand-primary)}.ds-primary:hover{background:var(--brand-primary-hover);border-color:var(--brand-primary-hover)}.ds-primary:focus-visible{outline:2px solid var(--brand-primary);outline-offset:3px;}.ds-primary:active{transform:scale(.98)}.ds-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}.ds-primary:active{transform:none}}"
+    },
+    {
+      "name": "Acción secundaria",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Acción secundaria sobre superficie.",
+      "html": "<button class=\"ds-secondary\">Ver cursos</button>",
+      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:12px 20px;border:1px solid transparent;border-radius:10px;font:700 14px/1.4 var(--font-ui);cursor:pointer;box-shadow:none;transition:transform 160ms var(--brand-ease);background:var(--brand-surface);color:var(--brand-primary);border-color:var(--brand-primary-line)}.ds-secondary:hover{background:var(--brand-primary-soft)}.ds-secondary:focus-visible{outline:2px solid var(--brand-primary);outline-offset:3px;}.ds-secondary:active{transform:scale(.98)}.ds-secondary:disabled{opacity:.5;cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none}.ds-secondary:active{transform:none}}"
+    },
+    {
+      "name": "Avanzar y consultar",
+      "kind": "button",
+      "refersTo": "button-success",
+      "description": "Acción de avance y contacto que conserva el acento menta en ambos temas.",
+      "html": "<button class=\"ds-success\">Continuar</button>",
+      "css": ".ds-success{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:12px 20px;border:1px solid transparent;border-radius:10px;font:700 14px/1.4 var(--font-ui);cursor:pointer;box-shadow:none;transition:transform 160ms var(--brand-ease);background:var(--brand-accent);color:var(--brand-on-accent);border-color:var(--brand-accent)}.ds-success:hover{background:var(--brand-accent-hover);border-color:var(--brand-accent-hover)}.ds-success:focus-visible{outline:2px solid var(--brand-primary);outline-offset:3px;}.ds-success:active{transform:scale(.98)}.ds-success:disabled{opacity:.5;cursor:not-allowed;transform:none}@media(prefers-reduced-motion:reduce){.ds-success{transition:none}.ds-success:active{transform:none}}"
+    },
+    {
+      "name": "Campo de perfil",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo nativo con etiqueta y tamaño legible en móvil.",
+      "html": "<label class=\"ds-field\">Nombre<input class=\"ds-input\" type=\"text\" placeholder=\"Tu nombre\" /></label>",
+      "css": ".ds-field{display:grid;gap:8px;font:600 14px/1.6 var(--font-ui);color:var(--brand-ink)}.ds-input{min-height:46px;padding:0 14px;border:1px solid var(--brand-line-strong);border-radius:10px;background:var(--brand-inset);color:var(--brand-ink);font:400 16px/1.6 var(--font-ui)}.ds-input:focus{border-color:var(--brand-primary)}.ds-input:focus-visible{outline:2px solid var(--brand-primary);outline-offset:3px;}"
+    },
+    {
+      "name": "Navegación de producto",
+      "kind": "nav",
+      "description": "Selección verde sobre fondo suave.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Aprendizaje\"><a class=\"ds-nav-link ds-active\" href=\"#inicio\" aria-current=\"page\">Inicio</a><a class=\"ds-nav-link\" href=\"#cursos\">Cursos</a></nav>",
+      "css": ".ds-nav{display:grid;gap:4px;font:600 14px/1.6 var(--font-ui)}.ds-nav-link{display:flex;align-items:center;min-height:44px;padding:10px 12px;border-radius:10px;color:var(--brand-secondary);text-decoration:none}.ds-nav-link:hover{color:var(--brand-ink);background:var(--brand-inset)}.ds-nav-link.ds-active{color:var(--brand-primary);background:var(--brand-primary-soft)}.ds-nav-link:focus-visible{outline:2px solid var(--brand-primary);outline-offset:3px;}"
+    },
+    {
+      "name": "Filtro de escuela",
+      "kind": "chip",
+      "description": "Filtro seleccionado mediante borde, fondo y aria-pressed.",
+      "html": "<button class=\"ds-filter\" aria-pressed=\"true\">Matemáticas</button>",
+      "css": ".ds-filter{min-height:44px;padding:0 18px;border:2px solid var(--brand-line);border-radius:14px;background:var(--brand-surface);color:var(--brand-secondary);font:800 14px/1.6 var(--font-ui);cursor:pointer}.ds-filter:hover{background:var(--brand-inset)}.ds-filter[aria-pressed=true]{border-color:var(--brand-primary);background:var(--brand-primary-soft);color:var(--brand-primary)}.ds-filter:focus-visible{outline:2px solid var(--brand-primary);outline-offset:3px;}"
+    },
+    {
+      "name": "Tarjeta de curso",
+      "kind": "card",
+      "refersTo": "course-card",
+      "description": "Curso de catálogo con título y descripción reales.",
+      "html": "<a class=\"ds-course\" href=\"#curso/fundamentos-matematicas\"><h3 class=\"ds-course-title\">Fundamentos de Matemáticas</h3><p class=\"ds-course-description\">De los números reales a los números complejos. Aritmética, álgebra, funciones y trigonometría: la base para el cálculo y las ciencias.</p></a>",
+      "css": ".ds-course{display:block;padding:20px 24px;border:1px solid var(--brand-line);border-radius:14px;background:var(--brand-surface);color:var(--brand-ink);text-decoration:none;font-family:var(--font-ui);box-shadow:none}.ds-course:hover{border-color:var(--brand-primary)}.ds-course:focus-visible{outline:2px solid var(--brand-primary);outline-offset:3px;}.ds-course-title{margin:0;font-size:17px;font-weight:700;letter-spacing:-.01em}.ds-course-description{margin:4px 0 0;color:var(--brand-secondary);font-size:14px;line-height:1.55}@media(max-width:650px){.ds-course{padding:16px}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Matemáticas que conectan",
+    "overview": "La identidad une una base casi negra con verde menta, tipografía amplia y geometría matemática. La dirección elegida a partir de Sumz se adapta al propósito de Zuka: comprender las materias y avanzar con cursos, práctica y acompañamiento. Manrope y el destello existente conectan la portada con el producto.\n\nLa portada deja espacio al texto y a una figura paramétrica; el aprendizaje conserva una densidad más compacta, controles claros y una acción principal por reto. Este registro describe el código del rediseño. Se revisaron portada, servicios, escuelas, bienvenida, catálogo, entrenamiento y lectura en ambos temas, con vistas de escritorio, tableta y celular. Los pares principales de texto y botón cumplen 4,5:1; la instalación en un dispositivo físico no forma parte de esta comprobación.",
+    "keyCharacteristics": [
+      "Negro y menta compartidos por toda la experiencia.",
+      "Manrope local, títulos amplios y contenido académico legible.",
+      "Profundidad tonal, bordes discretos y geometría matemática local.",
+      "Mascota cercana y profesional, con movimiento adaptable."
+    ],
+    "rules": [
+      {
+        "name": "The One Green Rule",
+        "body": "Los cursos comparten la identidad verde; sus nombres de clase históricos no definen paletas independientes.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tonal Surface Rule",
+        "body": "Distinguir canvas, superficie y campo con los tokens compartidos antes de añadir elevación.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** usar los tokens compartidos de `src/identity.css` en ambos temas.",
+      "**Do** conservar Manrope local, las fórmulas legibles y las cifras reales de progreso.",
+      "**Do** mantener foco visible, etiquetas, estados accesibles y movimiento reducido.",
+      "**Do** verificar móvil, tableta y escritorio antes de cerrar una entrega visual."
+    ],
+    "donts": [
+      "**Don't** reintroducir cobalto y ámbar como identidad paralela por curso o componente.",
+      "**Don't** sustituir la geometría matemática por una imagen remota sin una nueva decisión de diseño.",
+      "**Don't** colorear ni deformar el QR de instalación.",
+      "**Don't** añadir reseñas, cifras o resultados de aprendizaje inventados."
+    ]
+  }
+}

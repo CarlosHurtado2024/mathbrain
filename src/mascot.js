@@ -1,13 +1,13 @@
-// Zuka es un destello ámbar con la silueta del logo: una figura sobria, sin boca, mejillas ni pedestal.
-// Su ánimo se lee en los ojos (dos trazos) y en un único detalle en cobalto. Conserva la API de la mascota.
+// Zuka es un destello verde con la silueta del logo: una figura sobria, sin boca, mejillas ni pedestal.
+// Su ánimo se lee en los ojos (dos trazos) y en un único detalle verde oscuro. Conserva la API de la mascota.
 (() => {
   'use strict';
 
   const moods = ['saluda', 'feliz', 'piensa', 'animo', 'celebra'];
   let drawing = 0;
   const escapeAttribute = value => String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
-  const ink = '#2b1a00';
-  const accent = '#2f5bea';
+  const ink = '#052316';
+  const accent = '#159d63';
 
   function svg(mood = 'feliz', { label = 'Zuka, tu impulso para aprender' } = {}) {
     const state = moods.includes(mood) ? mood : 'feliz';
@@ -29,8 +29,8 @@
       celebra: `<g stroke="${accent}" stroke-width="3.5" stroke-linecap="round"><path d="M60 3v6"/><path d="m34 11 4 4.5"/><path d="m86 11-4 4.5"/></g>`
     }[state];
     return `<svg xmlns="http://www.w3.org/2000/svg" class="zuka-spark" data-mood="${state}" viewBox="0 0 120 120" fill="none" role="img" aria-label="${escapeAttribute(label)}">`
-      + `<defs><linearGradient id="${id}" x1="30" y1="14" x2="92" y2="104" gradientUnits="userSpaceOnUse"><stop stop-color="#ffc83d"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs>`
-      + `<ellipse cx="60" cy="112" rx="28" ry="3.5" fill="#17203a" opacity=".1"/>${detail}`
+      + `<defs><linearGradient id="${id}" x1="30" y1="14" x2="92" y2="104" gradientUnits="userSpaceOnUse"><stop stop-color="#8bffd1"/><stop offset="1" stop-color="#39d994"/></linearGradient></defs>`
+      + `<ellipse cx="60" cy="112" rx="28" ry="3.5" fill="#07130c" opacity=".1"/>${detail}`
       + `<g class="zuka-spark-body"><path transform="translate(-2.5 -6.5) scale(1.25)" d="M50 14c10 0 12 11 18 17s18 9 18 19-12 12-18 18-8 18-18 18-12-12-18-18-18-8-18-18 12-13 18-19 8-17 18-17Z" fill="url(#${id})"/>`
       + `<path d="M44 26c-4 5-9 9-15 13" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".45"/>${eyes}</g></svg>`;
   }
